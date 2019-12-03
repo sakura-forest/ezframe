@@ -1,0 +1,6 @@
+- key: customer
+  type: foreign
+- key: ship_sched
+  type: date
+- key: bill
+  type: int

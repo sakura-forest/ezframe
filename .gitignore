@@ -1,0 +1,8 @@
+TODO.md
+Gemfile.lock
+vendor/
+.bundle
+node_modules/
+.vscode/
+log/*
+db/*
