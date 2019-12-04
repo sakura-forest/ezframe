@@ -7,7 +7,7 @@ module Ezframe
         { tag: "form", method: "post", action: "/admin/search", child: [
           { tag: "input", type: "text", name: "word", id: "word" }, 
           { tag: "button", type: "button", class: %w[btn-small], 
-            event: "on=click:cmd=inject:into=#center-panel:url=/admin/search", 
+            event: "on=click:cmd=inject:into=#center-panel:url=/admin/search:get_form=true", 
             child: { tag: "icon", name: "search" } } 
         ]},
         { tag: "br" },

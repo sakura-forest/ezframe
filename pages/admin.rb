@@ -15,31 +15,37 @@ module Ezframe
       matrix = @column_set.map do |column|
         [column.label, column.form]
       end
-      matrix.push([{ tag: "input", type: "button", value: "送信", class: ["submit-button"] }])
+      matrix.push([{ tag: "input", type: "button", value: "送信", class: %w[btn], event: "on=click:cmd=inject:into=#center-panel:url=/admin/new:get_form=true" }])
       tb = Html::Table.new(matrix)
       layout = main_layout(left: sidenav, center: { tag: "form", method: "post", action: "/admin/new_submit", child: tb.to_layout })
       Materialize.input_without_label = true
       common_page(title: "新規顧客登録", body: Html.wrap(Materialize.convert(layout)))
     end
 
-    def public_new_submit_page
-      values = @request.POST
-      @column_set.values = values
+    def public_new_post
+      # values = @request.POST
+      @column_set.values = @json[:form]
       @column_set.save
-      mylog("new_submit: #{values.inspect}")
-      public_index_page
+      # mylog("new_submit: #{values.inspect}")
+      # public_index_page
+      make_index_table(@dataset.all)
     end
 
     def public_index_page
       data_a = @dataset.all
-      make_index_page(data_a)
+      htb = make_index_table(data_a)
+      layout = main_layout(left: sidenav, center: { tag: "form", child: htb })
+      common_page(title: "顧客情報", body: Html.wrap(Materialize.convert(layout)))
     end
 
     alias_method :public_default_page, :public_index_page
 
-    def public_search_page
-      data_a = @dataset.where(Sequel.like(:name, @request.params["word"])).all
-      make_index_page(data_a)
+    def public_search_post
+      mylog "public_search_post: #{@json.inspect}"
+      word = @json[:form][:word]
+      pattern = "%#{word}%"
+      data_a = @dataset.where(Sequel.|(Sequel.like(:name_kana, pattern), Sequel.like(:name, pattern))).all
+      make_index_table(data_a)
     end
 
     def public_detail_page
@@ -73,7 +79,7 @@ module Ezframe
         { tag: "a", href: "#talk", child: "会話" },
         { tag: "a", href: "#email", child: "Eメール" },
       ])
-      a = %w[alarm order talk email].map { |k| { tag: "div", id: k, class: %w[col s12], event: "on=show:cmd=inject:into=##{k}:/#{k}:customer=#{@id}", child: k } }
+      a = %w[alarm order talk email].map { |k| { tag: "div", id: k, class: %w[col s12], event: "on=show:cmd=inject:into=##{k}:url=/admin/#{k}/index:customer=#{@id}", child: k } }
       a.unshift(tabs)
       a
     end
@@ -109,7 +115,7 @@ module Ezframe
       end
     end
 
-    def make_index_page(data_a)
+    def make_index_table(data_a)
       column_header = [:id, :name, :email, :zipcode, :prefecture]
       @column_set.each { |col| col.attribute.delete(:hidden) }
       a_element = Proc.new { |key, id, text|
@@ -122,10 +128,9 @@ module Ezframe
       }
       table = PageKit::IndexTable.new(column_header: column_header, column_set: @column_set, add_checkbox: :id,
                                       decorate_column: a_element)
-      htb = table.make_table(data_a)
-      layout = main_layout(left: sidenav, center: { tag: "form", child: htb })
-      common_page(title: "顧客情報", body: Html.wrap(Materialize.convert(layout)))
+      table.make_table(data_a)
     end
+
 
     def detail_value_part(column)
       { tag: "span", id: "detail-#{column.key}", child: [{ tag: "span", child: column.view }, edit_button(column)].compact }

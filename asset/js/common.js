@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
   add_event(document)
-  M.AutoInit();
   //initialize_materialize_select()
   var elems = document.querySelectorAll(".submit-button")
   if (elems) {
@@ -22,11 +21,14 @@ function add_event(obj) {
       var elem = elems[i]
       var event_s = elem.getAttribute("event")
       var cmd = parse_event(event_s)
+      console.log(JSON.stringify(cmd))
       elem.addEventListener(cmd.on, function(event) {
         execute_command(event, this)
       })
     }
   }
+  M.AutoInit();
+  initialize_materialize_tabs()
 }
 
 function parse_event(event) {
@@ -38,10 +40,12 @@ function parse_event(event) {
       res[b[0]] = b[1]
     }
   }
+  //console.log("current url: " + res.url)
   if (!res.url) {
     res.url = location.pathname
-    console.log("set url: " +res.url)
+    //console.log("set url: " + res.url)
   }
+  // console.log("parse_event: "+JSON.stringify(res))
   return res
 }
 
@@ -54,8 +58,7 @@ function access_server(path, send_values, func) {
   xhr.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       var res = this.response;
-      console.log("access_server: res=")
-      console.dir(res)
+      console.log("access_server: res="+JSON.stringify(res))
       func(res)
     }
   }
@@ -72,8 +75,6 @@ function execute_command(event, obj) {
   //console.dir(obj)
   switch (cmd.cmd) {
     case "open":
-      open_page(cmd, obj)
-      break
     case "inject":
       inject(cmd, obj)
       break
@@ -82,41 +83,44 @@ function execute_command(event, obj) {
       update_value(cmd, obj)
       break
     case "reset_value":
-      reset_value(cmd, obj)
+      reset_value(cmd)
       break
     default:
       console.log("unknown command: " + command)
   }
 }
 
-function open_page(cmd, obj) {
-  var win = window.open(cmd.url)
-}
-
 function inject(cmd, obj) {
   var url = cmd.url // obj.getAttribute("url")
   console.log("inject: url=" + url)
+  if (cmd.get_form) {
+    var node = obj
+    // console.dir(node)
+    while(node && node.nodeName !='FORM') { 
+      node = node.parentNode 
+      // console.log(node.nodeName)
+    }
+    form = collect_form_values(node)
+    cmd.form = form
+  }
   access_server(url, cmd, function (res) {
-    var selector = cmd.into  //obj.getAttribute("into")
-    console.log("inject: into=" + selector)
-    var elem = document.querySelector(selector)
-    if (elem) {
-      elem.innerHTML = htmlgen(res)
-      add_event(elem)
-      initialize_materialize_select()
-    } else {
-      console.log("no such element: " + selector)
+    switch(cmd.cmd) {
+      case "inject":
+        var selector = cmd.into
+        console.log("inject: into=" + selector)
+        var elem = document.querySelector(selector)
+        if (elem) {
+          elem.innerHTML = htmlgen(res)
+          add_event(elem)
+        } else {
+          console.log("no such element: " + selector)
+        }
+        break
     }
   })
 }
 
-function initialize_materialize_select() {
-  var elems = document.querySelectorAll('select');
-  if (elems) {
-    for (var i = 0; i < elems.length; i++) {
-      M.FormSelect.init(elems[i], {});
-    }
-  }
+function initialize_materialize_tabs() {
   elems = document.querySelectorAll('.tabs');
   if (elems) {
     for (var i = 0; i < elems.length; i++) {
@@ -126,14 +130,15 @@ function initialize_materialize_select() {
 }
 
 function show_tab_contents(obj) {
-  console.log("show_tab_contents: "+obj.id)
-  console.dir(obj)
+  console.log("show_tab_contents: " + JSON.stringify(obj.getAttribute("event")))
+  var event = parse_event(obj.getAttribute("event"))
+  //console.dir(obj)
   var id = obj.id
-  url ="/"+id
-  //obj.removeEventListner("show", show_tab_contents)
-  access_server(url, {}, function(obj) {
+  url ="/admin/"+id
+  access_server(event.url, event, function(res) {
     var elem = document.querySelector("#"+id);
-    elem.innerHTML = htmlgen(obj)
+    elem.innerHTML = htmlgen(res)
+    add_event(elem)
   })
 }
 
@@ -174,16 +179,19 @@ function reset_value(cmd, obj) {
 }
 
 function collect_form_values(obj) {
-  var inputs = obj.querySelectorAll("form input");
+  // console.log("collect_form_values")
   var res = {};
+  var inputs = obj.querySelectorAll("input");
   for (var i = 0; i < inputs.length; i++) {
     var elem = inputs[i]
-    res[elem.key] = elem.value
+    // console.dir(elem)
+    res[elem.name] = elem.value
   }
-  var selects = obj.querySelectorAll("form select");
+  var selects = obj.querySelectorAll("select");
   for (var i = 0; i < selects.length; i++) {
     var elem = selects[i]
-    res[elem.key] = elem.value
+    // console.dir(elem)
+    res[elem.name] = elem.value
   }
   return res
 }

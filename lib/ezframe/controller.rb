@@ -5,14 +5,19 @@ module Ezframe
     class << self
       def exec(request, response)
         mylog("exec: path=#{request.path_info} params=#{request.params}")
-        Ezframe::Model.make_base
-        model = Ezframe::Model.get_clone
-        klass_name, method = parse_path(request.path_info)
-        puts "klass_name, method = #{klass_name}, #{method}"
-        klass = Ezframe::PageBase.get_class(klass_name)
+        Model.make_base
+        model = Model.get_clone
+        klass_names = parse_path(request.path_info)
+        if klass_names.length > 1
+          method = klass_names.pop
+        else
+          method = "default"
+        end
+        puts "klass_names, method = #{klass_names}, #{method}"
+        klass = PageBase.get_class(klass_names)
         unless klass
-          mylog("no such Ezframe class: #{klass_name}")
-          page = Ezframe::Admin.new(request, model)
+          mylog("no such Ezframe class: #{klass_names}")
+          page = Admin.new(request, model)
           response.body = [page.public_default_page ]
           response.status = 200
           return

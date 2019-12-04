@@ -60,6 +60,7 @@ def multi_div(class_a, child)
   class_a.reverse.each do |klass|
     child = { tag: "div", class: klass, child: child }
   end
+  return child
 end
 
 def mylog(msg)

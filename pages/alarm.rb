@@ -11,21 +11,29 @@ module Ezframe
         @dataset = @column_set.dataset
       end
 
-      def public_default_page
-        case @params["stage"].to_i
-        when 2
-        else
-          customer_id = @params[:customer]
-          # add_btn = { tag: "a", class: %w[btn-floating btn-small waves-effect waves-light teal], child: { tag: "icon", name: "add" } }
-          data_a = @column_set.dataset.where(customer: customer_id).order(:scheduled_for).all
-          new_form = { tag: "form", child: %w[scheduled_for content].map { |key| @column_set[key].form } }
-          list = data_a.map do |data|
-            @column_set.clear
-            @column_set.values = data
-            PagetKit::Card(title: @column_set[:scheduled_for].view, content: @column_set[:content].view)
-          end
-          return Materialize.convert([new_form, list])
+      def public_index_post
+        mylog "Alarm::public_index_post: #{@json}"
+        customer_id = @json[:customer]
+        # add_btn = { tag: "a", class: %w[btn-floating btn-small waves-effect waves-light teal], child: { tag: "icon", name: "add" } }
+        data_a = @column_set.dataset.where(customer: customer_id).order(:scheduled_for).all
+        form = %w[scheduled_for content].map { |key| @column_set[key].form }
+        form.push({ tag: "button", type: "button", class: %w[btn], child: "登録",  event: "on=click:cmd=inject:into=#alarm_top:stage=2:url=/admin/alarm/new:customer=#{customer_id}:get_form=true" })
+        new_form = { tag: "div", id: "alarm_top", child: { tag: "form", child: form } }
+        list = data_a.map do |data|
+          @column_set.clear
+          @column_set.values = data
+          PageKit::Card.base_layout(title: @column_set[:scheduled_for].view, content: @column_set[:content].view)
         end
+        Materialize.input_without_label = nil
+        return Materialize.convert([new_form, list])
+      end
+
+      def public_new_post
+        @column_set.values = @json[:form]
+        @column_set[:customer].value = @json[:customer]
+        @column_set.save
+        @column_set.clear
+        public_index_post
       end
 
       private
