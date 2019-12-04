@@ -6,8 +6,9 @@ module Ezframe
         { tag: "br" },
         { tag: "form", method: "post", action: "/admin/search", child: [
           { tag: "input", type: "text", name: "word", id: "word" }, 
-          { tag: "input", type: "hidden", name: "dummy", value: 1},
-          { tag: "button", type: "submit", class: %w[btn-small], child: { tag: "icon", name: "search" } } 
+          { tag: "button", type: "button", class: %w[btn-small], 
+            event: "on=click:cmd=inject:into=#center-panel:url=/admin/search", 
+            child: { tag: "icon", name: "search" } } 
         ]},
         { tag: "br" },
         { tag: "a", href: "/admin/new", child: "新規顧客登録" } 

@@ -34,7 +34,7 @@ class Materialize
           return new_layout
         when :checkbox
           new_layout = c = checkbox(layout)
-          mylog("checkbox: #{c}")
+          # mylog("checkbox: #{c}")
           return new_layout
         when :icon
           return icon(layout)

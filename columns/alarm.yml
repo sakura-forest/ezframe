@@ -2,6 +2,7 @@
   type: foreign
 - key: scheduled_for
   type: date
-  name: 予定日
+  label: 予定日
 - key: content
   type: string
+  label: 予定内容

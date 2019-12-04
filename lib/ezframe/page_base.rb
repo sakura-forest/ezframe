@@ -7,12 +7,11 @@ require_relative 'util'
 
 module Ezframe
   class PageBase
-    def self.get_class(key)
-      upper = Object.const_get("Ezframe")
-      key_camel = key.to_camel
-      # puts "key_camel=#{key_camel}"
-      if upper.const_defined?(key_camel)
-        return upper.const_get(key_camel)
+    def self.get_class(keys)
+      keys = [ keys ] if keys.is_a?(String)
+      klass = (%w[Ezframe] + keys.map {|k| k.to_camel }).join("::")
+      if Object.const_defined?(klass)
+        return Object.const_get(klass)
       end
       return nil
     end
@@ -22,6 +21,7 @@ module Ezframe
       @request = request
       @params = parse_query_string(request.env["QUERY_STRING"])
       @id, @key = @params[:id], @params[:key]
+      parse_json_body if request.post?
     end  
 
     def parse_query_string(str)
@@ -39,6 +39,18 @@ module Ezframe
         into_bottom_of_body: Materialize.into_bottom_of_body
       }
       EzView::Template.fill_template('template/base.html', args)
+    end
+
+    def parse_json_body
+      body = @request.body.read
+      begin
+        @json = JSON.parse(body)
+      rescue => e
+        mylog "ERROR: "#{e.class}:#{e.message}\n#{e.backtrace}"
+        return nil
+      end
+      @json = @json.recursively_symbolize_keys if @json.is_a?(Hash) || @json.is_a?(Array)
+      return @json
     end
 
     def main_layout(left: "Logo", center: "", right: "")

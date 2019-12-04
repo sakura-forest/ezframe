@@ -110,6 +110,7 @@ module Ezframe
     end
 
     def values=(value_h)
+      clear
       # puts "value_h=#{value_h.inspect}"
       value_h.each do |k, v|
         # puts "values=: k=#{k}, v=#{v}"

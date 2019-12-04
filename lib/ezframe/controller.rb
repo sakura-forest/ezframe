@@ -4,7 +4,7 @@ module Ezframe
   class Boot
     class << self
       def exec(request, response)
-        mylog("exec: request.params=#{request.params}")
+        mylog("exec: path=#{request.path_info} params=#{request.params}")
         Ezframe::Model.make_base
         model = Ezframe::Model.get_clone
         klass_name, method = parse_path(request.path_info)
@@ -12,16 +12,22 @@ module Ezframe
         klass = Ezframe::PageBase.get_class(klass_name)
         unless klass
           mylog("no such Ezframe class: #{klass_name}")
-          page = EzPage::Admin.new(request)
+          page = Ezframe::Admin.new(request, model)
           response.body = [page.public_default_page ]
           response.status = 200
           return
         end
         page = klass.new(request, model)
-        method_full_name = "public_#{method}_page"
+        if request.post?
+          method_full_name = "public_#{method}_post"
+        else
+          method_full_name = "public_#{method}_page"
+        end
+
         body = if page.respond_to?(method_full_name)
                     page.send(method_full_name)
                   else
+                    mylog "no such method: #{method_full_name}"
                     page.public_default_page
                   end
         if body.is_a?(Hash) || body.is_a?(Array)

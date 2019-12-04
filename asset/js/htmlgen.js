@@ -5,6 +5,7 @@ function join_attr(elem) {
     switch (key) {
       case 'child':
       case 'tag':
+      case 'final':
         break;
       default:
         var value = elem[key];

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# generate HTML elements
+require "base64"
+
 class Html
   def self.wrap(opts = {})
     return '' if opts.nil? || opts.to_s.empty?
@@ -19,7 +20,6 @@ class Html
     if child_s.length.positive?
       return "<#{tag} #{opt_s}>\n#{child_s}\n</#{tag}>\n"
     end
-
     "<#{tag} #{opt_s}/>"
   end
 
@@ -35,6 +35,8 @@ class Html
       when :key
         "name=\"#{v}\"" if attrs[:tag].intern == :input
         next
+      when :param
+        "param=\"#{Base64.encode64(JSON.generate(v))}\""
       else
         if v.is_a?(Array)
           "#{k}=\"#{v.join(' ')}\""
