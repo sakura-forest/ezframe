@@ -1,0 +1,10 @@
+- key: name
+  label: 商品名
+  type: string
+- key: unit_price
+  label: 単価
+  type: int
+- key: category
+  label: 種別
+  type: foreign
+  

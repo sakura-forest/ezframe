@@ -1,0 +1,5 @@
+- key: customer
+  type: foreign
+- key: content
+  name: 会話内容
+  type: string

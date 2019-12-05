@@ -46,7 +46,7 @@ module Ezframe
       begin
         @json = JSON.parse(body)
       rescue => e
-        mylog "ERROR: "#{e.class}:#{e.message}\n#{e.backtrace}"
+        mylog "ERROR: #{e.class}:#{e.message}\n#{e.backtrace}"
         return nil
       end
       @json = @json.recursively_symbolize_keys if @json.is_a?(Hash) || @json.is_a?(Array)

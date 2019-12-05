@@ -1,0 +1,8 @@
+- key: customer
+  type: foreign
+- key: scheduled_for
+  type: date
+  label: 予定日
+- key: content
+  type: string
+  label: 予定内容
