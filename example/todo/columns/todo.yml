@@ -1,0 +1,9 @@
+- key: issue
+  type: string
+  label: 内容
+- key: status
+  type: select
+  label: 状態
+  items: 
+    0: Active
+    1: Completed

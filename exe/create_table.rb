@@ -4,6 +4,7 @@
 
 $:.push("lib")
 require 'ezframe'
+require 'sequel'
 
 Ezframe::Model.make_base
 model = Ezframe::Model.get_clone

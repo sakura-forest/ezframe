@@ -31,13 +31,13 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_development_dependency "bundler", "~> 1.16"
-  spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency "minitest", '~> 0'
-  spec.add_development_dependency "nokogiri", '~> 0'
-  spec.add_development_dependency "rubocop", '~> 0'
+  spec.add_development_dependency "rake", "~> 13.0"
+  spec.add_development_dependency "minitest", '~> 5.13.0'
+  spec.add_development_dependency "nokogiri", '~> 1.10.7'
+  spec.add_development_dependency "rubocop", '~> 0.77.0'
 
-  spec.add_runtime_dependency 'rack', '~> 0'
-  spec.add_runtime_dependency 'sequel', '~> 0'
-  spec.add_runtime_dependency 'sqlite3', '~> 0'
-  spec.add_runtime_dependency 'htmlbeautifier', '~> 0'
+  spec.add_runtime_dependency 'rack', '~> 2.0.7'
+  spec.add_runtime_dependency 'sequel', '~> 5.27.0'
+  spec.add_runtime_dependency 'sqlite3', '~> 1.4.0'
+  spec.add_runtime_dependency 'htmlbeautifier', '~> 1.3.1'
 end

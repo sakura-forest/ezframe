@@ -1,6 +1,0 @@
-- key: orders
-  type: foreign
-- key: product
-  type: foreign
-- key: quantity
-  type: int

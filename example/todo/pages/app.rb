@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
 module Ezframe
-  class Admin < PageBase
-    include PageCommon
+  class App < PageBase
+    # include PageCommon
 
     def initialize(request, model)
       super(request, model)
-      @column_set = @model.column_sets[:customer]
-      # puts "Admin.init: #{@column_set.inspect}"
+      @column_set = @model.column_sets[:todo]
       @dataset = @column_set.dataset
     end
 
+=begin
     def public_new_page
       matrix = @column_set.map do |column|
         [column.label, column.form]
@@ -30,16 +30,48 @@ module Ezframe
       # public_index_page
       make_index_table(@dataset.all)
     end
+=end
 
     def public_index_page
+      form = { tag: "form", child: [ @column_set[:issue].form, { tag: "button", type: "button", class: %w[btn], child: "send",
+        event: "on=click:cmd=open:goto=/app/index:get_form=true" } ] }
+      mylog(form.to_json)
       data_a = @dataset.all
-      htb = make_index_table(data_a)
-      layout = main_layout(left: sidenav, center: { tag: "form", child: htb })
-      common_page(title: "顧客情報", body: Html.wrap(Materialize.convert(layout)))
+      column_header = [ :id, :issue ]
+      tb = PageKit::IndexTable.new(column_header: column_header, column_set: @column_set, add_checkbox: :id)
+      common_page(title: "Todos", body: Html.wrap(Materialize.convert([form, tb.make_table(data_a)])))
+    end
+
+    def public_index_post
+      mylog "public_index_post: #{@json}"
+      { tag: "h1", child: "public_index_post"}
+      @column_set.values = @json[:form]
+      @column_set.save
+      { tag: "h1", child: "dummy" }
     end
 
     alias_method :public_default_page, :public_index_page
+    alias_method :public_default_post, :public_index_post
 
+=begin    
+    def make_index_table(data_a)
+      column_header = [:id, :name, :email, :zipcode, :prefecture]
+      @column_set.each { |col| col.attribute.delete(:hidden) }
+      a_element = Proc.new { |key, id, text|
+        # mylog "proc executed"
+        if key == :name
+          { tag: "a", href: "/admin/detail?id=#{id}", child: text }
+        else
+          text
+        end
+      }
+      table = PageKit::IndexTable.new(column_header: column_header, column_set: @column_set, add_checkbox: :id,
+                                      decorate_column: a_element)
+      table.make_table(data_a)
+    end
+=end
+
+=begin
     def public_search_post
       mylog "public_search_post: #{@json.inspect}"
       word = @json[:form][:word]
@@ -115,23 +147,6 @@ module Ezframe
       end
     end
 
-    def make_index_table(data_a)
-      column_header = [:id, :name, :email, :zipcode, :prefecture]
-      @column_set.each { |col| col.attribute.delete(:hidden) }
-      a_element = Proc.new { |key, id, text|
-        # mylog "proc executed"
-        if key == :name
-          { tag: "a", href: "/admin/detail?id=#{id}", child: text }
-        else
-          text
-        end
-      }
-      table = PageKit::IndexTable.new(column_header: column_header, column_set: @column_set, add_checkbox: :id,
-                                      decorate_column: a_element)
-      table.make_table(data_a)
-    end
-
-
     def detail_value_part(column)
       { tag: "span", id: "detail-#{column.key}", child: [{ tag: "span", child: column.view }, edit_button(column)].compact }
     end
@@ -152,5 +167,7 @@ module Ezframe
                             { tag: "span", class: %w[btn small teal waves-effect waves-light], event: "on=click:cmd=update_value:into=#{into}:id=#{@id}:key=#{column.key}:value=#{column.value}", child: { tag: "icon", name: "check" } },
                             { tag: "span", class: %w[btn small waves-effect waves-light], event: "on=click:cmd=reset_value:into=#{into}:id=#{@id}:key=#{column.key}:value=#{column.value}", child: { tag: "icon", name: "clear" } }] }
     end
+=end
+
   end
 end

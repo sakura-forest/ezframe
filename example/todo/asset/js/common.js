@@ -116,6 +116,9 @@ function inject(cmd, obj) {
           console.log("no such element: " + selector)
         }
         break
+      case "open":
+        console.log("open: "+JSON.stringify(cmd))
+        location.href = cmd.goto
     }
   })
 }

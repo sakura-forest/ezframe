@@ -2,8 +2,8 @@
 
 require 'logger'
 require 'rack'
-require 'rack/server'
-require 'rack/logger'
+#require 'rack/server'
+#require 'rack/logger'
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'lib'))
 require 'ezframe'
