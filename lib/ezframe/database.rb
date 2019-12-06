@@ -5,7 +5,7 @@ module Ezframe
   class Database
     attr_accessor :sequel
 
-    def initialize(dbfile = "db/test.sqlite")
+    def initialize(dbfile = "db/devel.sqlite")
       @dbfile = dbfile
       connect
     end  
@@ -40,7 +40,6 @@ module Ezframe
       dataset(table_name).insert(val_h)
     end
 
-    # predefined where-phrases expected for dataset
     def update(dataset, val_h)
       val_h.update({ updated_at: Time.now() })
       dataset.update(val_h)

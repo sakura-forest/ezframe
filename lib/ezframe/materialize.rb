@@ -84,8 +84,9 @@ class Materialize
     end
 
     def checkbox(layout)
-      # return { tag: "label", for: layout[:name], child: [ { tag: "input", type: "checkbox", name: layout[:name] }, layout[:value] ] }
-      { tag: "label", child: [ { tag: "input", type: "checkbox", name: layout[:name] }, { tag: "span", child: layout[:value] } ] }
+      layout[:tag]="input"
+      layout[:type]="checkbox"
+      { tag: "label", child: [ layout, { tag: "span", child: layout[:value] } ] }
     end
 
     def div(child, opts = {})

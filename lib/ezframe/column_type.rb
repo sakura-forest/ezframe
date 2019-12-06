@@ -1,15 +1,9 @@
 # frozen_string_literal: true
 
-require_relative "util"
-
 module Ezframe
   class TypeBase
     attr_accessor :attribute, :parent
     attr_writer :value
-
-#    def self.inherited(child)
-#      TypeDict.add_class(child)
-#    end
 
     def self.get_class(key)
       return nil unless key
@@ -60,28 +54,6 @@ module Ezframe
     end
   end
 
-  class ForeignType < TypeBase
-    def view
-      dataset = @parent.db.dataset[self.type.inner]
-      data = dataset.get(id: @value)
-      data[@attribute[:view]]
-    end
-
-    def db_type
-      "int"
-    end
-  end
-
-  class ParentType < TypeBase
-  end    
-  
-  class IdType < TypeBase
-    def label
-      return nil if @attribute[:hidden] && !@attribute[:force]
-      "ID"
-    end
-  end
-
   class StringType < TypeBase
     def normalize
       @value.gsub!(/　/, ' ')
@@ -113,6 +85,21 @@ module Ezframe
     end
   end
 
+  class ForeignType < IntType
+    def view
+      dataset = @parent.db.dataset[self.type.inner]
+      data = dataset.get(id: @value)
+      data[@attribute[:view]]
+    end
+  end
+  
+  class IdType < IntType
+    def label
+      return nil if @attribute[:hidden] && !@attribute[:force]
+      "ID"
+    end
+  end
+
   class SelectType < TypeBase
     def form
       return nil if @attribute[:hidden]
@@ -121,6 +108,17 @@ module Ezframe
 
     def db_type
       "string"
+    end
+  end
+
+  class CheckboxType < TypeBase
+    def form
+      return nil if @attribute[:hidden]
+      { tag: "checkbox", key: @attribute[:key], name: @attribute[:key], value: parent[:id].value, label: @attribute[:label] }
+    end
+
+    def db_type
+      "int"
     end
   end
 
@@ -136,9 +134,6 @@ module Ezframe
     end
   end
   
-  class JpnameType < StringType
-  end
-
   class EmailType < StringType
     def form
       h = super
@@ -153,6 +148,9 @@ module Ezframe
       h[:type] = 'tel' if h
       h
     end
+  end
+
+  class JpnameType < StringType
   end
 
   class JpnameKanaType < StringType

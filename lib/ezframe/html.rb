@@ -35,8 +35,6 @@ class Html
       when :key
         "name=\"#{v}\"" if attrs[:tag].intern == :input
         next
-      when :param
-        "param=\"#{Base64.encode64(JSON.generate(v))}\""
       else
         if v.is_a?(Array)
           "#{k}=\"#{v.join(' ')}\""
@@ -85,6 +83,7 @@ class Html
   class Table
     def initialize(matrix = nil)
       set(matrix) if matrix
+      @matrix ||= []
     end
 
     def set(matrix)

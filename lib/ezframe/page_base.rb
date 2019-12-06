@@ -17,11 +17,15 @@ module Ezframe
     end
 
     def initialize(request, model)
-      @model = model # EzModel::Bridge.instance
+      @model = model
       @request = request
       @params = parse_query_string(request.env["QUERY_STRING"])
+      mylog "params=#{@params.inspect}" if @params.length>0
       @id, @key = @params[:id], @params[:key]
-      parse_json_body if request.post?
+      if request.post?
+        parse_json_body 
+        mylog "json=#{@json.inspect}"
+      end
     end  
 
     def parse_query_string(str)
@@ -52,13 +56,11 @@ module Ezframe
       @json = @json.recursively_symbolize_keys if @json.is_a?(Hash) || @json.is_a?(Array)
       return @json
     end
+  end
 
-    def main_layout(left: "Logo", center: "", right: "")
-      { tag: "div", class: ["row", "container"], child: [
-        { tag: "div", class: %w[col s3], id: "left", child: left },
-        { tag: "div", class: %w[col s5], id: "center-panel", child: center },
-        { tag: "div", class: %w[col s4], id: "right-panel", child: right }
-      ] }
+  class Config
+    def load_config
+      
     end
   end
 end

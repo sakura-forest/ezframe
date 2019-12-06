@@ -2,172 +2,73 @@
 
 module Ezframe
   class App < PageBase
-    # include PageCommon
-
     def initialize(request, model)
       super(request, model)
       @column_set = @model.column_sets[:todo]
       @dataset = @column_set.dataset
     end
 
-=begin
-    def public_new_page
-      matrix = @column_set.map do |column|
-        [column.label, column.form]
-      end
-      matrix.push([{ tag: "input", type: "button", value: "送信", class: %w[btn], event: "on=click:cmd=inject:into=#center-panel:url=/admin/new:get_form=true" }])
-      tb = Html::Table.new(matrix)
-      layout = main_layout(left: sidenav, center: { tag: "form", method: "post", action: "/admin/new_submit", child: tb.to_layout })
-      Materialize.input_without_label = true
-      common_page(title: "新規顧客登録", body: Html.wrap(Materialize.convert(layout)))
-    end
-
-    def public_new_post
-      # values = @request.POST
-      @column_set.values = @json[:form]
-      @column_set.save
-      # mylog("new_submit: #{values.inspect}")
-      # public_index_page
-      make_index_table(@dataset.all)
-    end
-=end
-
     def public_index_page
-      form = { tag: "form", child: [ @column_set[:issue].form, { tag: "button", type: "button", class: %w[btn], child: "send",
-        event: "on=click:cmd=open:goto=/app/index:get_form=true" } ] }
-      mylog(form.to_json)
-      data_a = @dataset.all
-      column_header = [ :id, :issue ]
-      tb = PageKit::IndexTable.new(column_header: column_header, column_set: @column_set, add_checkbox: :id)
-      common_page(title: "Todos", body: Html.wrap(Materialize.convert([form, tb.make_table(data_a)])))
+      @params[:list]
+      form = { tag: "form", child: [ 
+        { tag: "div", class: "col s8", child: @column_set[:issue].form }, 
+        { tag: "div", class: "col s4", child: { tag: "button", type: "button", class: %w[btn], child: "send",
+        event: "on=click:cmd=open:goto=/app/index:get_form=true" } } ] }
+      form = { tag: "div", class: "row", child: form } 
+      # mylog(form.to_json)
+      data_a = if [ 1, 2 ].include?(@params[:list].to_i)
+        @dataset.where(status: @params[:list].to_i).all
+      else
+        @dataset.all
+      end
+      tb = Html::Table.new
+      data_a.map do |data|
+        @column_set.values = data
+        delete_event = "on=click:cmd=open:goto=/app/index:delete=#{data[:id]}"
+        checkbox = @column_set[:status].form
+        checkbox[:checked] = "checked" if "2" == @column_set[:status].value.to_s
+        checkbox[:event] = "on=change:cmd=open:goto=/app/index:change=#{data[:id]}:cur_stat=#{@column_set[:status].value}"
+        mylog "checkbox=#{checkbox}"
+        tb.add_row([ 
+          checkbox,
+          [{ tag: "span", child: @column_set[:issue].view }, { tag: "icon", name: "clear", event: delete_event } ]
+          ])
+      end
+      # contents = multi_div([ %w[container], %w[row] ], [form, tb.make_table(data_a)])
+      btns = [ [ 0, "all"], [1, "active"], [2, "completed"]].map do |a|
+      # { tag: "a", href: event: "on=click:cmd=open:goto=/app/index:show=#{a[0]}", child: a[1] }
+        { tag: "a", class: "btn", href: "/app/index?list=#{a[0]}", child: a[1] }
+      end
+      contents = multi_div([ %w[container], %w[row] ], [form, tb.to_layout, btns])
+      common_page(title: "Todos", body: Html.wrap(Materialize.convert(contents)))
     end
 
     def public_index_post
       mylog "public_index_post: #{@json}"
-      { tag: "h1", child: "public_index_post"}
-      @column_set.values = @json[:form]
-      @column_set.save
+      if @json[:change]
+        id = @json[:change]
+        data = @dataset.where(id: id).first
+        value = data[:status]
+        value = case value.to_i
+        when 1
+          2
+        when 2
+          1
+        end
+        mylog "change: #{value}"
+        @dataset.where(id: id).update(status: value)
+      elsif @json[:delete]
+        id = @json[:delete]
+        @dataset.where(id: id).delete
+      elsif @json[:form]
+        @column_set.values = @json[:form]
+        @column_set[:status].value = 1
+        @column_set.save
+      end
       { tag: "h1", child: "dummy" }
     end
 
     alias_method :public_default_page, :public_index_page
     alias_method :public_default_post, :public_index_post
-
-=begin    
-    def make_index_table(data_a)
-      column_header = [:id, :name, :email, :zipcode, :prefecture]
-      @column_set.each { |col| col.attribute.delete(:hidden) }
-      a_element = Proc.new { |key, id, text|
-        # mylog "proc executed"
-        if key == :name
-          { tag: "a", href: "/admin/detail?id=#{id}", child: text }
-        else
-          text
-        end
-      }
-      table = PageKit::IndexTable.new(column_header: column_header, column_set: @column_set, add_checkbox: :id,
-                                      decorate_column: a_element)
-      table.make_table(data_a)
-    end
-=end
-
-=begin
-    def public_search_post
-      mylog "public_search_post: #{@json.inspect}"
-      word = @json[:form][:word]
-      pattern = "%#{word}%"
-      data_a = @dataset.where(Sequel.|(Sequel.like(:name_kana, pattern), Sequel.like(:name, pattern))).all
-      make_index_table(data_a)
-    end
-
-    def public_detail_page
-      mylog "pubilc_detail_page: #{@request.params.inspect}"
-      data = @column_set.set_from_db(@id)
-      return common_page(title: "no data", body: "no customer data: #{@id}") unless data
-      # Materialize.convert(Html::Table.new(detail_table).to_layout)
-      table = Html::Table.new(detail_table).to_layout
-      common_page(title: "顧客情報", body: Html.wrap(Materialize.convert(main_layout(left: sidenav, center: table, right: right_tabs ))))
-    end
-
-    def public_detail_post
-      mylog "public_detail_post: #{@request.params.inspect}: #{@json}"
-      @id, @key = @json[:id], @json[:key]
-      case @json[:cmd]
-      when "update_value"
-        update_value
-      when "reset_value"
-        reset_value
-      else
-        @column_set.set_from_db(@id)
-        Materialize.input_without_label = true
-        Materialize.convert(detail_edit_part(@column_set[@key])).to_json
-      end
-    end
-
-    def right_tabs
-      tabs = PageKit::Tab.base_layout([
-        { tag: "a", href: "#alarm", child: "次回予定" },
-        { tag: "a", href: "#order", child: "受注" },
-        { tag: "a", href: "#talk", child: "会話" },
-        { tag: "a", href: "#email", child: "Eメール" },
-      ])
-      a = %w[alarm order talk email].map { |k| { tag: "div", id: k, class: %w[col s12], event: "on=show:cmd=inject:into=##{k}:url=/admin/#{k}/index:customer=#{@id}", child: k } }
-      a.unshift(tabs)
-      a
-    end
-
-    def reset_value
-      @id = @json[:id]
-      @column_set.set_from_db(@id)
-      column = @column_set[@json[:key]]
-      Materialize.convert(detail_value_part(column))
-    end
-    
-#    def public_form_page
-#      mylog "public_form_page: params=#{@params.inspect}"
-#      @column_set.set_from_db(@id)
-#      column = @column_set[@key]
-#      Materialize.input_without_label = true
-#      Materialize.convert(detail_edit_part(column)).to_json
-#    end
-
-    private
-
-    def update_value
-      value = @json[:update_value]
-      mylog("update_value: id=#{@id}, key=#{@key}, value=#{value}")
-      column = @column_set.update(@id, @key, value)
-      Materialize.convert(detail_value_part(column)).to_json
-    end
-
-    def detail_table
-      @column_set.map do |column|
-        column.attribute.delete(:hidden)  # Todo: remove this
-        [column.label, detail_value_part(column)]
-      end
-    end
-
-    def detail_value_part(column)
-      { tag: "span", id: "detail-#{column.key}", child: [{ tag: "span", child: column.view }, edit_button(column)].compact }
-    end
-
-    def edit_button(column)
-      return nil if column.attribute[:no_edit]
-      into = "#detail-#{column.key}"
-      { tag: "a", key: column.key,
-        event: "on=click:cmd=inject:into=#{into}:id=#{@id}:key=#{column.key}:value=#{column.value}",
-        class: %w[btn btn-small circle waves-effect waves-light], child: { tag: "icon", name: "edit" } }
-    end
-
-    def detail_edit_part(column)
-      # url = "/admin/finish?id=#{@id}&key=#{column.key}&value=#{column.value}"
-      # reset_url = "/admin/value?id=#{@id}&key=#{column.key}&value=#{column.value}"
-      into = "#detail-#{column.key}"
-      { tag: "span", child: [column.form,
-                            { tag: "span", class: %w[btn small teal waves-effect waves-light], event: "on=click:cmd=update_value:into=#{into}:id=#{@id}:key=#{column.key}:value=#{column.value}", child: { tag: "icon", name: "check" } },
-                            { tag: "span", class: %w[btn small waves-effect waves-light], event: "on=click:cmd=reset_value:into=#{into}:id=#{@id}:key=#{column.key}:value=#{column.value}", child: { tag: "icon", name: "clear" } }] }
-    end
-=end
-
   end
 end

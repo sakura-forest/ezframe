@@ -5,7 +5,7 @@ module Ezframe
     class << self
       def exec(request, response)
         mylog("exec: path=#{request.path_info} params=#{request.params}")
-        Model.make_base
+        Model.init
         model = Model.get_clone
         klass_names = parse_path(request.path_info)
         if klass_names.length > 1
@@ -13,7 +13,7 @@ module Ezframe
         else
           method = "default"
         end
-        puts "klass_names, method = #{klass_names}, #{method}"
+        # mylog("klass_names, method = #{klass_names}, #{method}")
         klass = PageBase.get_class(klass_names)
         unless klass
           mylog("no such Ezframe class: #{klass_names}")
@@ -28,7 +28,7 @@ module Ezframe
         else
           method_full_name = "public_#{method}_page"
         end
-
+        mylog "method: #{klass}.#{method_full_name}"
         body = if page.respond_to?(method_full_name)
                     page.send(method_full_name)
                   else
@@ -44,7 +44,7 @@ module Ezframe
         end
         response.status = 200
       end
-    
+
       def parse_path(path_info)
         path_a = path_info.split('/').drop(1)
         return path_a

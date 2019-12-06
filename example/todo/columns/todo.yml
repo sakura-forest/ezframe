@@ -1,9 +1,9 @@
 - key: issue
   type: string
-  label: 内容
+  label: やること
 - key: status
-  type: select
+  type: checkbox
   label: 状態
   items: 
-    0: Active
-    1: Completed
+    1: Active
+    2: Completed

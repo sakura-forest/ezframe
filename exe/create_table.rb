@@ -6,6 +6,6 @@ $:.push("lib")
 require 'ezframe'
 require 'sequel'
 
-Ezframe::Model.make_base
+Ezframe::Model.init
 model = Ezframe::Model.get_clone
 model.create_tables

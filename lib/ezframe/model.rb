@@ -15,7 +15,7 @@ module Ezframe
         @base_db = Database.new
       end
 
-      def make_base
+      def init
         unless @base_column_sets
           init_column_sets
           init_db
@@ -32,29 +32,8 @@ module Ezframe
     def initialize(column_sets, db)
       @column_sets, @db = column_sets, db
       @column_sets.model = self
-      @column_sets.each {|name, colset| colset.model = self }
+      # @column_sets.each {|name, colset| colset.model = self }
     end
-
-=begin    
-    def save(column_set)
-      dataset = @db.dataset(column_set.name)
-      col_h = column_set.get_hash(:value)
-      col_h.delete(:id)
-      p "save: #{col_h.inspect}"
-      id = column_set[:id]
-      if id.value.to_i > 0
-        dataset.where(id: id).update(col_h)
-      else
-        dataset.insert(col_h)
-      end
-    end
-
-    def update_value(table_name, id, key, value)
-      dataset = @db.dataset(table_name)
-      dataset.where(id: id).update( key => value )
-      mylog("update_value: key=#{key}, id=#{id}, value=#{value}")
-    end
-=end
 
     def create_tables
       @column_sets.tables.each do |table_name, column_set|

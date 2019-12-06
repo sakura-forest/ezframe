@@ -1,8 +1,10 @@
 TODO.md
 Gemfile.lock
 vendor/
-.bundle
+.bundle/
 node_modules/
 .vscode/
 log/*
 db/*
+**/log/*
+**/db/*

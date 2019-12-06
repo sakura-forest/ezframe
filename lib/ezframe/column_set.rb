@@ -28,7 +28,7 @@ module Ezframe
     end
 
     def add(table_name, columns)
-      @tables[table_name.intern] = tb = ColumnSet.new(name: table_name, columns: columns)
+      @tables[table_name.intern] = tb = ColumnSet.new(parent: self, name: table_name, columns: columns)
       tb.set(columns)
     end
 
@@ -42,9 +42,10 @@ module Ezframe
   end
 
   class ColumnSet
-    attr_accessor :name, :model
+    attr_accessor :name, :parent
 
-    def initialize(name: nil, columns: nil)
+    def initialize(parent:, name: nil, columns: nil)
+      @parent = parent
       @name = name 
       @columns ||= {}
       set(columns) if columns
@@ -78,7 +79,7 @@ module Ezframe
 
     def dataset
       # puts "dataset: #{@model.inspect}"
-      @model.db.dataset(@name)
+      @parent.model.db.dataset(@name)
     end
 
     def set_from_db(id)
