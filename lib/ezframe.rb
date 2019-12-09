@@ -19,6 +19,7 @@ require_relative 'ezframe/pages'
 require_relative 'ezframe/template'
 require_relative 'ezframe/util'
 require_relative 'ezframe/server'
+require_relative 'ezframe/auth.rb'
 
 
 
