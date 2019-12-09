@@ -8,19 +8,24 @@ module Ezframe
 
       def init_warden
         Warden::Manager.serialize_into_session do |auth|
+          mylog "serialize_into: #{auth.inspect}"
           auth.user[:id]
         end
         Warden::Manager.serialize_from_session do |account|
-          Auth.get(account)
+          inst = Auth.get(account)
+          mylog "serialize_from: account = #{account}, inst = #{inst.inspect}"
+          inst
         end
-        Warden::Strategies.add(:base) do
+        Warden::Strategies.add(:mystrategy) do
           def valid?
+            mylog "valid?"
             params["account"] || params["password"]
           end
 
           def authenticate!
+            mylog "authenticate!"
             if Auth.authenticate(params["account"], params["password"])
-              success!(Auth.get(params["acccount"]))
+              success!(Auth.get(params["account"]))
             else
               fail!("failll")
             end
@@ -46,7 +51,7 @@ module Ezframe
 
     def initialize(account)
       self.account = account
-      @user = Auth.model.db.dataset(:user).where(account: account)
+      @user = Auth.model.db.dataset(:user).where(account: account).first
       self.password = @user[:password]
     end
   end

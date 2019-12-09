@@ -35,7 +35,7 @@ class Materialize
       if layout.kind_of?(Array)
         new_layout = layout.map { |v| convert(v) }
       elsif layout.kind_of?(Hash)
-        case layout[:tag].intern
+        case layout[:tag].to_sym
         when :input, :select
           return layout if @input_without_label  
           new_layout = input(layout) if "hidden" != layout[:type]

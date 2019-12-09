@@ -28,7 +28,7 @@ module Ezframe
     end
 
     def add(table_name, columns)
-      @tables[table_name.intern] = tb = ColumnSet.new(parent: self, name: table_name, columns: columns)
+      @tables[table_name.to_sym] = tb = ColumnSet.new(parent: self, name: table_name, columns: columns)
       tb.set(columns)
     end
 
@@ -67,7 +67,7 @@ module Ezframe
         unless klass
           raise "no such column type: #{attr[:type]}"
         else
-          @columns[col_key.intern] = klass.new(attr)
+          @columns[col_key.to_sym] = klass.new(attr)
         end
       end
       @columns[:created_at] = DateType.new(type: "date", key: "created_at", label: "生成日時", hidden: true, no_edit: true)
@@ -105,7 +105,7 @@ module Ezframe
 
     def update(id, key, value)
       dataset.where(id: id).update(key => value)
-      column = @columns[key.intern]
+      column = @columns[key.to_sym]
       column.value = value
       return column
     end
@@ -115,7 +115,7 @@ module Ezframe
       # puts "value_h=#{value_h.inspect}"
       value_h.each do |k, v|
         # puts "values=: k=#{k}, v=#{v}"
-        col = @columns[k.intern]
+        col = @columns[k.to_sym]
         unless col
           mylog("no such column: #{k}")
           next
@@ -151,7 +151,7 @@ module Ezframe
     end
 
     def [](col_key)
-      @columns[col_key.intern]
+      @columns[col_key.to_sym]
     end
     
     def form

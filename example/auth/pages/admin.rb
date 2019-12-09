@@ -36,27 +36,19 @@ module Ezframe
 
     def public_login_page
       form = { tag: "div", class: %w[container], child: 
-        { tag: "form", action: "/login", method: "post", child: [
+        { tag: "form", action: "/admin/login", method: "post", child: [
           { tag: "input", type: "text", name: "account", label: "User ID"},
           { tag: "input", type: "password", name: "password", label: "Password"},
-          { tag: "button", type: "submit", child: "login"}
+          { tag: "button", type: "submit", class: %w[btn], child: "login"}
         ]}
       }
       common_page(title: "Login", body: Html.wrap(Materialize.convert(form)))
     end
 
     def public_login_post
-      mylog "public_login_post: #{@json}"
-      authenticate(@params[:account], @params[:password])
-      { tag: "h1", child: "dummy" }
+      mylog "public_login_post: #{@params.inspect}, #{@json}"
+      warden.authenticate # (@params["account"], @params["password"])
+      public_index_page
     end
-
-    def public_default_post
-      mylog "public_default_post: #{@json}"
-      # @request.env["warden"].authenticate(@params[:account], @params[:password])
-      { tag: "h1", child: "dummy" }
-    end
-
-    alias_method :public_default_page, :public_index_page
   end
 end

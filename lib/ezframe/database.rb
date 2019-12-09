@@ -19,12 +19,12 @@ module Ezframe
     end  
 
     def dataset(table_name)
-      @sequel[table_name.intern]  
+      @sequel[table_name.to_sym]  
     end
   
     def create_table(table_name, dbtype_h)
       %w[id created_at updated_at].each do |key|
-        dbtype_h.delete(key.intern)
+        dbtype_h.delete(key.to_sym)
       end
       @sequel.create_table(table_name) do 
         primary_key :id, auto_increment: true

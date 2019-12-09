@@ -33,7 +33,7 @@ class Html
       when :tag, :final
         next
       when :key
-        "name=\"#{v}\"" if attrs[:tag].intern == :input
+        "name=\"#{v}\"" if attrs[:tag].to_sym == :input
         next
       else
         if v.is_a?(Array)

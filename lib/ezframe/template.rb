@@ -3,7 +3,7 @@
 module EzView
   class Template
     def self.embed_words(keyword, dir, opts)
-      return opts[keyword.intern] if opts[keyword.intern]
+      return opts[keyword.to_sym] if opts[keyword.to_sym]
 
      temp = "#{dir}/#{keyword}.html"
      return File.open(temp, &:read) if File.exist?(temp)

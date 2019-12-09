@@ -20,6 +20,7 @@ module Ezframe
       @model = model
       @request = request
       @params = parse_query_string(request.env["QUERY_STRING"])
+      @params.update(request.params)
       mylog "params=#{@params.inspect}" if @params.length>0
       @id, @key = @params[:id], @params[:key]
       if request.post?
@@ -31,7 +32,7 @@ module Ezframe
     def parse_query_string(str)
       query_a = URI::decode_www_form(str)
       res_h = {}
-      query_a.map {|a| res_h[a[0].intern] = a[1] }
+      query_a.map {|a| res_h[a[0].to_sym] = a[1] }
       res_h
     end
 
@@ -55,6 +56,18 @@ module Ezframe
       end
       @json = @json.recursively_symbolize_keys if @json.is_a?(Hash) || @json.is_a?(Array)
       return @json
+    end
+
+    def warden
+      @request.env["warden"]
+    end
+
+    def login?
+      !!warden.user
+    end
+
+    def user
+      warden.user
     end
   end
 end
