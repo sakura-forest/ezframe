@@ -57,10 +57,4 @@ module Ezframe
       return @json
     end
   end
-
-  class Config
-    def load_config
-      
-    end
-  end
 end

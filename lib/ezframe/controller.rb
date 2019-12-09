@@ -4,24 +4,41 @@ module Ezframe
   class Boot
     class << self
       def exec(request, response)
+        @request = request
+        Config.load_files("./config")
         mylog("exec: path=#{request.path_info} params=#{request.params}")
         Model.init
         model = Model.get_clone
+        Auth.init_warden
+        Auth.model = model
+#        if "/unauthorized" == request.path_info
+#          response.body= [ App.new(request, model).public_login_page ]
+#          response.status = 200
+#          return
+#        end
+#        warden.authenticate!
+#        mylog "authed: #{warden.user.inspect}"
         klass_names = parse_path(request.path_info)
-        if klass_names.length > 1
+        mylog "klass_names=#{klass_names}"
+        if klass_names.empty?
+          klass_names =  [ Config[:default_page_class] ]
+        elsif klass_names.length > 1
           method = klass_names.pop
         else
           method = "default"
         end
-        # mylog("klass_names, method = #{klass_names}, #{method}")
         klass = PageBase.get_class(klass_names)
         unless klass
           mylog("no such Ezframe class: #{klass_names}")
-          page = Admin.new(request, model)
-          response.body = [page.public_default_page ]
+          fallback = "Ezframe::#{Config[:default_page_class]}"
+          mylog("fallback=#{fallback}")
+          klass = Object.const_get(fallback)
+          page = klass.new(request, model)
+          response.body = [ page.public_default_page ]
           response.status = 200
           return
         end
+        mylog "klass=#{klass}"
         page = klass.new(request, model)
         if request.post?
           method_full_name = "public_#{method}_post"
@@ -53,7 +70,19 @@ module Ezframe
       def file_not_found(response)
         response.body = ['path not found']
         response.status = 404
-      end  
+      end
+
+      def warden
+        request.env["warden"]
+      end
+
+      def login?
+        !!warden.user
+      end
+
+      def user
+        warden.user
+      end
     end
   end
 end

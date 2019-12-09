@@ -6,6 +6,7 @@ require "sequel"
 require "json"
 require "yaml"
 
+require_relative 'ezframe/config'
 require_relative 'ezframe/controller'
 require_relative 'ezframe/column_set'
 require_relative 'ezframe/column_type'

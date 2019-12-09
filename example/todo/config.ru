@@ -6,7 +6,6 @@ require 'warden'
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'lib'))
 require 'ezframe'
-Dir["./config/*.rb"].each {|file| require file }
 
 use Rack::Session::Cookie, :secret => 'kamasecret'
 

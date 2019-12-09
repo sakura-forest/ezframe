@@ -49,6 +49,10 @@ module Ezframe
       nil
     end
 
+    def db_value
+      value
+    end
+
     def form
       nil
     end
@@ -97,6 +101,16 @@ module Ezframe
     def label
       return nil if @attribute[:hidden] && !@attribute[:force]
       "ID"
+    end
+  end
+
+  class PasswordType < StringType
+    def form
+      { tag: "input", type: "password", label: @attribute[:label], value: @value}
+    end
+
+    def db_value
+      value      
     end
   end
 

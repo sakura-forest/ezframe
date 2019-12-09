@@ -1,0 +1,3 @@
+default_page_class: App
+default_page_method: index
+template_file: base.html
