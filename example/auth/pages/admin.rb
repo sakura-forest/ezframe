@@ -2,11 +2,16 @@
 
 module Ezframe
   class Admin < PageBase
-    def initialize(request, model)
+    def initialize(request=nil, model=nil)
       super(request, model)
-      mylog "request=#{request.inspect}"
-      @column_set = @model.column_sets[:user]
-      @dataset = @column_set.dataset
+      if @request
+        mylog "request=#{@request.inspect}"
+      end
+      if @model
+        @column_set = @model.column_sets[:user]
+        @dataset = @column_set.dataset
+      end
+      @auth = true
     end
 
     def public_index_page

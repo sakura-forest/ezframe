@@ -12,8 +12,9 @@ module Ezframe
           auth.user[:id]
         end
         Warden::Manager.serialize_from_session do |account|
+          mylog "serialize_from: account = #{account}"
           inst = Auth.get(account)
-          mylog "serialize_from: account = #{account}, inst = #{inst.inspect}"
+          mylog "inst = #{inst.inspect}"
           inst
         end
         Warden::Strategies.add(:mystrategy) do
@@ -40,18 +41,18 @@ module Ezframe
       def authenticate(account, pass)
         raise "model is not initialized" unless @model
         @user = @model.db.dataset(:user).where(account: account).first
-        mylog "authenticate: user=#{@user.inspect}"
+        mylog "Auth: authenticate: user=#{@user.inspect}"
         password = @user[:password]
         return nil if !pass || !password
         !!(password == pass)
       end
     end
 
-    attr_accessor :account, :password, :model, :user
+    attr_accessor :account, :password, :model, :user, :id
 
     def initialize(account)
       self.account = account
-      @user = Auth.model.db.dataset(:user).where(account: account).first
+      @user = Auth.model.db.dataset(:user).where(Sequel.or(account: account, id: account)).first
       self.password = @user[:password]
     end
   end

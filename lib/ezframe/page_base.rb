@@ -16,17 +16,22 @@ module Ezframe
       return nil
     end
 
-    def initialize(request, model)
-      @model = model
-      @request = request
-      @params = parse_query_string(request.env["QUERY_STRING"])
-      @params.update(request.params)
-      mylog "params=#{@params.inspect}" if @params.length>0
-      @id, @key = @params[:id], @params[:key]
-      if request.post?
-        parse_json_body 
-        mylog "json=#{@json.inspect}"
+    attr_accessor :auth
+
+    def initialize(request=nil, model=nil)
+      @model = model if model
+      if request
+        @request = request
+        @params = parse_query_string(request.env["QUERY_STRING"])
+        @params.update(request.params)
+        mylog "params=#{@params.inspect}" if @params.length>0
+        @id, @key = @params[:id], @params[:key]
+        if request.post?
+          parse_json_body 
+          mylog "json=#{@json.inspect}"
+        end
       end
+      @auth = nil
     end  
 
     def parse_query_string(str)

@@ -9,7 +9,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), "lib"))
 require "ezframe"
 
 failure_app = Proc.new do |env|
-  ["401", { "Content-Type" => "text/html" }, ["fail."]]
+  ["401", { "Content-Type" => "text/html" }, [ Ezframe::Admin.new.public_login_page ]]
 end
 
 use Warden::Manager do |manager|
