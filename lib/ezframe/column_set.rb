@@ -22,6 +22,10 @@ module Ezframe
         mylog("YAML load error: #{filename}")
         return 
       end
+      if yaml.length == 0
+        mylog("[ERROR] columns file is empty: #{filename}")
+        return
+      end
       column_info = yaml.recursively_symbolize_keys
       # puts "load_one_file: filename=#{filename} column_info=#{column_info.inspect}"
       add(table_name, column_info)

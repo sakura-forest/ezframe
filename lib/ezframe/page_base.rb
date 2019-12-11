@@ -3,41 +3,68 @@
 require "json"
 require "uri"
 
-require_relative 'util'
+require_relative "util"
 
 module Ezframe
   class PageBase
-    def self.get_class(keys)
-      keys = [ keys ] if keys.is_a?(String)
-      klass = (%w[Ezframe] + keys.map {|k| k.to_camel }).join("::")
-      if Object.const_defined?(klass)
-        return Object.const_get(klass)
+    class << self
+      def get_class(keys)
+        keys = [keys] if keys.is_a?(String)
+        klass = (%w[Ezframe] + keys.map { |k| k.to_camel }).join("::")
+        if Object.const_defined?(klass)
+          return Object.const_get(klass)
+        end
+        return nil
       end
-      return nil
+
+      def decide_route(path_info)
+        default_class = Config[:default_page_class]
+        path_parts = path_info.split('/').drop(1)
+        case path_parts.length
+        when 0
+          [default_class, "default"]
+        when 1
+          klass = get_class(path_parts)
+          if klass
+            return [klass, "default"]
+          else
+            return [default_class, parth_parts[0]]
+          end
+        else
+          klass = get_class(path_parts)
+          if klass
+            [klass, "default"]
+          else
+            method = path_parts.pop
+            klass = get_class(path_parts)
+            [klass, method]
+          end
+        end
+      end
     end
 
     attr_accessor :auth
 
-    def initialize(request=nil, model=nil)
+    def initialize(request = nil, model = nil)
       @model = model if model
       if request
         @request = request
         @params = parse_query_string(request.env["QUERY_STRING"])
         @params.update(request.params)
-        mylog "params=#{@params.inspect}" if @params.length>0
+        mylog "params=#{@params.inspect}" if @params.length > 0
         @id, @key = @params[:id], @params[:key]
         if request.post?
-          parse_json_body 
+          parse_json_body
           mylog "json=#{@json.inspect}"
         end
       end
       @auth = nil
-    end  
+    end
 
     def parse_query_string(str)
       query_a = URI::decode_www_form(str)
       res_h = {}
-      query_a.map {|a| res_h[a[0].to_sym] = a[1] }
+      query_a.map { |a| res_h[a[0].to_sym] = a[1] }
       res_h
     end
 
@@ -46,9 +73,9 @@ module Ezframe
         title: opts[:title],
         body: opts[:body],
         into_html_header: Materialize.into_html_header,
-        into_bottom_of_body: Materialize.into_bottom_of_body
+        into_bottom_of_body: Materialize.into_bottom_of_body,
       }
-      EzView::Template.fill_template('template/base.html', args)
+      EzView::Template.fill_template("template/base.html", args)
     end
 
     def parse_json_body

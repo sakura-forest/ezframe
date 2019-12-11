@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 module Ezframe
-  class Admin < PageBase
+  class App < PageBase
     def initialize(request=nil, model=nil)
       super(request, model)
       if @request
-        mylog "request=#{@request.inspect}"
+        mylog "request=#{@request}"
       end
       if @model
         @column_set = @model.column_sets[:user]
@@ -16,10 +16,10 @@ module Ezframe
 
     def public_index_page
       layout = { tag: "ul", child: [
-        { tag: "li", child: { tag: "a", href: "/admin/test1", child: "admin1"}},
-        { tag: "li", child: { tag: "a", href: "/admin/test2", child: "admin2"}},
+        { tag: "li", child: { tag: "a", href: "/app/test1", child: "app1"}},
+        { tag: "li", child: { tag: "a", href: "/app/test2", child: "app2"}},
       ] }
-      common_page(title: "Admin Top", body: Html.wrap(Materialize.convert(layout)))
+      common_page(title: "app Top", body: Html.wrap(Materialize.convert(layout)))
     end
 
     def public_test1_page
@@ -41,7 +41,7 @@ module Ezframe
 
     def public_login_page
       form = { tag: "div", class: %w[container], child: 
-        { tag: "form", action: "/admin/login", method: "post", child: [
+        { tag: "form", action: "/app/login", method: "post", child: [
           { tag: "input", type: "text", name: "account", label: "User ID"},
           { tag: "input", type: "password", name: "password", label: "Password"},
           { tag: "button", type: "submit", class: %w[btn], child: "login"}

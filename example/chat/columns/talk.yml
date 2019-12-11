@@ -1,0 +1,6 @@
+- key: body
+  label: 本文
+  type: string
+- key: user
+  type: foreign
+  view: name

@@ -11,14 +11,6 @@ module Ezframe
         model = Model.get_clone
         Auth.init_warden
         Auth.model = model
-#        if "/unauthorized" == request.path_info
-#          response.body= [ App.new(request, model).public_login_page ]
-#          response.status = 200
-#          return
-#        end
-#        warden.authenticate!
-#        mylog "authed: #{warden.user.inspect}"
-        klass_names = parse_path(request.path_info)
         mylog "klass_names=#{klass_names}"
         if klass_names.empty?
           klass_names =  [ Config[:default_page_class] ]
@@ -66,10 +58,6 @@ module Ezframe
         response.status = 200
       end
 
-      def parse_path(path_info)
-        path_a = path_info.split('/').drop(1)
-        return path_a
-      end
 
       def file_not_found(response)
         response.body = ['path not found']

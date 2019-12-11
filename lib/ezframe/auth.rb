@@ -1,7 +1,4 @@
 module Ezframe
-  #  class BaseStrategy < Warden::Strategies::Base
-  #  end
-
   class Auth
     class << self
       attr_accessor :model, :user
@@ -24,14 +21,16 @@ module Ezframe
           end
 
           def authenticate!
-            mylog "authenticate!"
+            mylog "authenticate!: #{params}"
             if Auth.authenticate(params["account"], params["password"])
               success!(Auth.get(params["account"]))
             else
-              fail!("failll")
+              # mylog "can i get env?: #{env}"
+              env['x-rack.flash'].error = 'ユーザーが登録されていないか、パスワードが違っています。'
+              fail!("authenticate failure")
             end
           end
-        end
+        end 
       end
 
       def get(account)
@@ -41,8 +40,14 @@ module Ezframe
       def authenticate(account, pass)
         raise "model is not initialized" unless @model
         @user = @model.db.dataset(:user).where(account: account).first
-        mylog "Auth: authenticate: user=#{@user.inspect}"
+        if @user
+          mylog "Auth: authenticate: user=#{@user.inspect}"
+        else
+          mylog "authenticate: this user does not exist: #{account}"
+          return nil
+        end
         password = @user[:password]
+        @user.delete(:password)
         return nil if !pass || !password
         !!(password == pass)
       end
@@ -53,7 +58,11 @@ module Ezframe
     def initialize(account)
       self.account = account
       @user = Auth.model.db.dataset(:user).where(Sequel.or(account: account, id: account)).first
+      unless @user
+        mylog "Auth.initialize: This user does not exist: #{account}"
+      end
       self.password = @user[:password]
+      @user.delete(:password)
     end
   end
 end
