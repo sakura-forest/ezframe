@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'minitest/autorun'
-require 'lib/util.rb'
+require 'ezframe/util.rb'
 
 class MaterializeTest < Minitest::Test
   def test_add_class
@@ -12,6 +12,16 @@ class MaterializeTest < Minitest::Test
     h = { a: 1, b: 2, class: ["a"] }
     h.add_class("b")
     assert_equal(%w[a b], h[:class])
+
+    h = { a: 1, b: 2, class: ["a"] }
+    h.add_class(["b", "c"])
+    assert_equal(%w[a b c], h[:class])
+  end
+
+  def test_remove_class
+    h = { a: 1, b: 2, class: %w[a b c] }
+    h.remove_class("b")
+    assert_equal(%w[a c], h[:class])
   end
 
   def test_deep_dup

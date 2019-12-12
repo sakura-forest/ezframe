@@ -81,6 +81,7 @@ module Ezframe
 
     def parse_json_body
       body = @request.body.read
+      return {} if !body || body.length==0
       begin
         @json = JSON.parse(body)
       rescue => e

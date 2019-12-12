@@ -60,7 +60,7 @@ module Ezframe
     end
 
     class Tab
-      def self.base_layout(link_list)
+      def self.base_hthash(link_list)
         size = 12 / link_list.length
         tabs = link_list.map do |link|
           { tag: "li", class: ["tab", "s#{size}"], child: link }
@@ -72,7 +72,7 @@ module Ezframe
     end
 
     class Card
-      def self.base_layout(title: "", content: "")
+      def self.base_hthash(title: "", content: "")
         multi_div([%w[row], %w[col s12], %w[card blue-grey darken-1], %w[card-content white-text]],
                   [
                   { tag: "span", class: %w[card-tite], child: title },

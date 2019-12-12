@@ -42,7 +42,7 @@ module Ezframe
       # { tag: "a", href: event: "on=click:cmd=open:goto=/app/index:show=#{a[0]}", child: a[1] }
         { tag: "a", class: "btn", href: "/app/index?list=#{a[0]}", child: a[1] }
       end
-      contents = multi_div([ %w[container], %w[row] ], [form, tb.to_layout, btns])
+      contents = multi_div([ %w[container], %w[row] ], [form, tb.to_hthash, btns])
       common_page(title: "Todos", body: Html.wrap(Materialize.convert(contents)))
     end
 

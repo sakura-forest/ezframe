@@ -15,11 +15,11 @@ module Ezframe
     end
 
     def public_index_page
-      layout = { tag: "ul", child: [
+      hthash = { tag: "ul", child: [
         { tag: "li", child: { tag: "a", href: "/app/test1", child: "app1"}},
         { tag: "li", child: { tag: "a", href: "/app/test2", child: "app2"}},
       ] }
-      common_page(title: "app Top", body: Html.wrap(Materialize.convert(layout)))
+      common_page(title: "app Top", body: Html.wrap(Materialize.convert(hthash)))
     end
 
     def public_test1_page

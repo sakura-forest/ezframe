@@ -29,12 +29,28 @@ class Hash
   end
 
   def add_class(klass)
-    v = self[:class]
-    if v.is_a?(Array)
-      self[:class].push(klass)
-    else
-      self[:class] = [ v, klass ]
+    c = self[:class]
+    if c.is_a?(String)
+      a = [ c ]
+      self[:class] = c = a
     end
+    if klass.is_a?(Array)
+      klass.each {|k| add_class(k) }
+    else
+      return if c.include?(klass)
+      c.push(klass)
+    end
+  end
+
+  def remove_class(klass)
+    c = self[:class]
+    if c.is_a?(String)
+      if klass == c
+        self.delete(:class)
+      end
+    else
+      c.delete(klass)
+    end          
   end
 end
 

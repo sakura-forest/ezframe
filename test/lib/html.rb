@@ -25,7 +25,7 @@ class HtmlTest < Minitest::Test
     assert(html.index('</div>'))
   end
 
-  def test_layout
+  def test_hthash
     assert_equal('<input class="c1 c2 c3"/>', Html.wrap(tag: 'input', class: %w[c1 c2 c3]))
     res = Html.wrap(tag: 'div', class: 'c1', child: { tag: 'input', type: 'text', name: 'inp' })
     assert_equal('<div class="c1">
@@ -37,8 +37,8 @@ class HtmlTest < Minitest::Test
   def test_table
     matrix = [ %w[a b], %w[c d] ]
     matrix[0][0] = { tag: "icon", name: "edit", dummy: 1 }
-    layout = Html::Table.new(matrix).to_layout
-    html = Html.wrap(layout)
+    hthash = Html::Table.new(matrix).to_hthash
+    html = Html.wrap(hthash)
     doc = Nokogiri::HTML(html)
     tmp = doc.xpath("//td")
     assert_equal(4, tmp.length)

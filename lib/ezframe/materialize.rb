@@ -27,66 +27,67 @@ class Materialize
       EOBOT
     end
 
-    def convert(layout)
-      return nil unless layout
-      return layout if (layout.kind_of?(Hash) && layout[:final])
-      new_layout = layout.clone
-      # mylog("convert: new_layout: #{layout.inspect}")
-      if layout.kind_of?(Array)
-        new_layout = layout.map { |v| convert(v) }
-      elsif layout.kind_of?(Hash)
-        case layout[:tag].to_sym
+    def convert(hthash)
+      return nil unless hthash
+      return hthash if (hthash.kind_of?(Hash) && hthash[:final])
+      new_hthash = hthash.clone
+      # mylog("convert: new_hthash: #{hthash.inspect}")
+      if hthash.kind_of?(Array)
+        new_hthash = hthash.map { |v| convert(v) }
+      elsif hthash.kind_of?(Hash)
+        case hthash[:tag].to_sym
         when :input, :select
-          return layout if @input_without_label  
-          new_layout = input(layout) if "hidden" != layout[:type]
-          return new_layout
+          return hthash if @input_without_label  
+          new_hthash = input(hthash) if "hidden" != hthash[:type]
+          return new_hthash
         when :checkbox
-          new_layout = c = checkbox(layout)
+          new_hthash = c = checkbox(hthash)
           # mylog("checkbox: #{c}")
-          return new_layout
+          return new_hthash
         when :icon
-          return icon(layout)
+          return icon(hthash)
         when :form
-          return new_layout = form(layout)
+          return new_hthash = form(hthash)
         when :table
-          new_layout[:class] ||= []
-          new_layout[:class].push("striped")
+          new_hthash[:class] ||= []
+          new_hthash[:class].push("striped")
+          new_hthash[:class].push("highlight")
         end
-        new_layout[:child] = convert(layout[:child]) if layout[:child]
+        new_hthash[:child] = convert(hthash[:child]) if hthash[:child]
       end
-      return new_layout
+      return new_hthash
     end
 
-    def icon(layout)
-      new_layout = layout.clone
-      new_layout.add_class("material-icons")
-      new_layout.update({ tag: "i", child: layout[:name] })
-      new_layout.delete(:name)
-      return new_layout
+    def icon(hthash)
+      new_hthash = hthash.clone
+      new_hthash.add_class("material-icons")
+      new_hthash.update({ tag: "i", child: hthash[:name] })
+      new_hthash.delete(:name)
+      return new_hthash
     end
 
-    def form(layout)
-      new_layout = layout.clone
-      new_layout[:child] = convert(new_layout[:child])
-      # new_layout = { tag: "div", class: ["container"], child: new_layout }
-      return new_layout
+    def form(hthash)
+      new_hthash = hthash.clone
+      new_hthash[:child] = convert(new_hthash[:child])
+      # new_hthash = { tag: "div", class: ["container"], child: new_hthash }
+      return new_hthash
     end
 
-    def input(layout)
-      layout[:name] ||= layout[:key]
-      width_s = "s#{layout[:width_s] || 12}"
-      layout.delete(:witdth_s)
-      new_layout = div(add_sibling(layout, 
-        { tag: "label", for: layout[:key], child: layout[:label], final: true }
+    def input(hthash)
+      hthash[:name] ||= hthash[:key]
+      width_s = "s#{hthash[:width_s] || 12}"
+      hthash.delete(:witdth_s)
+      new_hthash = div(add_sibling(hthash, 
+        { tag: "label", for: hthash[:key], child: hthash[:label], final: true }
       ), class: [ "input-field",  "col", width_s ])
-      new_layout = div(new_layout, class: "row")
-      return new_layout
+      new_hthash = div(new_hthash, class: "row")
+      return new_hthash
     end
 
-    def checkbox(layout)
-      layout[:tag]="input"
-      layout[:type]="checkbox"
-      { tag: "label", child: [ layout, { tag: "span", child: layout[:value] } ] }
+    def checkbox(hthash)
+      hthash[:tag]="input"
+      hthash[:type]="checkbox"
+      { tag: "label", child: [ hthash, { tag: "span", child: hthash[:value] } ] }
     end
 
     def div(child, opts = {})
