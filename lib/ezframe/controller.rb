@@ -6,11 +6,11 @@ module Ezframe
       def exec(request, response)
         @request = request
         Config.load_files("./config")
-        mylog("exec: path=#{request.path_info} params=#{request.params}")
         Model.init
         model = Model.get_clone
         Auth.init_warden
         Auth.model = model
+=begin      
         mylog "klass_names=#{klass_names}"
         if klass_names.empty?
           klass_names =  [ Config[:default_page_class] ]
@@ -30,7 +30,10 @@ module Ezframe
           response.status = 200
           return
         end
-        mylog "klass=#{klass}"
+=end
+        mylog("exec: path=#{request.path_info} params=#{request.params}")
+        klass, method = PageBase::decide_route(request.path_info)
+        mylog "klass=#{klass}, method=#{method}"
         page = klass.new(request, model)
         if request.post?
           method_full_name = "public_#{method}_post"

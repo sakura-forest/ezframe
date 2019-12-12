@@ -18,22 +18,23 @@ module Ezframe
       end
 
       def decide_route(path_info)
-        default_class = Config[:default_page_class]
+        default_class = Config[:default_page_class]||"App"
+        default_method = Config[:default_page_method]||"default"
         path_parts = path_info.split('/').drop(1)
         case path_parts.length
         when 0
-          [default_class, "default"]
+          [get_class(default_class), default_method]
         when 1
           klass = get_class(path_parts)
           if klass
-            return [klass, "default"]
+            return [klass, default_method]
           else
-            return [default_class, parth_parts[0]]
+            return [get_class(default_class), parth_parts[0]]
           end
         else
           klass = get_class(path_parts)
           if klass
-            [klass, "default"]
+            [klass, default_method]
           else
             method = path_parts.pop
             klass = get_class(path_parts)
