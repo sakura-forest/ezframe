@@ -54,6 +54,8 @@ module Ezframe
         @params.update(request.params)
         mylog "params=#{@params.inspect}" if @params.length > 0
         @id, @key = @params[:id], @params[:key]
+        @env = @request.env
+        @session = @env["rack.x-session"]
         if request.post?
           parse_json_body
           mylog "json=#{@json.inspect}"

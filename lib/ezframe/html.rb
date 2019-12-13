@@ -3,11 +3,11 @@
 module Ezframe
   class Html
     class << self
-      def wrap(opts = {})
+      def convert(opts = {})
         return "" if opts.nil? || opts.to_s.empty?
         return opts.to_html if opts.respond_to?(:to_html)
         return opts.to_s if opts.is_a?(String) || opts.is_a?(Symbol) || opts.is_a?(Integer) || opts.is_a?(Time)
-        return opts.map { |args| wrap(args) }.join if opts.is_a?(Array)
+        return opts.map { |args| convert(args) }.join if opts.is_a?(Array)
 
         tag = opts[:tag]
         case tag
@@ -28,7 +28,7 @@ module Ezframe
         opt_a = attrs.map do |k, v|
           case k
           when :child
-            child_s = wrap(v)
+            child_s = convert(v)
             next
           when :tag, :final
             next
@@ -77,7 +77,7 @@ module Ezframe
         attr[:name] = attr[:key]
         attr[:final] = true
         attr.delete(:items)
-        Html.wrap(attr)
+        Html.convert(attr)
       end
     end
   end

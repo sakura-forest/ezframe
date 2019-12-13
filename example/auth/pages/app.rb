@@ -19,15 +19,15 @@ module Ezframe
         { tag: "li", child: { tag: "a", href: "/app/test1", child: "app1"}},
         { tag: "li", child: { tag: "a", href: "/app/test2", child: "app2"}},
       ] }
-      common_page(title: "App Top", body: Html.wrap(Materialize.convert(hthash)))
+      common_page(title: "App Top", body: Html.convert(Materialize.convert(hthash)))
     end
 
     def public_test1_page
-      common_page(title: "Secret Page", body: Html.wrap(Materialize.convert({ tag: "h1", child: "test1"})))
+      common_page(title: "Secret Page", body: Html.convert(Materialize.convert({ tag: "h1", child: "test1"})))
     end
 
     def public_test2_page
-      common_page(title: "Secret Page", body: Html.wrap(Materialize.convert({ tag: "h1", child: "test2"})))
+      common_page(title: "Secret Page", body: Html.convert(Materialize.convert({ tag: "h1", child: "test2"})))
     end
 
     def public_default_page
@@ -49,7 +49,7 @@ module Ezframe
           { tag: "button", type: "submit", class: %w[btn], child: "login"}
         ]}
       }
-      common_page(title: "Login", body: Html.wrap(Materialize.convert(flash_area+form)))
+      common_page(title: "Login", body: Html.convert(Materialize.convert(flash_area+form)))
     end
 
     def public_login_post

@@ -6,6 +6,7 @@ require "sequel"
 require "json"
 require "yaml"
 
+require_relative 'ezframe/util'
 require_relative 'ezframe/config'
 require_relative 'ezframe/controller'
 require_relative 'ezframe/column_set'
@@ -17,9 +18,8 @@ require_relative 'ezframe/materialize'
 require_relative 'ezframe/model'
 require_relative 'ezframe/page_kit'
 require_relative 'ezframe/page_base'
-require_relative 'ezframe/pages'
 require_relative 'ezframe/template'
-require_relative 'ezframe/util'
+require_relative 'ezframe/pages'
 require_relative 'ezframe/server'
 require_relative 'ezframe/auth.rb'
 

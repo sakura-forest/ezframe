@@ -1,7 +1,7 @@
 module Ezframe
-  class Ht < Hash
+  module Ht
     class << self
-      def wrap_tag(opts={})
+      def wrap_tag(opts = {})
         h = opts.dup
         h[:tag] = __callee__.to_s
         h
@@ -20,7 +20,6 @@ module Ezframe
       alias_method :span, :wrap_tag
       alias_method :i, :wrap_tag
       alias_method :strong, :wrap_tag
-      alias_method :icon, :wrap_tag
       alias_method :ul, :wrap_tag
       alias_method :ol, :wrap_tag
       alias_method :li, :wrap_tag
@@ -33,29 +32,19 @@ module Ezframe
       alias_method :form, :wrap_tag
       alias_method :button, :wrap_tag
       alias_method :input, :wrap_tag
+      alias_method :select, :wrap_tag
       alias_method :textarea, :wrap_tag
       alias_method :label, :wrap_tag
       alias_method :fieldset, :wrap_tag
-    end
 
-    def multi_wrap(class_a, child)
-      class_a.reverse.each do |klass|
-        child = { tag: "div", class: klass, child: child }
-      end
-      return child
-    end
+      alias_method :icon, :wrap_tag
+      alias_method :checkbox, :wrap_tag
 
-    def add_class(klass)
-      c = self[:class]
-      if c.is_a?(String)
-        a = [ c ]
-        self[:class] = c = a
-      end
-      if klass.is_a?(Array)
-        klass.each {|k| add_class(k) }
-      else
-        return if c.include?(klass)
-        c.push(klass)
+      def multi_wrap(class_a, child)
+        class_a.reverse.each do |klass|
+          child = Ht.div(class: klass, child: child)
+        end
+        return child
       end
     end
 
@@ -67,7 +56,7 @@ module Ezframe
         @array = array.dup
       end
 
-      def to_hthash
+      def to_hash
         return nil if @list.nil? || @list.empty?
         child = @array.map do |elem|
           { tag: "li", child: elem }
@@ -88,8 +77,9 @@ module Ezframe
       end
     end
 
-
     class Table
+      attr_accessor :class_a
+
       def initialize(matrix = nil)
         set(matrix) if matrix
         @matrix ||= []
@@ -103,17 +93,18 @@ module Ezframe
         @matrix.push(row)
       end
 
-      def to_hthash
+      def to_hash
+        table_class, tr_class, td_class = @class_a
         max_col = 0
         @matrix.each { |row| max_col = row.length if max_col < row.length }
         tr_a = @matrix.map do |row|
           add_attr = nil
           add_attr = { colspan: max_col - row.length + 1 } if row.length < max_col
-          td_a = row.map { |v| { tag: 'td', child: v } }
+          td_a = row.map { |v| Ht.td(class: td_class, child: v) }
           td_a[0].update(add_attr) if add_attr
-          { tag: 'tr', child: td_a }
+          Ht.tr(class: tr_class, child: td_a)
         end
-        { tag: 'table', child: tr_a }
+        Ht.table(class: table_class, child: tr_a)
       end
     end
   end

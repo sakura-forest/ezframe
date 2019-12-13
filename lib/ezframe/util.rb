@@ -30,7 +30,9 @@ class Hash
 
   def add_class(klass)
     c = self[:class]
-    if c.is_a?(String)
+    if !c
+      self[:class] = c = []
+    elsif c.is_a?(String)
       a = [ c ]
       self[:class] = c = a
     end

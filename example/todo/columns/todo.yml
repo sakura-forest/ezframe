@@ -2,7 +2,7 @@
   type: string
   label: やること
 - key: status
-  type: checkbox
+  type: select
   label: 状態
   items: 
     1: Active
