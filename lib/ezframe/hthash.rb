@@ -1,5 +1,5 @@
 module Ezframe
-  class Hthash < Hash
+  class Ht < Hash
     class << self
       def wrap_tag(opts={})
         h = opts.dup
