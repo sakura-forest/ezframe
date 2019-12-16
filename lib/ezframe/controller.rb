@@ -10,27 +10,7 @@ module Ezframe
         model = Model.get_clone
         Auth.init_warden
         Auth.model = model
-=begin      
-        mylog "klass_names=#{klass_names}"
-        if klass_names.empty?
-          klass_names =  [ Config[:default_page_class] ]
-        elsif klass_names.length > 1
-          method = klass_names.pop
-        else
-          method = "default"
-        end
-        klass = PageBase.get_class(klass_names)
-        unless klass
-          mylog("no such Ezframe class: #{klass_names}")
-          fallback = "Ezframe::#{Config[:default_page_class]}"
-          mylog("fallback=#{fallback}")
-          klass = Object.const_get(fallback)
-          page = klass.new(request, model)
-          response.body = [ page.public_default_page ]
-          response.status = 200
-          return
-        end
-=end
+
         mylog("exec: path=#{request.path_info} params=#{request.params}")
         klass, method = PageBase::decide_route(request.path_info)
         mylog "klass=#{klass}, method=#{method}"
@@ -41,7 +21,7 @@ module Ezframe
           method_full_name = "public_#{method}_page"
         end
         warden.authenticate! if page.auth
-        request.env["rack.session"]["kamatest"]="kamatest1234"
+        # request.env["rack.session"]["kamatest"]="usable"
         mylog "method: #{klass}.#{method_full_name}"
         mylog "rack.session.id=#{request.env['rack.session'].id}"
         mylog "rack.session.keys=#{request.env['rack.session'].keys}"

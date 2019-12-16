@@ -3,20 +3,20 @@
 module Ezframe
   class Html
     class << self
-      def convert(opts = {})
-        return "" if opts.nil? || opts.to_s.empty?
-        return opts.to_html if opts.respond_to?(:to_html)
-        return opts.to_s if opts.is_a?(String) || opts.is_a?(Symbol) || opts.is_a?(Integer) || opts.is_a?(Time)
-        return opts.map { |args| convert(args) }.join if opts.is_a?(Array)
+      def convert(ht_h = {})
+        return "" if ht_h.nil? || ht_h.to_s.empty?
+        return ht_h.to_html if ht_h.respond_to?(:to_html)
+        return ht_h.to_s if ht_h.is_a?(String) || ht_h.is_a?(Symbol) || ht_h.is_a?(Integer) || ht_h.is_a?(Time)
+        return ht_h.map { |args| convert(args) }.join if ht_h.is_a?(Array)
 
-        tag = opts[:tag]
+        tag = ht_h[:tag]
         case tag
         when "select"
-          return select(opts) if opts[:items]
+          return select(ht_h) if ht_h[:items]
         when "icon"
           tag = "i"
         end
-        opt_s, child_s = join_attributes(opts)
+        opt_s, child_s = join_attributes(ht_h)
         if child_s.length.positive?
           return "<#{tag} #{opt_s}>\n#{child_s}\n</#{tag}>\n"
         end
@@ -48,11 +48,11 @@ module Ezframe
         [opt_a.compact.join(" "), child_s]
       end
 
-      def select(opts = {})
-        attr = opts.clone
+      def select(ht_h = {})
+        attr = ht_h.clone
         items = attr[:items]
         if items.is_a?(Hash)
-          option_a = opts[:items].map do |k, v|
+          option_a = ht_h[:items].map do |k, v|
             h = { tag: "option", value: k }
             if v.is_a?(Array)
               v, selected = v
@@ -70,7 +70,7 @@ module Ezframe
             h
           end
         else
-          warn "unknown items: #{opts.inspect}"
+          warn "unknown items: #{ht_h.inspect}"
         end
         attr[:tag] = "select"
         attr[:child] = option_a

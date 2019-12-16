@@ -3,6 +3,7 @@ module Ezframe
     class << self
       def wrap_tag(opts = {})
         h = opts.dup
+        raise "Ht.wrap_tag: value must be a hash: #{h}" unless h.is_a?(Hash)
         h[:tag] = __callee__.to_s
         h
       end
@@ -24,6 +25,8 @@ module Ezframe
       alias_method :ol, :wrap_tag
       alias_method :li, :wrap_tag
       alias_method :table, :wrap_tag
+      alias_method :thead, :wrap_tag
+      alias_method :tbody, :wrap_tag
       alias_method :tr, :wrap_tag
       alias_method :th, :wrap_tag
       alias_method :td, :wrap_tag
@@ -39,6 +42,7 @@ module Ezframe
 
       alias_method :icon, :wrap_tag
       alias_method :checkbox, :wrap_tag
+      alias_method :radio, :wrap_tag
 
       def multi_wrap(class_a, child)
         class_a.reverse.each do |klass|
@@ -78,7 +82,7 @@ module Ezframe
     end
 
     class Table
-      attr_accessor :class_a
+      attr_accessor :class_a, :header
 
       def initialize(matrix = nil)
         set(matrix) if matrix
@@ -104,6 +108,7 @@ module Ezframe
           td_a[0].update(add_attr) if add_attr
           Ht.tr(class: tr_class, child: td_a)
         end
+        tr_a.unshift( Ht.thead(child: Ht.tr(child: @header.map {|v| Ht.th(child: v) }) )) if @header
         Ht.table(class: table_class, child: tr_a)
       end
     end
