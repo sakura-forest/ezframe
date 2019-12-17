@@ -80,7 +80,7 @@ module Ezframe
         id = event[:id]
         @dataset.where(id: id).update(status: new_stat)
       when "change_filter"
-        @session["filter"]=event[:value]
+        @session["filter"] = event[:value]
       end
       return_value = { inject: "#main-table", body: Materialize.convert(make_table.to_hash) }
       return_value.update(opts)

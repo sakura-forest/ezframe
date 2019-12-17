@@ -8,3 +8,5 @@ log/*
 db/*
 **/log/*
 **/db/*
+pkg/
+*.old
