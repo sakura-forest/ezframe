@@ -1,0 +1,11 @@
+.chat-message {
+  position: relative;
+  float: left;
+  clear: both;
+  margin: 2px 50px 20px;
+  padding: 8px;
+  border-radius: 8px;
+  line-height: 22px;
+  background-color: #ddd;
+}
+

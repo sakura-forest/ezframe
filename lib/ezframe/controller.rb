@@ -20,11 +20,14 @@ module Ezframe
         else
           method_full_name = "public_#{method}_page"
         end
-        warden.authenticate! if page.auth
+        if page.auth
+          warden.authenticate! 
+        end
         # request.env["rack.session"]["kamatest"]="usable"
         mylog "method: #{klass}.#{method_full_name}"
         mylog "rack.session.id=#{request.env['rack.session'].id}"
         mylog "rack.session.keys=#{request.env['rack.session'].keys}"
+        mylog "warden=#{request.env['warden'].inspect}"
         body = if page.respond_to?(method_full_name)
                     page.send(method_full_name)
                   else

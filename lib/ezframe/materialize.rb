@@ -4,32 +4,25 @@ module Ezframe
   class Materialize
     class << self
       def into_html_header
-        str =<<~EOHEAD2
-          <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-          <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-        EOHEAD2
+
+        css_a = Config[:extra_css_list].map {|file| "<link href=\"#{file}\" rel=\"stylesheet\">\n" }
+        js_a = Config[:extra_js_list].map {|file| "<script src=\"#{file}\"></script>\n" }
 
         css_files = Dir["./asset/css/*.css"]||[]
-        css_a = css_files.map do |file|
+        css_a += css_files.map do |file|
           file.gsub!("./asset", "")
           "<link href=\"#{file}\" rel=\"stylesheet\">\n"
         end
         js_files = Dir["./asset/js/*.js"]||[]
-        js_a = js_files.map do |file|
+        js_a += js_files.map do |file|
           file.gsub!("./asset", "")
           "<script src=\"#{file}\"></script>\n"
         end
-        str+(css_a+js_a).join
+        (css_a+js_a).join
       end
 
       def into_bottom_of_body
         ""
-#        Dir["./asset/js"].each do ||
-#        <<~EOBOT
-#          <script src="/js/htmlgen.js"></script>
-#          <script src="/js/common.js"></script>
-#        EOBOT
       end
 
       def convert(ht_h)
@@ -103,6 +96,17 @@ module Ezframe
         else
           [dest, elem]
         end
+      end
+    end
+
+    class Grid
+      def initialize(matrix=nil)
+        @matrix = matrix
+        @matrix ||= [[]]
+      end
+
+      def add_row(row)
+        
       end
     end
   end

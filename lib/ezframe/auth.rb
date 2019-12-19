@@ -46,8 +46,10 @@ module Ezframe
           mylog "authenticate: this user does not exist: #{account}"
           return nil
         end
+        env['x-rack.session'][:user] = @user[:id]
         password = @user[:password]
         @user.delete(:password)
+
         return nil if !pass || !password
         !!(password == pass)
       end

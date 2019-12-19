@@ -4,7 +4,7 @@ module Ezframe
       def wrap_tag(opts = {})
         h = opts.dup
         raise "Ht.wrap_tag: value must be a hash: #{h}" unless h.is_a?(Hash)
-        h[:tag] = __callee__.to_s
+        h[:tag] ||= __callee__.to_s
         h
       end
 
@@ -39,10 +39,21 @@ module Ezframe
       alias_method :textarea, :wrap_tag
       alias_method :label, :wrap_tag
       alias_method :fieldset, :wrap_tag
+      alias_method :nav, :wrap_tag
+      alias_method :footer, :wrap_tag
 
-      alias_method :icon, :wrap_tag
       alias_method :checkbox, :wrap_tag
       alias_method :radio, :wrap_tag
+
+      def icon(arg)
+        if arg.is_a?(Hash)
+          h = arg.clone
+          h[:tag] = "icon"
+          wrap_tag(h)
+        elsif arg.is_a?(String)
+          { tag: "icon", name: arg }
+        end
+      end
 
       def multi_wrap(class_a, child)
         class_a.reverse.each do |klass|
