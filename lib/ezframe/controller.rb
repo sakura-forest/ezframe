@@ -13,7 +13,6 @@ module Ezframe
 
         mylog("exec: path=#{request.path_info} params=#{request.params}")
         klass, method = PageBase::decide_route(request.path_info)
-        mylog "klass=#{klass}, method=#{method}"
         page = klass.new(request, model)
         if request.post?
           method_full_name = "public_#{method}_post"
@@ -28,6 +27,7 @@ module Ezframe
         mylog "rack.session.id=#{request.env['rack.session'].id}"
         mylog "rack.session.keys=#{request.env['rack.session'].keys}"
         mylog "warden=#{request.env['warden'].inspect}"
+        mylog "klass=#{klass}, method=#{method_full_name}"
         body = if page.respond_to?(method_full_name)
                     page.send(method_full_name)
                   else
@@ -43,7 +43,6 @@ module Ezframe
         end
         response.status = 200
       end
-
 
       def file_not_found(response)
         response.body = ['path not found']

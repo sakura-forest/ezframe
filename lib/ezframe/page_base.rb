@@ -8,15 +8,6 @@ require_relative "util"
 module Ezframe
   class PageBase
     class << self
-      def get_class(keys)
-        keys = [keys] if keys.is_a?(String)
-        klass = (%w[Ezframe] + keys.map { |k| k.to_camel }).join("::")
-        if Object.const_defined?(klass)
-          return Object.const_get(klass)
-        end
-        return nil
-      end
-
       def decide_route(path_info)
         default_class = Config[:default_page_class]||"App"
         default_method = Config[:default_page_method]||"default"
@@ -42,6 +33,17 @@ module Ezframe
           end
         end
       end
+
+      def get_class(keys)
+        keys = [keys] if keys.is_a?(String)
+        klass = (%w[Ezframe] + keys.map { |k| k.to_camel }).join("::")
+        mylog "get_class: #{klass}"
+        if Object.const_defined?(klass)
+          return Object.const_get(klass)
+        end
+        return nil
+      end
+
     end
 
     attr_accessor :auth
