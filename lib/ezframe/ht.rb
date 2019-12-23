@@ -8,6 +8,8 @@ module Ezframe
         h
       end
 
+      alias_method :script, :wrap_tag
+
       alias_method :h1, :wrap_tag
       alias_method :h2, :wrap_tag
       alias_method :h3, :wrap_tag
@@ -33,7 +35,6 @@ module Ezframe
       alias_method :img, :wrap_tag
       alias_method :a, :wrap_tag
       alias_method :form, :wrap_tag
-      alias_method :button, :wrap_tag
       alias_method :input, :wrap_tag
       alias_method :select, :wrap_tag
       alias_method :textarea, :wrap_tag
@@ -55,7 +56,15 @@ module Ezframe
         end
       end
 
-      def multi_wrap(class_a, child)
+      def button(arg)
+        arg[:tag] = "button"
+        unless arg[:type]
+          arg[:type] = "button"
+        end
+        wrap_tag(arg)
+      end
+
+      def multi_div(class_a, child)
         class_a.reverse.each do |klass|
           child = Ht.div(class: klass, child: child)
         end

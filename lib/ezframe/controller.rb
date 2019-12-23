@@ -9,7 +9,8 @@ module Ezframe
         Model.init
         model = Model.get_clone
         Auth.init_warden
-        Auth.model = model
+        @request.env["model"] = model
+        # Auth.model = model
 
         mylog("exec: path=#{request.path_info} params=#{request.params}")
         klass, method = PageBase::decide_route(request.path_info)
@@ -23,10 +24,10 @@ module Ezframe
           warden.authenticate! 
         end
         # request.env["rack.session"]["kamatest"]="usable"
-        mylog "method: #{klass}.#{method_full_name}"
-        mylog "rack.session.id=#{request.env['rack.session'].id}"
-        mylog "rack.session.keys=#{request.env['rack.session'].keys}"
-        mylog "warden=#{request.env['warden'].inspect}"
+        # mylog "method: #{klass}.#{method_full_name}"
+        #mylog "rack.session.id=#{request.env['rack.session'].id}"
+        #mylog "rack.session.keys=#{request.env['rack.session'].keys}"
+        #mylog "warden=#{request.env['warden'].inspect}"
         mylog "klass=#{klass}, method=#{method_full_name}"
         body = if page.respond_to?(method_full_name)
                     page.send(method_full_name)
@@ -44,10 +45,10 @@ module Ezframe
         response.status = 200
       end
 
-      def file_not_found(response)
-        response.body = ['path not found']
-        response.status = 404
-      end
+#      def file_not_found(response)
+#        response.body = ['path not found']
+#        response.status = 404
+#      end
 
       def warden
         @request.env["warden"]

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "singleton"
-
 module Ezframe
   class Model
     class << self

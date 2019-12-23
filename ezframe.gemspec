@@ -40,4 +40,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'sequel', '~> 5.27.0'
   spec.add_runtime_dependency 'sqlite3', '~> 1.4.0'
   spec.add_runtime_dependency 'htmlbeautifier', '~> 1.3.1'
+  spec.add_runtime_dependency 'ruby2js', '~> 3.2.0'
 end

@@ -10,7 +10,7 @@ module Ezframe
         end
         Warden::Manager.serialize_from_session do |account|
           mylog "serialize_from: account = #{account}"
-          inst = Auth.get(account)
+          inst = Auth.get(env['model'], account)
           mylog "inst = #{inst.inspect}"
           inst
         end
@@ -22,10 +22,9 @@ module Ezframe
 
           def authenticate!
             mylog "authenticate!: #{params}"
-            if Auth.authenticate(params["account"], params["password"])
-              success!(Auth.get(params["account"]))
+            if Auth.authenticate(env, params["account"], params["password"])
+              success!(Auth.get(env['model'], params["account"]))
             else
-              # mylog "can i get env?: #{env}"
               env['x-rack.flash'].error = 'ユーザーが登録されていないか、パスワードが違っています。'
               fail!("authenticate failure")
             end
@@ -33,20 +32,22 @@ module Ezframe
         end 
       end
 
-      def get(account)
-        new(account)
+      def get(model, account)
+        new(model, account)
       end
 
-      def authenticate(account, pass)
-        raise "model is not initialized" unless @model
-        @user = @model.db.dataset(:user).where(account: account).first
+      def authenticate(env, account, pass)
+        model = env["model"]
+        raise "model is not initialized" unless model
+        @user = model.db.dataset(:user).where(account: account).first
         if @user
           mylog "Auth: authenticate: user=#{@user.inspect}"
         else
           mylog "authenticate: this user does not exist: #{account}"
           return nil
         end
-        env['x-rack.session'][:user] = @user[:id]
+        mylog "env=#{env.inspect}"
+        env['rack.session'][:user] = @user[:id]
         password = @user[:password]
         @user.delete(:password)
 
@@ -57,9 +58,9 @@ module Ezframe
 
     attr_accessor :account, :password, :model, :user, :id
 
-    def initialize(account)
+    def initialize(model, account)
       self.account = account
-      @user = Auth.model.db.dataset(:user).where(Sequel.or(account: account, id: account)).first
+      @user = model.db.dataset(:user).where(Sequel.or(account: account, id: account)).first
       unless @user
         mylog "Auth.initialize: This user does not exist: #{account}"
       end

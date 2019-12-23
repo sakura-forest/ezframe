@@ -17,7 +17,7 @@ module Ezframe
           tag = "i"
         end
         opt_s, child_s = join_attributes(ht_h)
-        if child_s.length.positive?
+        if child_s.length >= 0
           return "<#{tag} #{opt_s}>\n#{child_s}\n</#{tag}>\n"
         end
         "<#{tag} #{opt_s}/>"

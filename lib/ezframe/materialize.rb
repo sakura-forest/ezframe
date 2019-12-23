@@ -99,15 +99,19 @@ module Ezframe
       end
     end
 
-    class Grid
-      def initialize(matrix=nil)
-        @matrix = matrix
-        @matrix ||= [[]]
-      end
+    def self.loading
+      p  Ht.div(class: %w[spinner-layer spinner-green], child: [
+         Ht.multi_div([%w[circle-clipper left], %w[circle]], ""),
+         Ht.multi_div([%w[gap-patch], %w[circle]], ""),
+         Ht.multi_div([%w[circle-clipper right], %w[circle]], "")
+       ])
 
-      def add_row(row)
-        
-      end
+     Ht.div(class: %w[preloader-wrapper big active], child: 
+       Ht.div(class: %w[spinner-layer spinner-green], child: [
+         Ht.multi_div([%w[circle-clipper left], %w[circle]], ""),
+         Ht.multi_div([%w[gap-patch], %w[circle]], ""),
+         Ht.multi_div([%w[circle-clipper right], %w[circle]], "")
+       ]))
     end
   end
 end
