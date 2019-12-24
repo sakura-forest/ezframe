@@ -146,6 +146,14 @@ module Ezframe
     def db_type
       "datetime"
     end
+
+    def view
+      if @value.is_a?(Time)
+        "#{@value.year}/#{@value.mon}/#{@value.mday} %02d:%02d"%[@value.hour,@value.min]
+      else
+        @value
+      end
+    end
   end
   
   class EmailType < StringType

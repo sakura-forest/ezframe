@@ -5,7 +5,7 @@ require "rack"
 require "warden"
 require "digest/sha2"
 
-puts "digest: "+Digest::SHA256.hexdigest("1234")
+# puts "digest: "+Digest::SHA256.hexdigest("1234")
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), "lib"))
 require "ezframe"
