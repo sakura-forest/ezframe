@@ -17,9 +17,5 @@ class HthashTest < Minitest::Test
     assert_equal(%w[a b], res[:class])
     assert_equal(%w[c d], res[:child][:class])
     assert_equal("test", res[:child][:child])
-
-    res = Ht.multi_div([%w[a b], "test")
-    res = Ht.multi_div([%w[a b], "test")
-
   end
 end

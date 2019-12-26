@@ -80,7 +80,7 @@ module Ezframe
         @array = array.dup
       end
 
-      def to_hash
+      def to_h
         return nil if @list.nil? || @list.empty?
         child = @array.map do |elem|
           { tag: "li", child: elem }
@@ -117,19 +117,27 @@ module Ezframe
         @matrix.push(row)
       end
 
-      def to_hash
+      def to_h
         table_class, tr_class, td_class = @class_a
         max_col = 0
         @matrix.each { |row| max_col = row.length if max_col < row.length }
         tr_a = @matrix.map do |row|
           add_attr = nil
           add_attr = { colspan: max_col - row.length + 1 } if row.length < max_col
-          td_a = row.map { |v| Ht.td(class: td_class, child: v) }
+          td_a = row.map do |v| 
+            td = Ht.td(child: v) 
+            td.add_class(td_class) if td_class
+            td
+          end
           td_a[0].update(add_attr) if add_attr
-          Ht.tr(class: tr_class, child: td_a)
+          tr = Ht.tr(class: tr_class, child: td_a)
+          tr.add_class(tr_class) if tr_class
+          tr
         end
         tr_a.unshift( Ht.thead(child: Ht.tr(child: @header.map {|v| Ht.th(child: v) }) )) if @header
-        Ht.table(class: table_class, child: tr_a)
+        tb = Ht.table(child: tr_a)
+        tb.add_class(table_class) if table_class
+        tb
       end
     end
   end

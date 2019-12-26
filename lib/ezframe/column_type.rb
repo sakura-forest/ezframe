@@ -65,7 +65,9 @@ module Ezframe
 
     def form
       return nil if @attribute[:hidden] && !@attribute[:force]
-      { tag: 'input', type: 'text', name: @attribute[:key], key: @attribute[:key], label: @attribute[:label], value: @value }
+      h = { tag: 'input', type: 'text', name: @attribute[:key], key: @attribute[:key], label: @attribute[:label], value: @value||"" }
+      h[:size] = @attribute[:size] if @attribute[:size]
+      h
     end
 
     def db_type
@@ -81,7 +83,7 @@ module Ezframe
 
     def form
       return nil if @attribute[:hidden]
-      { tag: 'input', type: 'number', key: @attribute[:key], label: @attribute[:label], value: @value }
+      { tag: 'input', type: 'number', key: @attribute[:key], label: @attribute[:label], value: @value||"" }
     end
 
     def db_type
@@ -106,7 +108,7 @@ module Ezframe
 
   class PasswordType < StringType
     def form
-      { tag: "input", type: "password", label: @attribute[:label], value: @value}
+      { tag: "input", type: "password", label: @attribute[:label], value: @value||""}
     end
 
     def db_value
@@ -139,7 +141,10 @@ module Ezframe
   class DateType < StringType
     def form
       h = super
-      h[:type] = 'date' if h
+      if h
+        h[:type] = 'date' 
+        h[:class] = "datepicker"
+      end
       h
     end
 
@@ -147,9 +152,16 @@ module Ezframe
       "datetime"
     end
 
+    def value
+      if @value.is_a?(Date) || @value.is_a?(Time)
+        return "%d-%02d-%02d"%[@value.year, @value.mon, @value.mday]
+      end
+      @value
+    end
+
     def view
       if @value.is_a?(Time)
-        "#{@value.year}/#{@value.mon}/#{@value.mday} %02d:%02d"%[@value.hour,@value.min]
+        "#{@value.year}/#{@value.mon}/#{@value.mday}"
       else
         @value
       end
@@ -165,11 +177,6 @@ module Ezframe
   end
 
   class TelephoneType < StringType
-    def form
-      h = super
-      h[:type] = 'tel' if h
-      h
-    end
   end
 
   class JpnameType < StringType

@@ -32,11 +32,11 @@ module Ezframe
       radio_a.unshift(Ht.radio(name: "status", value: "0", label: "All", event: event, checked: "checked"))
 
       # join all
-      tb = make_table.to_hash
+      tb = make_table.to_h
       contents = Ht.div(class: %w[container], child: [ 
         Ht.div(class: %w[row], child: form),
         Ht.div(class: %w[row], id: "filter-buttons", child: radio_a),
-        Ht.div(class: %w[row], id: "main-table", child: tb.to_hash)
+        Ht.div(class: %w[row], id: "main-table", child: tb.to_h)
       ])
       common_page(title: "Todos", body: Html.convert(Materialize.convert(contents)))
     end
@@ -82,7 +82,7 @@ module Ezframe
       when "change_filter"
         @session["filter"] = event[:value]
       end
-      return_value = { inject: "#main-table", body: Materialize.convert(make_table.to_hash) }
+      return_value = { inject: "#main-table", body: Materialize.convert(make_table.to_h) }
       return_value.update(opts)
       return return_value
     end

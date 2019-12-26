@@ -11,6 +11,8 @@ module Ezframe
 
         tag = ht_h[:tag]
         case tag
+        when "input"
+          input(ht_h)
         when "select"
           return select(ht_h) if ht_h[:items]
         when "icon"
@@ -46,6 +48,18 @@ module Ezframe
           end
         end
         [opt_a.compact.join(" "), child_s]
+      end
+
+      def input(ht_h)
+        size = ht_h[:size]
+        if size && (size.index("x") || size.index("*"))
+          if /(\d+)\s*[x\*]\s*(\d+)/ =~ size
+            ht_h[:cols], ht_h[:rows] = $1, $2
+          end
+          ht_h[:tag] = "textarea"
+          ht_h[:child] = ht_h[:value]
+          ht_h.delete(:value)
+        end
       end
 
       def select(ht_h = {})

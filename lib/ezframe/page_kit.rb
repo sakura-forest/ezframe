@@ -56,24 +56,6 @@ module Ezframe
       end
     end
 
-    class Tab
-      def self.base_layout(link_list)
-        size = 12 / link_list.length
-        tabs = link_list.map do |link|
-          Ht.li(class: ["tab", "s#{size}"], child: link)
-        end
-        Ht.multi_div([%w[row], %w[col s12]], Ht.ul(class: %w[tabs], child: tabs))
-      end
-    end
 
-    class Card
-      def self.base_layout(title: "", content: "")
-        Ht.multi_div([%w[row], %w[col s12], %w[card blue-grey darken-1], %w[card-content white-text]],
-                  [
-                  Ht.span(class: %w[card-title], child: title),
-                  Ht.p(child: content),
-                ])
-      end
-    end
   end
 end

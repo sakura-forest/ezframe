@@ -103,22 +103,28 @@ module Ezframe
       if id.value.to_i > 0
         dataset.where(id: id.value).update(col_h)
       else
-        dataset.insert(col_h)
+        return dataset.insert(col_h)
       end
     end
 
-    def update(id, key, value)
-      dataset.where(id: id).update(key => value)
-      column = @columns[key.to_sym]
-      column.value = value
-      return column
+    def update(id, value_h)
+      values = {}
+      colkeys = @columns.keys
+      value_h.each do |k, v|
+        values[k] = v if colkeys.include?(k)
+      end
+      dataset.where(id: id).update(values)
+      set_values(values)
     end
 
     def values=(value_h)
       clear
-      # puts "value_h=#{value_h.inspect}"
+      set_values(value_h)
+    end
+
+    def set_values(value_h)
+      return unless value_h
       value_h.each do |k, v|
-        # puts "values=: k=#{k}, v=#{v}"
         col = @columns[k.to_sym]
         unless col
           mylog("no such column: #{k}")

@@ -26,7 +26,7 @@ module Ezframe
         # request.env["rack.session"]["kamatest"]="usable"
         # mylog "method: #{klass}.#{method_full_name}"
         #mylog "rack.session.id=#{request.env['rack.session'].id}"
-        #mylog "rack.session.keys=#{request.env['rack.session'].keys}"
+        mylog "rack.session.keys=#{request.env['rack.session'].keys}"
         #mylog "warden=#{request.env['warden'].inspect}"
         mylog "klass=#{klass}, method=#{method_full_name}"
         body = if page.respond_to?(method_full_name)

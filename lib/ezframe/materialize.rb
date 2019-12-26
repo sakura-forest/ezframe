@@ -32,10 +32,14 @@ module Ezframe
         if ht_h.kind_of?(Array)
           new_h = ht_h.map { |v| convert(v) }
         elsif ht_h.kind_of?(Hash)
+          unless ht_h[:tag]
+            mylog("convert: no tag: #{ht_h.inspect}")
+            return nil
+          end
           case ht_h[:tag].to_sym
-          when :input, :select
-            new_h = input(ht_h) if "hidden" != ht_h[:type]
-            return new_h
+#          when :input, :select
+#            new_h = input(ht_h) if "hidden" != ht_h[:type]
+#            return new_h
           when :checkbox
             return checkbox(ht_h)
           when :radio
@@ -68,10 +72,10 @@ module Ezframe
       end
 
       def input(ht_h)
-        ht_h[:name] ||= ht_h[:key]
+        ht_h[:tag] = "input"
         width_s = "s#{ht_h[:width_s] || 12}"
         ht_h.delete(:witdth_s)
-        label = Ht.label(for: ht_h[:key], child: ht_h[:label], final: true )
+        label = Ht.label(for: ht_h[:name], child: ht_h[:label], final: true )
         cls = ["input-field", "col", width_s]
         new_h = Ht.div(class: cls, child: [ht_h, label])
         new_h = Ht.div(child: new_h, class: "row")
@@ -97,21 +101,44 @@ module Ezframe
           [dest, elem]
         end
       end
+
+      def loading
+       Ht.div(class: %w[preloader-wrapper big active], child: 
+         Ht.div(class: %w[spinner-layer spinner-green], child: [
+           Ht.multi_div([%w[circle-clipper left], %w[circle]], ""),
+           Ht.multi_div([%w[gap-patch], %w[circle]], ""),
+           Ht.multi_div([%w[circle-clipper right], %w[circle]], "")
+         ]))
+      end
     end
 
-    def self.loading
-      p  Ht.div(class: %w[spinner-layer spinner-green], child: [
-         Ht.multi_div([%w[circle-clipper left], %w[circle]], ""),
-         Ht.multi_div([%w[gap-patch], %w[circle]], ""),
-         Ht.multi_div([%w[circle-clipper right], %w[circle]], "")
-       ])
+    class Collection < Array
+      def to_h
+        list = self.map do |line|
+          Ht.li(class: %w[collection-item], child: line)
+        end
+        Ht.ul(class: %w[collection], child: list)
+      end
+    end
 
-     Ht.div(class: %w[preloader-wrapper big active], child: 
-       Ht.div(class: %w[spinner-layer spinner-green], child: [
-         Ht.multi_div([%w[circle-clipper left], %w[circle]], ""),
-         Ht.multi_div([%w[gap-patch], %w[circle]], ""),
-         Ht.multi_div([%w[circle-clipper right], %w[circle]], "")
-       ]))
+    class Tab
+      def self.base_layout(link_list)
+        size = 12 / link_list.length
+        tabs = link_list.map do |link|
+          Ht.li(class: ["tab", "s#{size}"], child: link)
+        end
+        Ht.multi_div([%w[row], %w[col s12]], Ht.ul(class: %w[tabs], child: tabs))
+      end
+    end
+
+    class Card
+      def self.base_layout(title: "", content: "")
+        Ht.multi_div([%w[row], %w[col s12], %w[card blue-grey darken-1], %w[card-content white-text]],
+                  [
+                  Ht.span(class: %w[card-title], child: title),
+                  Ht.p(child: content),
+                ])
+      end
     end
   end
 end
