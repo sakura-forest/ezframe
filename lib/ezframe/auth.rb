@@ -16,7 +16,7 @@ module Ezframe
         end
         Warden::Strategies.add(:mystrategy) do
           def valid?
-            mylog "valid?"
+            # mylog "valid?"
             params["account"] || params["password"]
           end
 

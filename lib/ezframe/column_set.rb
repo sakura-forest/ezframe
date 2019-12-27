@@ -126,10 +126,7 @@ module Ezframe
       return unless value_h
       value_h.each do |k, v|
         col = @columns[k.to_sym]
-        unless col
-          mylog("no such column: #{k}")
-          next
-        end
+        next unless col
         col.value = v
       end
     end

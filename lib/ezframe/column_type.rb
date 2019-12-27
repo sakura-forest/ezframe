@@ -3,7 +3,6 @@
 module Ezframe
   class TypeBase
     attr_accessor :attribute, :parent
-    attr_writer :value
 
     def self.get_class(key)
       return nil unless key
@@ -39,6 +38,10 @@ module Ezframe
 
     def value(_situation = nil)
       @value
+    end
+
+    def value=(v)
+      @value = v
     end
 
     def view
@@ -142,8 +145,10 @@ module Ezframe
     def form
       h = super
       if h
-        h[:type] = 'date' 
+#        h[:type] = 'date' 
+        h[:type] = 'text' 
         h[:class] = "datepicker"
+        h[:value] = value||""
       end
       h
     end
@@ -153,10 +158,18 @@ module Ezframe
     end
 
     def value
+      # puts "DateType: value=#{@value}"
       if @value.is_a?(Date) || @value.is_a?(Time)
         return "%d-%02d-%02d"%[@value.year, @value.mon, @value.mday]
       end
       @value
+    end
+
+    def value=(v)
+      if v.is_a?(String) && v.empty?
+        return
+      end
+      super(v)
     end
 
     def view
@@ -167,7 +180,11 @@ module Ezframe
       end
     end
   end
-  
+
+  class DatetimeType < DateType
+
+  end
+
   class EmailType < StringType
     def form
       h = super

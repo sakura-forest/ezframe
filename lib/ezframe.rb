@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 require 'yaml'
-require 'htmlbeautifier'
 require "sequel"
 require "json"
-require "yaml"
 
 require_relative 'ezframe/util'
 require_relative 'ezframe/config'
