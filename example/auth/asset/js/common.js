@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
   add_event(document)
   //initialize_materialize_select()
+  /*
   var elems = document.querySelectorAll(".submit-button")
   if (elems) {
     for (var i = 0; i < elems.length; i++) {
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
       })
     }
   }
+  */
 })
 
 function add_event(obj) {
@@ -20,15 +22,15 @@ function add_event(obj) {
     for (var i = 0; i < elems.length; i++) {
       var elem = elems[i]
       var event_s = elem.getAttribute("event")
-      var cmd = parse_event(event_s)
-      console.log(JSON.stringify(cmd))
-      elem.addEventListener(cmd.on, function(event) {
-        execute_command(event, this)
+      var event = parse_event(event_s)
+      console.log(JSON.stringify(event))
+      elem.addEventListener(cmd.on, function(ev) {
+        execute_command(ev, this)
       })
     }
   }
   M.AutoInit();
-  initialize_materialize_tabs()
+  // initialize_materialize_tabs()
 }
 
 function parse_event(event) {
@@ -49,6 +51,7 @@ function parse_event(event) {
   return res
 }
 
+/*
 function access_server(path, send_values, func) {
   console.log("access_server: " + path)
   if (!path) {
@@ -67,33 +70,46 @@ function access_server(path, send_values, func) {
   xhr.responseType = 'json';
   xhr.send(JSON.stringify(send_values));
 }
+*/
 
-function execute_command(event, obj) {
-  var cmd = parse_event(obj.getAttribute("event"))
-  console.log("execute_command: event=" + JSON.stringify(event) + 
-    ", cmd=" + JSON.stringify(cmd))
+function execute_command(ev, obj) {
+  var event = parse_event(obj.getAttribute("event"))
+  console.log("execute_command: event=" + JSON.stringify(ev) + 
+    ", event=" + JSON.stringify(event))
   //console.dir(obj)
-  switch (cmd.cmd) {
+  if (event.branch) {
+    console.log("[obsolete] event.branch is obsolete")
+    return
+  }
+  if (event.cmd) {
+    console.log("[obsolete] event.cmd is obsolete")
+    return
+  }
+  return
+  /*
+  switch (event.branch) {
     case "open":
     case "inject":
-      inject(cmd, obj)
+      inject(event, obj)
       break
     case "update_value":
       console.log("update_value")
-      update_value(cmd, obj)
+      update_value(event, obj)
       break
     case "reset_value":
-      reset_value(cmd)
+      reset_value(event)
       break
     default:
       console.log("unknown command: " + command)
   }
+  */
 }
 
-function inject(cmd, obj) {
-  var url = cmd.url // obj.getAttribute("url")
+/*
+function inject(event, obj) {
+  var url = event.url // obj.getAttribute("url")
   console.log("inject: url=" + url)
-  if (cmd.get_form) {
+  if (event.get_form) {
     var node = obj
     // console.dir(node)
     while(node && node.nodeName !='FORM') { 
@@ -180,6 +196,7 @@ function reset_value(cmd, obj) {
     }
   })
 }
+*/
 
 function collect_form_values(obj) {
   // console.log("collect_form_values")
