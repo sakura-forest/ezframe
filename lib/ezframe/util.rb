@@ -29,6 +29,7 @@ class Hash
   end
 
   def add_class(klass)
+    return unless klass
     c = self[:class]
     if !c
       self[:class] = c = []

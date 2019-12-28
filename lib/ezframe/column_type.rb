@@ -59,6 +59,14 @@ module Ezframe
     def form
       nil
     end
+
+    def no_edit?
+      return ((@attribute[:hidden] || @attribute[:no_edit]) && !@attribute[:force])
+    end
+
+    def no_view?
+      return (@attribute[:hidden] && !@attribute[:force])
+    end
   end
 
   class StringType < TypeBase
@@ -67,7 +75,7 @@ module Ezframe
     end
 
     def form
-      return nil if @attribute[:hidden] && !@attribute[:force]
+      return nil if no_edit?
       h = { tag: 'input', type: 'text', name: @attribute[:key], key: @attribute[:key], label: @attribute[:label], value: @value||"" }
       h[:size] = @attribute[:size] if @attribute[:size]
       h
@@ -80,12 +88,12 @@ module Ezframe
 
   class IntType < StringType
     def view
-      return nil if @attribute[:hidden]
+      return nil if no_view?
       Util.add_comma(@value.to_i)
     end
 
     def form
-      return nil if @attribute[:hidden]
+      return nil if no_edit?
       { tag: 'input', type: 'number', key: @attribute[:key], label: @attribute[:label], value: @value||"" }
     end
 
@@ -96,48 +104,57 @@ module Ezframe
 
   class ForeignType < IntType
     def view
+      return nil if no_view?
       dataset = @parent.db.dataset[self.type.inner]
       data = dataset.get(id: @value)
-      data[@attribute[:view]]
+      return data[@attribute[:view]]
+    end
+
+    def form
+      return nil
     end
   end
   
   class IdType < IntType
     def label
-      return nil if @attribute[:hidden] && !@attribute[:force]
-      "ID"
+      return nil if no_view?
+      return "ID"
+    end
+
+    def form
+      return nil
     end
   end
 
   class PasswordType < StringType
     def form
-      { tag: "input", type: "password", label: @attribute[:label], value: @value||""}
+      return { tag: "input", type: "password", label: @attribute[:label], value: @value||""}
     end
 
     def db_value
-      value      
+      return value      
     end
   end
 
   class SelectType < TypeBase
     def form
-      return nil if @attribute[:hidden]
-      { tag: 'select', key: @attribute[:key], label: @attribute[:label], items: @attribute[:items], value: @value }
+      return nil if no_edit?
+      return { tag: 'select', key: @attribute[:key], label: @attribute[:label], items: @attribute[:items], value: @value }
     end
 
     def db_type
-      "string"
+      return "string"
     end
   end
 
   class CheckboxType < TypeBase
     def form
-      return nil if @attribute[:hidden]
-      { tag: "checkbox", key: @attribute[:key], name: @attribute[:key], value: parent[:id].value, label: @attribute[:label] }
+      return nil if no_edit?
+      return { tag: "checkbox", key: @attribute[:key], name: @attribute[:key], value: parent[:id].value, label: @attribute[:label] }
     end
 
     def db_type
-      "int"
+      return "int"
     end
   end
 
@@ -150,7 +167,7 @@ module Ezframe
         h[:class] = "datepicker"
         h[:value] = value||""
       end
-      h
+      return h
     end
 
     def db_type
@@ -158,11 +175,10 @@ module Ezframe
     end
 
     def value
-      # puts "DateType: value=#{@value}"
       if @value.is_a?(Date) || @value.is_a?(Time)
         return "%d-%02d-%02d"%[@value.year, @value.mon, @value.mday]
       end
-      @value
+      return @value
     end
 
     def value=(v)
@@ -173,6 +189,7 @@ module Ezframe
     end
 
     def view
+      return nil if no_view?
       if @value.is_a?(Time)
         "#{@value.year}/#{@value.mon}/#{@value.mday}"
       else
@@ -182,14 +199,14 @@ module Ezframe
   end
 
   class DatetimeType < DateType
-
   end
 
   class EmailType < StringType
     def form
+      return nil if no_edit?
       h = super
       h[:type] = 'email' if h
-      h
+      return h
     end
   end
 
@@ -228,25 +245,27 @@ module Ezframe
     end
 
     def form
+      return nil if no_edit?
       h = super
       h[:items] = @pref_h
-      h
+      return h
     end
 
     def view
-      @pref_h[@value.to_i]
+      return @pref_h[@value.to_i]
     end
   end
 
   # Japanese Zipcode type column
   class ZipcodeType < StringType
     def view
+      return nil if no_view?
       return "" unless @value
-      @value.to_s.gsub(/(\d{3})(\d{4})/) { "#{$1}-#{$2}" }
+      return @value.to_s.gsub(/(\d{3})(\d{4})/) { "#{$1}-#{$2}" }
     end
 
     def db_type
-      "string"
+      return "string"
     end
   end
 end

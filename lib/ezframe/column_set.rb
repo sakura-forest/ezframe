@@ -37,7 +37,7 @@ module Ezframe
     end
 
     def [](table_name)
-      @tables[table_name]
+      return @tables[table_name]
     end
 
     def each
@@ -46,7 +46,7 @@ module Ezframe
   end
 
   class ColumnSet
-    attr_accessor :name, :parent
+    attr_accessor :name, :parent, :edit_keys, :view_keys
 
     def initialize(parent:, name: nil, columns: nil)
       @parent = parent
@@ -78,12 +78,12 @@ module Ezframe
       @columns[:updated_at] = DateType.new(type: "date", key: "updated_at", label: "更新日時", hidden: true, no_edit: true)
       # mylog "set: #{@columns.inspect}"
       @columns.values.each {|col| col.parent = self }
-      @columns
+      return @columns
     end
 
     def dataset
       # puts "dataset: #{@model.inspect}"
-      @parent.model.db.dataset(@name)
+      return @parent.model.db.dataset(@name)
     end
 
     def set_from_db(id)
@@ -98,7 +98,7 @@ module Ezframe
       col_h.delete(:id)
       col_h.delete(:created_at)
       col_h[:updated_at] = Time.now
-      p "save: #{col_h.inspect}"
+      mylog "save: #{col_h.inspect}"
       id = @columns[:id]
       if id.value.to_i > 0
         dataset.where(id: id.value).update(col_h)
@@ -144,7 +144,7 @@ module Ezframe
     end
 
     def get_matrix(method_a)
-      @columns.map do |_key, col|
+      return @columns.map do |_key, col|
         method_a.map { |method| col.send(method) }
       end
     end
@@ -154,22 +154,45 @@ module Ezframe
       @columns.map do |key, col|
         res_h[key] = col.send(method)
       end
-      res_h
+      return res_h
     end
 
     def [](col_key)
-      @columns[col_key.to_sym]
+      return @columns[col_key.to_sym]
     end
     
     def form
-      res = @columns.values.map do |coltype|
-        coltype.form
+      if @edit_keys
+        return @edit_keys.map do |key| 
+          col = @columns[key.to_sym]
+          unless col
+            mylog "[ERROR] @edit_keys has unknown column:name=#{@name}:key=#{key}"
+            next
+          end
+          col.form
+        end
+      else
+        return  @columns.values.map {|coltype| coltype.form }
+      end        
+    end
+
+    def view
+      if @view_keys
+        return @view_keys.map do |key| 
+          col = @columns[key.to_sym]
+          unless col
+            mylog "[ERROR] @view_keys has unknown column:name=#{@name}:key=#{key}"
+            next
+          end
+          col.view
+        end
+      else
+        return  @columns.values.map {|coltype| coltype.view }
       end
-      res.compact
     end
 
     def hidden_form
-      @columns.map do |colkey, coltype|
+      return @columns.map do |colkey, coltype|
         { tag: 'input', id: colkey, name: colkey, type: 'hidden', value: coltype.value }
       end
     end

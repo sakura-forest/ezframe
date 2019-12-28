@@ -117,7 +117,7 @@ module Ezframe
         list = self.map do |line|
           Ht.li(class: %w[collection-item], child: line)
         end
-        Ht.ul(class: %w[collection], child: list)
+        return Ht.ul(class: %w[collection], child: list)
       end
     end
 
