@@ -2,10 +2,13 @@ module Ezframe
   module Ht
     class << self
       def wrap_tag(opts = {})
-        h = opts.dup
-        raise "Ht.wrap_tag: value must be a hash: #{h}" unless h.is_a?(Hash)
+        h = if opts.is_a?(String) || opts.is_a?(Array)
+          { child: opts }
+        else
+          opts.dup
+        end
         h[:tag] ||= __callee__.to_s
-        h
+        return h
       end
 
       alias_method :script, :wrap_tag
@@ -42,6 +45,8 @@ module Ezframe
       alias_method :fieldset, :wrap_tag
       alias_method :nav, :wrap_tag
       alias_method :footer, :wrap_tag
+
+      alias_method :small, :wrap_tag
 
       alias_method :checkbox, :wrap_tag
       alias_method :radio, :wrap_tag
