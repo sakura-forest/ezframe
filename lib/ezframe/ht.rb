@@ -2,10 +2,13 @@ module Ezframe
   module Ht
     class << self
       def wrap_tag(opts = {})
-        h = if opts.is_a?(String) || opts.is_a?(Array)
-          { child: opts }
+        if opts.is_a?(String) || opts.is_a?(Array)
+          h = { child: opts }
+        elsif opts.is_a?(Hash)
+          h = opts.dup
         else
-          opts.dup
+          mylog("wrap_tag: unknown type: #{opts.inspect}")
+          return nil
         end
         h[:tag] ||= __callee__.to_s
         return h

@@ -12,6 +12,11 @@ class HthashTest < Minitest::Test
     assert_equal({ tag: "span", child: "test"},  Ht.span(child: "test"))
   end
 
+  def test_div
+    h = Ht.div(child: [Ht.div(child: "A"), Ht.div(child: "B")])
+    p h
+  end
+
   def test_multidiv
     res = Ht.multi_div([%w[a b], %w[c d]], "test")
     assert_equal(%w[a b], res[:class])
