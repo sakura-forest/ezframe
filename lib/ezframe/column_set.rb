@@ -74,8 +74,8 @@ module Ezframe
           @columns[col_key.to_sym] = klass.new(attr)
         end
       end
-      @columns[:created_at] = DateType.new(type: "date", key: "created_at", label: "生成日時", hidden: true, no_edit: true)
-      @columns[:updated_at] = DateType.new(type: "date", key: "updated_at", label: "更新日時", hidden: true, no_edit: true)
+      @columns[:created_at] = DateType.new(type: "date", key: "created_at", label: "生成日時", no_edit: true)
+      @columns[:updated_at] = DateType.new(type: "date", key: "updated_at", label: "更新日時", no_edit: true)
       # mylog "set: #{@columns.inspect}"
       @columns.values.each {|col| col.parent = self }
       return @columns

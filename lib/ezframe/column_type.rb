@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require "date"
 
 module Ezframe
   class TypeBase
@@ -44,10 +45,6 @@ module Ezframe
       @value = v
     end
 
-    def view
-      @value
-    end
-
     def db_type
       nil
     end
@@ -56,9 +53,15 @@ module Ezframe
       value
     end
 
-    def form
+    def form(opts = {})
       nil
     end
+
+    def view(opts ={})
+      return nil if no_view?
+      @value
+    end
+
 
     def no_edit?
       return ((@attribute[:hidden] || @attribute[:no_edit]) && !@attribute[:force])
@@ -71,11 +74,20 @@ module Ezframe
 
   class StringType < TypeBase
     def normalize
+      return unless @value
+      @value = @value.to_s
       @value.gsub!(/　/, ' ')
+      @value.gsub!(/\s+/, ' ')
+      @value.strip!
     end
 
-    def form
-      return nil if no_edit?
+    def value=(v)
+      super(v)
+      normalize
+    end
+
+    def form(opts ={})
+      return nil if no_edit? && !opts[:force]
       h = { tag: 'input', type: 'text', name: @attribute[:key], key: @attribute[:key], label: @attribute[:label], value: @value||"" }
       h[:size] = @attribute[:size] if @attribute[:size]
       h
@@ -87,13 +99,24 @@ module Ezframe
   end
 
   class IntType < StringType
-    def view
-      return nil if no_view?
-      Util.add_comma(@value.to_i)
+    def view(opts = {})
+      return nil if no_view? && !opts[:force]
+      return Util.add_comma(@value.to_i)
     end
 
-    def form
-      return nil if no_edit?
+    def value=(v)
+      if v.nil?
+        @value = nil
+        return
+      end
+      if v.is_a?(String)
+        v = v.tr("０-９", "0-9").strip
+      end
+      @value = v.to_i
+    end
+
+    def form(opts = {})
+      return nil if no_edit? && !opts[:force]
       { tag: 'input', type: 'number', key: @attribute[:key], label: @attribute[:label], value: @value||"" }
     end
 
@@ -103,8 +126,8 @@ module Ezframe
   end
 
   class ForeignType < IntType
-    def view
-      return nil if no_view?
+    def view(opts = {})
+      return nil if no_view? && !opts[:force]
       dataset = @parent.db.dataset[self.type.inner]
       data = dataset.get(id: @value)
       return data[@attribute[:view]]
@@ -135,10 +158,10 @@ module Ezframe
       return value      
     end
   end
-
+ 
   class SelectType < TypeBase
-    def form
-      return nil if no_edit?
+    def form(opts = {})
+      return nil if no_edit? && !opts[:force]
       return { tag: 'select', key: @attribute[:key], label: @attribute[:label], items: @attribute[:items], value: @value }
     end
 
@@ -148,8 +171,8 @@ module Ezframe
   end
 
   class CheckboxType < TypeBase
-    def form
-      return nil if no_edit?
+    def form(opts = {})
+      return nil if no_edit? && !opts[:force]
       return { tag: "checkbox", key: @attribute[:key], name: @attribute[:key], value: parent[:id].value, label: @attribute[:label] }
     end
 
@@ -159,7 +182,8 @@ module Ezframe
   end
 
   class DateType < StringType
-    def form
+    def form(opts = {})
+      return nil if no_edit? && !opts[:force]
       h = super
       if h
 #        h[:type] = 'date' 
@@ -182,18 +206,32 @@ module Ezframe
     end
 
     def value=(v)
-      if v.is_a?(String) && v.empty?
-        return
+      if v.nil?
+        @value = nil
+        return 
       end
-      super(v)
+      if v.is_a?(String)
+        if v.strip.empty?
+          @value = nil
+          return 
+        end
+        y,m,d = v.split(/\-\//)
+        @value = Date.new(y.to_i, m.to_i, d.to_i)
+        return 
+      end
+      if v.is_a?(Date) || v.is_a?(Time)
+        @value = v
+      else
+        mylog "[WARN] illegal value for date type: #{v.inspect}"
+      end
     end
 
-    def view
-      return nil if no_view?
-      if @value.is_a?(Time)
-        "#{@value.year}/#{@value.mon}/#{@value.mday}"
+    def view(opts = {})
+      return nil if no_view? && !opts[:force]
+      if @value.is_a?(Time) || @value.is_a?(Date)
+        return "#{@value.year}/#{@value.mon}/#{@value.mday}"
       else
-        @value
+        return @value
       end
     end
   end
@@ -202,8 +240,8 @@ module Ezframe
   end
 
   class EmailType < StringType
-    def form
-      return nil if no_edit?
+    def form(opts = {})
+      return nil if no_edit? && !opts[:force]
       h = super
       h[:type] = 'email' if h
       return h
@@ -217,9 +255,10 @@ module Ezframe
   end
 
   class JpnameKanaType < StringType
-    def set(val)
-      val = val.tr('ァ-ン', 'ぁ-ん')
-      super(val)
+    def normalize
+      return unless @value
+      super
+      @value.tr!('ァ-ン', 'ぁ-ん')
     end
 
     def validation
@@ -229,7 +268,6 @@ module Ezframe
     end
   end
 
-  # 
   class PrefectureType < SelectType
     def initialize(attr)
       super(attr)
@@ -244,8 +282,8 @@ module Ezframe
       @pref_a.each_with_index { |p, i| @pref_h[i] = p }
     end
 
-    def form
-      return nil if no_edit?
+    def form(opts = {})
+      return nil if no_edit? && !opts[:force]
       h = super
       h[:items] = @pref_h
       return h
@@ -258,8 +296,8 @@ module Ezframe
 
   # Japanese Zipcode type column
   class ZipcodeType < StringType
-    def view
-      return nil if no_view?
+    def view(opts = {})
+      return nil if no_view? && !opts[:force]
       return "" unless @value
       return @value.to_s.gsub(/(\d{3})(\d{4})/) { "#{$1}-#{$2}" }
     end

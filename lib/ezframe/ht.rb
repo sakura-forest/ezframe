@@ -5,7 +5,11 @@ module Ezframe
         if opts.is_a?(String) || opts.is_a?(Array)
           h = { child: opts }
         elsif opts.is_a?(Hash)
-          h = opts.dup
+          if opts[:tag]
+            h = { child: opts }
+          else
+            h = opts.dup
+          end
         else
           mylog("wrap_tag: unknown type: #{opts.inspect}")
           return nil
