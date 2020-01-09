@@ -5,13 +5,15 @@ module Ezframe
   class Database
     attr_accessor :sequel
 
-    def initialize(dbfile = "db/devel.sqlite")
+    def initialize(dbfile = nil)
       @dbfile = dbfile
       connect
     end  
 
     def connect
-      @sequel = Sequel.connect("sqlite://#{@dbfile}", loggers: [Logger.new($stdout)])
+      @dbfile ||= ENV["EZFRAME_DB"] || Config[:db] || "sqlite://db/devel.sqlite"
+      puts "Database.connect: dbfile=#{@dbfile}"
+      @sequel = Sequel.connect(@dbfile, loggers: [Logger.new($stdout)])
     end  
 
     def exec(sql)
@@ -27,7 +29,7 @@ module Ezframe
         dbtype_h.delete(key.to_sym)
       end
       @sequel.create_table(table_name) do 
-        primary_key :id, auto_increment: true
+        primary_key :id # , auto_increment: true
         dbtype_h.each do |key, dbtype|
           column(key, dbtype)
         end

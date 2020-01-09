@@ -14,7 +14,10 @@ class HthashTest < Minitest::Test
 
   def test_div
     h = Ht.div(child: [Ht.div(child: "A"), Ht.div(child: "B")])
-    p h
+    assert_equal({ tag: "div", child: [ {tag: "div", child: "A"}, {tag: "div", child: "B"}]}, h)
+
+    h = Ht.div(child: [ "A", "B" ])
+    assert_equal({ tag: "div", child: })
   end
 
   def test_multidiv

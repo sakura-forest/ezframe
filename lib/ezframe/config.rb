@@ -28,6 +28,10 @@ module Ezframe
         @value_h||={}
         @value_h[k]=v
       end
+
+      def inspect
+        @value_h.inspect
+      end
     end
   end
 end

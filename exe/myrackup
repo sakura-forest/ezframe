@@ -1,5 +1,0 @@
-#!/usr/bin/env ruby
-
-require "rack"
-require "digest/sha2"
-Rack::Server.start

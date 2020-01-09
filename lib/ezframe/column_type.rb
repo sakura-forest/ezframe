@@ -94,7 +94,7 @@ module Ezframe
     end
 
     def db_type
-      "string"
+      "text"
     end
   end
 
@@ -166,7 +166,7 @@ module Ezframe
     end
 
     def db_type
-      return "string"
+      return "text"
     end
   end
 
@@ -215,7 +215,8 @@ module Ezframe
           @value = nil
           return 
         end
-        y,m,d = v.split(/\-\//)
+        y,m,d = v.split(/[\-\/]/)
+        puts "date=#{v.inspect}"
         @value = Date.new(y.to_i, m.to_i, d.to_i)
         return 
       end
@@ -303,7 +304,7 @@ module Ezframe
     end
 
     def db_type
-      return "string"
+      return "text"
     end
   end
 end

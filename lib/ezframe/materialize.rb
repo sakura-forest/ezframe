@@ -75,7 +75,7 @@ module Ezframe
         ht_h[:tag] = "input"
         width_s = "s#{ht_h[:width_s] || 12}"
         ht_h.delete(:witdth_s)
-        label = Ht.label(for: ht_h[:name], child: ht_h[:label], final: true )
+        label = Ht.label(class: %w[active], for: ht_h[:name], child: ht_h[:label], final: true )
         cls = ["input-field", "col", width_s]
         new_h = Ht.div(class: cls, child: [ht_h, label])
         new_h = Ht.div(child: new_h, class: "row")
@@ -85,13 +85,13 @@ module Ezframe
       def checkbox(ht_h)
         ht_h[:tag] = "input"
         ht_h[:type] = "checkbox"
-        Ht.label(child: [ht_h, { tag: "span", child: ht_h[:value] }])
+        return Ht.label(child: [ht_h, { tag: "span", child: ht_h[:value] }])
       end
 
       def radio(ht_h)
         ht_h[:tag] = "input"
         ht_h[:type] = "radio"
-        Ht.label(child: [ht_h, { tag: "span", child: ht_h[:label] }])
+        return Ht.label(child: [ht_h, { tag: "span", child: ht_h[:label] }])
       end
 
       def add_sibling(dest, elem)

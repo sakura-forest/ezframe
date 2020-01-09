@@ -5,7 +5,7 @@ module Ezframe
         if opts.is_a?(String) || opts.is_a?(Array)
           h = { child: opts }
         elsif opts.is_a?(Hash)
-          if opts[:tag]
+          if opts[:tag] && !__callee__.to_s.index("wrap_tag")
             h = { child: opts }
           else
             h = opts.dup
@@ -15,6 +15,8 @@ module Ezframe
           return nil
         end
         h[:tag] ||= __callee__.to_s
+        raise "no tag" if h[:tag] == "wrap_tag"
+        # puts JSON.pretty_generate(h)
         return h
       end
 
@@ -84,32 +86,30 @@ module Ezframe
       end
     end
 
-    class List
-      attr_accessor :array
-
-      def initialize(tag: "ul", array: [])
-        @tag = tag
-        @array = array.dup
-      end
-
-      def to_h
-        return nil if @list.nil? || @list.empty?
-        child = @array.map do |elem|
+    class List < Array
+      attr_accessor :tag
+      def to_h(opts = {})
+        return nil if self.empty?
+        child = self.map do |elem|
           { tag: "li", child: elem }
         end
-        { tag: @tag, child: child }
+        h = { tag: @tag, child: child }
+        h.update(opts)
+        return h
       end
     end
 
     class Ul < List
-      def initialize(array: [])
-        super(tag: "ul", array: array)
+      def to_h(opts = {})
+        @tag = "ul"
+        return super(opts)
       end
     end
 
     class Ol < List
-      def initialize(array: [])
-        super(tag: "ol", array: array)
+      def to_h(opts = {})
+        @tag = "ol"
+        return super(opts)
       end
     end
 
