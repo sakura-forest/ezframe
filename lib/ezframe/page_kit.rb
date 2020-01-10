@@ -12,8 +12,12 @@ module Ezframe
         table_a = row_a.map do |row_h|
           column_set.values = row_h
           id = column_set[:id].value
-          value_a = @attribute[:column_header].map do |key|
+          value_a = (@attribute[:column_header]||[]).map do |key|
             col = column_set[key]
+            unless col
+              mylog "undefined key: #{key}"
+              next
+            end
             checkbox_key = @attribute[:add_checkbox]
             if checkbox_key && key == checkbox_key
               text = add_checkbox(col)
@@ -42,7 +46,7 @@ module Ezframe
 
       def make_header
         column_set = @attribute[:column_set]
-        th_a = @attribute[:column_header].map do |key|
+        th_a = (@attribute[:column_header]||[]).map do |key|
           col = column_set[key]
           if col
             Ht.th(child: col.label)
@@ -55,7 +59,5 @@ module Ezframe
         Ht.tr(child: th_a)
       end
     end
-
-
   end
 end

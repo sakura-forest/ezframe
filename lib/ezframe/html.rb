@@ -20,9 +20,9 @@ module Ezframe
         end
         opt_s, child_s = join_attributes(ht_h)
         if child_s.length >= 0
-          return "<#{tag} #{opt_s}>\n#{child_s}\n</#{tag}>\n"
+          return "<#{ht_h[:tag]} #{opt_s}>\n#{child_s}\n</#{ht_h[:tag]}>\n"
         end
-        "<#{tag} #{opt_s}/>"
+        "<#{ht_h[:tag]} #{opt_s}/>"
       end
 
       def join_attributes(attrs)
@@ -52,6 +52,7 @@ module Ezframe
 
       def input(ht_h)
         size = ht_h[:size]
+        puts "input: size=#{size.inspect}"
         if size && (size.index("x") || size.index("*"))
           if /(\d+)\s*[x\*]\s*(\d+)/ =~ size
             ht_h[:cols], ht_h[:rows] = $1, $2
@@ -59,6 +60,7 @@ module Ezframe
           ht_h[:tag] = "textarea"
           ht_h[:child] = ht_h[:value]
           ht_h.delete(:value)
+          p ht_h
         end
       end
 

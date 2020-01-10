@@ -238,6 +238,9 @@ module Ezframe
     end
   end
 
+  class TimeType < TextType
+  end
+
   class DatetimeType < DateType
     def db_type
       "timestamp"
