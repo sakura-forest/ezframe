@@ -5,10 +5,10 @@ class ColumnTypeTest < Minitest::Test
   include EzModel
   
   def test_column_type
-    assert_equal("string", StringType.type_name)
-    assert_equal(StringType, TypeDict.get(:string))
+    assert_equal("string", TextType.type_name)
+    assert_equal(TextType, TypeDict.get(:string))
     assert_equal(IntegerType, TypeDict.get(:int))
-    obj = StringType.new({ type: "string", label: "mylabel" })
+    obj = TextType.new({ type: "string", label: "mylabel" })
     form = obj.form
     assert_equal("input", form[:tag])
     assert_equal("mylabel", form[:label])
@@ -16,7 +16,7 @@ class ColumnTypeTest < Minitest::Test
 
   def test_foreign
     sets=ColumnSets.new  
-    ColumnSet.new("customer", [{ key: name, type: string, label: "氏名" }])
+    ColumnSet.new("customer", [{ key: name, type: string, label: "氝坝" }])
     ColumnSet.new("order", { key: 'customer', type: "foreign", view: 'name' })
 
     assert_equal  

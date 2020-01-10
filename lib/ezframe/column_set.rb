@@ -62,7 +62,7 @@ module Ezframe
     end
 
     def set(attr_a)
-      @columns[:id] = IdType.new(key: "id", label: "ID", hidden: true, no_edit: true)
+      @columns[:id] = IdType.new(key: "id", label: "ID", no_edit: true)
       attr_a.each do |attributes|
         attr = attributes.clone
         col_key = attr[:key]
@@ -74,8 +74,8 @@ module Ezframe
           @columns[col_key.to_sym] = klass.new(attr)
         end
       end
-      @columns[:created_at] = DateType.new(type: "date", key: "created_at", label: "生成日時", no_edit: true)
-      @columns[:updated_at] = DateType.new(type: "date", key: "updated_at", label: "更新日時", no_edit: true)
+      @columns[:created_at] = DatetimeType.new(type: "datetime", key: "created_at", label: "生成日時", no_edit: true)
+      @columns[:updated_at] = DatetimeType.new(type: "datetime", key: "updated_at", label: "更新日時", no_edit: true)
       # mylog "set: #{@columns.inspect}"
       @columns.values.each {|col| col.parent = self }
       return @columns

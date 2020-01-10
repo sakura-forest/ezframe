@@ -65,6 +65,7 @@ module Ezframe
       def select(ht_h = {})
         attr = ht_h.clone
         items = attr[:items]
+        # puts "Html.select: #{items}"
         if items.is_a?(Hash)
           option_a = ht_h[:items].map do |k, v|
             h = { tag: "option", value: k }
@@ -73,6 +74,9 @@ module Ezframe
               h[:selected] = "selected" if selected
             end
             h[:child] = v
+            if ht_h[:default] && ht_h[:default] == v
+              h[:selected] = "selected"
+            end
             h
           end
         elsif items.is_a?(Array)
@@ -81,6 +85,10 @@ module Ezframe
             if %w[selected default].include?(v[2])
               h[:selected] = "selected"
             end
+            if ht_h[:default] && ht_h[:default] == v
+              h[:selected] = "selected"
+            end
+            puts h.inspect
             h
           end
         else

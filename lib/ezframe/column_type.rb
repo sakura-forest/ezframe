@@ -72,7 +72,7 @@ module Ezframe
     end
   end
 
-  class StringType < TypeBase
+  class TextType < TypeBase
     def normalize
       return unless @value
       @value = @value.to_s
@@ -98,7 +98,7 @@ module Ezframe
     end
   end
 
-  class IntType < StringType
+  class IntType < TextType
     def view(opts = {})
       return nil if no_view? && !opts[:force]
       return Util.add_comma(@value.to_i)
@@ -149,7 +149,7 @@ module Ezframe
     end
   end
 
-  class PasswordType < StringType
+  class PasswordType < TextType
     def form
       return { tag: "input", type: "password", label: @attribute[:label], value: @value||""}
     end
@@ -162,6 +162,7 @@ module Ezframe
   class SelectType < TypeBase
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
+      puts "selectType: #{@attribute[:items].inspect}"
       return { tag: 'select', key: @attribute[:key], label: @attribute[:label], items: @attribute[:items], value: @value }
     end
 
@@ -181,7 +182,7 @@ module Ezframe
     end
   end
 
-  class DateType < StringType
+  class DateType < TextType
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
       h = super
@@ -195,7 +196,7 @@ module Ezframe
     end
 
     def db_type
-      "datetime"
+      "date"
     end
 
     def value
@@ -238,9 +239,12 @@ module Ezframe
   end
 
   class DatetimeType < DateType
+    def db_type
+      "timestamp"
+    end
   end
 
-  class EmailType < StringType
+  class EmailType < TextType
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
       h = super
@@ -249,13 +253,13 @@ module Ezframe
     end
   end
 
-  class TelephoneType < StringType
+  class TelType < TextType
   end
 
-  class JpnameType < StringType
+  class JpnameType < TextType
   end
 
-  class JpnameKanaType < StringType
+  class JpnameKanaType < TextType
     def normalize
       return unless @value
       super
@@ -296,7 +300,7 @@ module Ezframe
   end
 
   # Japanese Zipcode type column
-  class ZipcodeType < StringType
+  class ZipcodeType < TextType
     def view(opts = {})
       return nil if no_view? && !opts[:force]
       return "" unless @value

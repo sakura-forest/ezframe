@@ -29,7 +29,7 @@ module Ezframe
         dbtype_h.delete(key.to_sym)
       end
       @sequel.create_table(table_name) do 
-        primary_key :id # , auto_increment: true
+        primary_key :id, auto_increment: true
         dbtype_h.each do |key, dbtype|
           column(key, dbtype)
         end
