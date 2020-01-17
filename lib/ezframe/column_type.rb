@@ -247,6 +247,26 @@ module Ezframe
     end
   end
 
+  class BirthdayType < DateType
+    def form(opts = {})
+      return nil if no_edit? && !opts[:force]
+      prefix = @attribute[:key]
+      now = Time.now
+      year_list = []
+      120.times do |y|
+        year = now.year-year
+        year_list.push [ year, "#{year}年 (#{convert_wareki(year)})" ]
+      end
+      mon_list = (1..12).map {|m| [ m, "#{m}月" }
+      mon_list.unshift([ 0, "(月)"])
+      mday_list = (1..31).map {|d| [ d, "#{d}日" }
+      mday_list.unshift([ 0, "(日)"])
+      return [ Ht.select(name: "#{prefix}_year", items: year_list),
+          Ht.select(name: "#{prefix}_mon", items: mon_list),
+        Ht.select(name: "#{prefix}_mday", items: mday_list)]
+    end
+  end
+
   class EmailType < TextType
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
