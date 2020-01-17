@@ -2,24 +2,28 @@
 
 module Ezframe
   class Template
-    def self.embed_words(keyword, dir, opts)
-      return opts[keyword.to_sym] if opts[keyword.to_sym]
+    class << self
+      def fill(filename, opts = {})
+        dir = File.dirname(filename)
+        unless File.exist?(filename)
+          raise "fill_template: file does not exist: #{filename}"
+        end
 
-     temp = "#{dir}/#{keyword}.html"
-     return File.open(temp, &:read) if File.exist?(temp)
-    end
-
-    def self.fill(filename, opts = {})
-      dir = File.dirname(filename)
-      unless File.exist?(filename)
-        raise "fill_template: file does not exist: #{filename}"
+        instr = File.open(filename, &:read)
+        return fill_in_text(instr, opts)
       end
 
-      instr = File.open(filename, &:read)
-      outstr = instr.gsub(/\#\{(.*)\}/) do
-        embed_words(Regexp.last_match(1), dir, opts)
+      def fill_in_text(text, opts = {})
+        outstr = text.gsub(/\#\{(.*)\}/) do
+          keyword = $1
+          if opts[keyword.to_sym]
+            opts[keyword.to_sym] 
+          else
+            nil
+          end
+        end
+        return outstr
       end
-      outstr
     end
   end
 end

@@ -25,7 +25,7 @@ module Ezframe
     end
 
     def initialize(attr = nil)
-      @attribute = attr if attr
+      @attribute = attr||{}
     end
 
     def key
@@ -254,7 +254,7 @@ module Ezframe
       now = Time.now
       year_list = []
       110.times do |y|
-        year = now.year-year-10
+        year = now.year-y-10
         year_list.push [ year, "#{year}年 (#{convert_wareki(year)})" ]
       end
       mon_list = (1..12).map {|m| [ m, "#{m}月" ] }
