@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module EzView
+module Ezframe
   class Template
     def self.embed_words(keyword, dir, opts)
       return opts[keyword.to_sym] if opts[keyword.to_sym]
@@ -9,7 +9,7 @@ module EzView
      return File.open(temp, &:read) if File.exist?(temp)
     end
 
-    def self.fill_template(filename, opts = {})
+    def self.fill(filename, opts = {})
       dir = File.dirname(filename)
       unless File.exist?(filename)
         raise "fill_template: file does not exist: #{filename}"

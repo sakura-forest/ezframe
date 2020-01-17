@@ -14,6 +14,12 @@ module Ezframe
 
         mylog("exec: path=#{request.path_info} params=#{request.params}")
         klass, method = PageBase::decide_route(request.path_info)
+        unless klass
+          response.status = 404
+          response['Content-Type'] = 'text/html; charset=utf-8'
+          response.body = [ Html.convert(Ht.p("file not found")) ]
+          return
+        end
         page = klass.new(request, model)
         if request.post?
           method_full_name = "public_#{method}_post"

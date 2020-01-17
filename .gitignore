@@ -10,3 +10,4 @@ db/*
 **/db/*
 pkg/
 *.old
+*.gem

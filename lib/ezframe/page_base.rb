@@ -16,11 +16,15 @@ module Ezframe
         when 0
           [get_class(default_class), default_method]
         when 1
+          filename = path_parts[0]
+          if filename.index(".")
+            return nil
+          end
           klass = get_class(path_parts)
           if klass
             return [klass, default_method]
           else
-            return [get_class(default_class), parth_parts[0]]
+            return [get_class(default_class), path_parts[0]]
           end
         else
           klass = get_class(path_parts)
@@ -43,7 +47,6 @@ module Ezframe
         end
         return nil
       end
-
     end
 
     attr_accessor :auth
@@ -81,7 +84,7 @@ module Ezframe
         into_html_header: Materialize.into_html_header,
         into_bottom_of_body: Materialize.into_bottom_of_body,
       }
-      EzView::Template.fill_template("template/base.html", args)
+      Template.fill("template/base.html", args)
     end
 
     def parse_json_body
