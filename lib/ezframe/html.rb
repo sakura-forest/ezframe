@@ -98,7 +98,7 @@ module Ezframe
         end
         attr[:tag] = "select"
         attr[:child] = option_a
-        attr[:name] = attr[:key]
+        attr[:name] ||= attr[:key]
         attr[:final] = true
         attr.delete(:items)
         Html.convert(attr)
