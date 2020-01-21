@@ -162,7 +162,7 @@ module Ezframe
   class SelectType < TypeBase
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      puts "selectType: #{@attribute[:items].inspect}"
+      # puts "selectType: #{@attribute[:items].inspect}"
       return { tag: 'select', key: @attribute[:key], label: @attribute[:label], items: @attribute[:items], value: @value }
     end
 
@@ -217,7 +217,7 @@ module Ezframe
           return 
         end
         y,m,d = v.split(/[\-\/]/)
-        puts "date=#{v.inspect}"
+        # puts "date=#{v.inspect}"
         @value = Date.new(y.to_i, m.to_i, d.to_i)
         return 
       end
