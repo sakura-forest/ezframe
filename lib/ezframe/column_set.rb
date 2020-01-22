@@ -152,7 +152,7 @@ module Ezframe
     def get_hash(method)
       res_h = {}  
       @columns.map do |key, col|
-        res_h[key] = col.send(method)
+        res_h[key.to_sym] = col.send(method)
       end
       return res_h
     end

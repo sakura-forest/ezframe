@@ -25,13 +25,13 @@ module Ezframe
     end
 
     def initialize(attr = nil)
-      @attribute = attr||{}
+      @attribute = attr || {}
     end
 
     def key
-      @attribute[:key]  
-    end  
-    
+      @attribute[:key]
+    end
+
     def label
       return nil if @attribute[:hidden]
       @attribute[:label]
@@ -57,11 +57,16 @@ module Ezframe
       nil
     end
 
-    def view(opts ={})
+    def form_html(opts = {})
+      form_h = form(opts)
+      return nil unless form_h
+      return Html.convert(form_h)
+    end
+
+    def view(opts = {})
       return nil if no_view?
       @value
     end
-
 
     def no_edit?
       return ((@attribute[:hidden] || @attribute[:no_edit]) && !@attribute[:force])
@@ -76,8 +81,8 @@ module Ezframe
     def normalize
       return unless @value
       @value = @value.to_s
-      @value.gsub!(/　/, ' ')
-      @value.gsub!(/\s+/, ' ')
+      @value.gsub!(/　/, " ")
+      @value.gsub!(/\s+/, " ")
       @value.strip!
     end
 
@@ -86,9 +91,9 @@ module Ezframe
       normalize
     end
 
-    def form(opts ={})
+    def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      h = { tag: 'input', type: 'text', name: @attribute[:key], key: @attribute[:key], label: @attribute[:label], value: @value||"" }
+      h = { tag: "input", type: "text", name: @attribute[:key], key: @attribute[:key], label: @attribute[:label], value: @value || "" }
       h[:size] = @attribute[:size] if @attribute[:size]
       h
     end
@@ -117,7 +122,7 @@ module Ezframe
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      { tag: 'input', type: 'number', key: @attribute[:key], label: @attribute[:label], value: @value||"" }
+      { tag: "input", type: "number", key: @attribute[:key], label: @attribute[:label], value: @value || "" }
     end
 
     def db_type
@@ -137,33 +142,34 @@ module Ezframe
       return nil
     end
   end
-  
+
   class IdType < IntType
     def label
       return nil if no_view?
       return "ID"
     end
 
-    def form
+    def form(opts = {})
       return nil
     end
   end
 
   class PasswordType < TextType
-    def form
-      return { tag: "input", type: "password", label: @attribute[:label], value: @value||""}
+    def form(opts = {})
+      return nil if no_edit? && !opts[:force]
+      return { tag: "input", type: "password", label: @attribute[:label], value: @value || "" }
     end
 
     def db_value
-      return value      
+      return value
     end
   end
- 
+
   class SelectType < TypeBase
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
       # puts "selectType: #{@attribute[:items].inspect}"
-      return { tag: 'select', key: @attribute[:key], label: @attribute[:label], items: @attribute[:items], value: @value }
+      return { tag: "select", key: @attribute[:key], label: @attribute[:label], items: @attribute[:items], value: @value }
     end
 
     def db_type
@@ -187,10 +193,10 @@ module Ezframe
       return nil if no_edit? && !opts[:force]
       h = super
       if h
-#        h[:type] = 'date' 
-        h[:type] = 'text' 
+        #        h[:type] = 'date'
+        h[:type] = "text"
         h[:class] = "datepicker"
-        h[:value] = value||""
+        h[:value] = value || ""
       end
       return h
     end
@@ -201,7 +207,7 @@ module Ezframe
 
     def value
       if @value.is_a?(Date) || @value.is_a?(Time)
-        return "%d-%02d-%02d"%[@value.year, @value.mon, @value.mday]
+        return "%d-%02d-%02d" % [@value.year, @value.mon, @value.mday]
       end
       return @value
     end
@@ -209,17 +215,17 @@ module Ezframe
     def value=(v)
       if v.nil?
         @value = nil
-        return 
+        return
       end
       if v.is_a?(String)
         if v.strip.empty?
           @value = nil
-          return 
+          return
         end
-        y,m,d = v.split(/[\-\/]/)
+        y, m, d = v.split(/[\-\/]/)
         # puts "date=#{v.inspect}"
         @value = Date.new(y.to_i, m.to_i, d.to_i)
-        return 
+        return
       end
       if v.is_a?(Date) || v.is_a?(Time)
         @value = v
@@ -254,16 +260,16 @@ module Ezframe
       now = Time.now
       year_list = []
       110.times do |y|
-        year = now.year-y-10
-        year_list.push [ year, "#{year}年 (#{convert_wareki(year)})" ]
+        year = now.year - y - 10
+        year_list.push [year, "#{year}年 (#{convert_wareki(year)})"]
       end
-      mon_list = (1..12).map {|m| [ m, "#{m}月" ] }
-      mon_list.unshift([ 0, "(月)"])
-      mday_list = (1..31).map {|d| [ d, "#{d}日" ] }
-      mday_list.unshift([ 0, "(日)"])
-      return [ Ht.select(name: "#{prefix}_year", items: year_list),
-          Ht.select(name: "#{prefix}_mon", items: mon_list),
-        Ht.select(name: "#{prefix}_mday", items: mday_list)]
+      mon_list = (1..12).map { |m| [m, "#{m}月"] }
+      mon_list.unshift([0, "(月)"])
+      mday_list = (1..31).map { |d| [d, "#{d}日"] }
+      mday_list.unshift([0, "(日)"])
+      return [Ht.select(name: "#{prefix}_year", items: year_list),
+              Ht.select(name: "#{prefix}_mon", items: mon_list),
+              Ht.select(name: "#{prefix}_mday", items: mday_list)]
     end
   end
 
@@ -271,7 +277,7 @@ module Ezframe
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
       h = super
-      h[:type] = 'email' if h
+      h[:type] = "email" if h
       return h
     end
   end
@@ -286,12 +292,12 @@ module Ezframe
     def normalize
       return unless @value
       super
-      @value.tr!('ァ-ン', 'ぁ-ん')
+      @value.tr!("ァ-ン", "ぁ-ん")
     end
 
     def validation
       unless /^[ぁ-ん ]+$/ =~ @value
-        'ひらがなのみで入力してください。'
+        "ひらがなのみで入力してください。"
       end
     end
   end

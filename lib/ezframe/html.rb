@@ -52,7 +52,7 @@ module Ezframe
 
       def input(ht_h)
         size = ht_h[:size]
-        puts "input: size=#{size.inspect}"
+        # puts "input: size=#{size.inspect}"
         if size && (size.index("x") || size.index("*"))
           if /(\d+)\s*[x\*]\s*(\d+)/ =~ size
             ht_h[:cols], ht_h[:rows] = $1, $2
@@ -90,7 +90,7 @@ module Ezframe
             if ht_h[:default] && ht_h[:default] == v
               h[:selected] = "selected"
             end
-            puts h.inspect
+            # puts h.inspect
             h
           end
         else
