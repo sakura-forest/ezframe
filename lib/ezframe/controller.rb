@@ -20,6 +20,7 @@ module Ezframe
           response.body = [ Html.convert(Ht.p("file not found")) ]
           return
         end
+        method = "default" if !method || method=="undefined"
         page = klass.new(request, model)
         if request.post?
           method_full_name = "public_#{method}_post"

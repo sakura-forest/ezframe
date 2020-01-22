@@ -7,6 +7,7 @@ require "json"
 require_relative 'ezframe/util'
 require_relative 'ezframe/config'
 require_relative 'ezframe/controller'
+require_relative 'ezframe/japanese_utils'
 require_relative 'ezframe/column_set'
 require_relative 'ezframe/column_type'
 require_relative 'ezframe/database'
