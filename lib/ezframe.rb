@@ -3,6 +3,7 @@
 require 'yaml'
 require "sequel"
 require "json"
+require "nkf"
 
 require_relative 'ezframe/util'
 require_relative 'ezframe/config'

@@ -3,7 +3,7 @@ require "date"
 
 module Ezframe
   class TypeBase
-    attr_accessor :attribute, :parent
+    attr_accessor :attribute, :parent, :error
 
     def self.get_class(key)
       return nil unless key
@@ -68,6 +68,16 @@ module Ezframe
       @value
     end
 
+    def validate
+      if !@value || @value.empty?
+        if @attribute[:must]
+          @error = "必須項目です。"
+          return @error
+        end
+      end  
+      return nil
+    end
+
     def no_edit?
       return ((@attribute[:hidden] || @attribute[:no_edit]) && !@attribute[:force])
     end
@@ -128,6 +138,8 @@ module Ezframe
     def db_type
       "int"
     end
+
+
   end
 
   class ForeignType < IntType
@@ -280,9 +292,37 @@ module Ezframe
       h[:type] = "email" if h
       return h
     end
+
+    def normalize
+      return unless @value
+      @value = NKF.nkf('-w -Z4', @value)
+    end
+
+    def validate
+      super
+      return @error if @error
+      if email_format?
+        @error = "形式が正しくありません"
+        return @error
+      end
+      return nil
+    end
+
+    def email_format?
+      return nil unless @value
+      return @value =~ /^[a-zA-Z0-9.!\#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+    end
   end
 
   class TelType < TextType
+    def validate
+      super
+      return @error if @error
+      unless /^0\d{9,10}$/ =~ @value
+        @error = "形式が正しくありません"
+        return @error
+      end
+    end
   end
 
   class JpnameType < TextType

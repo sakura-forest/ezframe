@@ -131,6 +131,20 @@ module Ezframe
       end
     end
 
+    def validate
+      clear_error
+      errors = []
+      @columns.values.each do |col| 
+        err = col.validate
+        errors.push([ col.key, err ]) if err
+      end
+      return errors
+    end
+
+    def clear_error
+      @columns.values.each {|col| col.error = nil }
+    end
+
     def values
       @columns.map {|key, col| col.value}
     end  
