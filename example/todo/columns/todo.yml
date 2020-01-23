@@ -1,9 +1,0 @@
-- key: issue
-  type: string
-  label: やること
-- key: status
-  type: select
-  label: 状態
-  items: 
-    1: Active
-    2: Completed

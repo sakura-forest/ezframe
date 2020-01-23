@@ -1,6 +1,0 @@
-- key: channel
-  type: foreign
-  view: name
-- key: user
-  type: foreign
-  view: name
