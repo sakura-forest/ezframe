@@ -8,9 +8,8 @@ module Ezframe
         Config.load_files("./config")
         Model.init
         model = Model.get_clone
-        Auth.init_warden
+        Auth.init_warden if defined?(Warden)
         @request.env["model"] = model
-        # Auth.model = model
 
         mylog("exec: path=#{request.path_info} params=#{request.params}")
         klass, method = PageBase::decide_route(request.path_info)

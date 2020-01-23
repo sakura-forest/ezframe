@@ -28,18 +28,25 @@ module Ezframe
       %w[id created_at updated_at].each do |key|
         dbtype_h.delete(key.to_sym)
       end
-      puts "create_table: #{table_name}"
-      @sequel.create_table(table_name) do 
-#        if @dbfile.index("postgresql")
+      # puts "create_table: #{table_name}"
+      if @dbfile.index("postgres")
+        @sequel.create_table(table_name) do 
           serial :id
-#        else
-          #primary_key :id, auto_increment: true
-        #end
-        dbtype_h.each do |key, dbtype|
-          column(key, dbtype)
+          dbtype_h.each do |key, dbtype|
+            column(key, dbtype)
+          end
+          column(:created_at, :timestamp, default: Sequel::CURRENT_TIMESTAMP)
+          column(:updated_at, :timestamp, default: Sequel::CURRENT_TIMESTAMP)
         end
-        column(:created_at, :timestamp, default: Sequel::CURRENT_TIMESTAMP)
-        column(:updated_at, :timestamp, default: Sequel::CURRENT_TIMESTAMP)
+      else
+        @sequel.create_table(table_name) do 
+          primary_key :id, auto_increment: true
+          dbtype_h.each do |key, dbtype|
+            column(key, dbtype)
+          end
+          column(:created_at, :timestamp, default: Sequel::CURRENT_TIMESTAMP)
+          column(:updated_at, :timestamp, default: Sequel::CURRENT_TIMESTAMP)
+        end
       end
     end
     

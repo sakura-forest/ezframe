@@ -4,8 +4,10 @@ module Ezframe
       attr_accessor :value_h
 
       def load_files(dir)
-        Dir["#{dir}/*.yml"].each do |file|
-          load_one_file(file)
+        unless @value_h
+          Dir["#{dir}/*.yml"].each do |file|
+            load_one_file(file)
+          end
         end
       end
 
