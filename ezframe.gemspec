@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["KAMACHI Masayuki"]
   spec.email         = ["kamachi@sakuraforest.co.jp"]
 
-  spec.summary       = %q{simple and easy-to-use web framework}
+  spec.summary       = %q{simple and easy-to-use web framework by ruby language}
   spec.description   = %q{easy web framework}
   spec.homepage      = "https://github.com/sakura-forest/ezframe"
   spec.license       = "MIT"

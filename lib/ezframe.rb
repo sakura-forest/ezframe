@@ -5,6 +5,7 @@ require "sequel"
 require "json"
 require "nkf"
 
+require_relative 'ezframe/version'
 require_relative 'ezframe/util'
 require_relative 'ezframe/config'
 require_relative 'ezframe/controller'

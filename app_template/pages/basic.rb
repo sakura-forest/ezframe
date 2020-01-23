@@ -1,5 +1,5 @@
 class BasicPages < Ezframe::PageBase
   def public_default_page
-    Html.convert(Ht.h1("Ezframe is working."))
+    return "<H1>Ezframe is working.</H1>"
   end
 end

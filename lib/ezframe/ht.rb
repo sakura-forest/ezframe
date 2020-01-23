@@ -1,6 +1,8 @@
+# HTMLを中間表現としてのハッシュであるhthashを生成するためのクラス
 module Ezframe
   module Ht
     class << self
+      # メソッド名の名前のタグのhthashを生成
       def wrap_tag(opts = {})
         if opts.is_a?(String) || opts.is_a?(Array)
           h = { child: opts }
@@ -16,7 +18,6 @@ module Ezframe
         end
         h[:tag] ||= __callee__.to_s
         raise "no tag" if h[:tag] == "wrap_tag"
-        # puts JSON.pretty_generate(h)
         return h
       end
 
@@ -60,16 +61,19 @@ module Ezframe
       alias_method :checkbox, :wrap_tag
       alias_method :radio, :wrap_tag
 
+      # materialize用のiconメソッド
+      # 引数が文字列だったら、それをname属性とする
       def icon(arg)
         if arg.is_a?(Hash)
           h = arg.clone
           h[:tag] = "icon"
-          wrap_tag(h)
+          return wrap_tag(h)
         elsif arg.is_a?(String)
-          { tag: "icon", name: arg }
+          return { tag: "icon", name: arg }
         end
       end
 
+      # buttonタグにはデフォルトでtype=button属性を付ける
       def button(arg)
         arg[:tag] = "button"
         unless arg[:type]
@@ -86,6 +90,7 @@ module Ezframe
       end
     end
 
+    # 配列を<UL><OL>要素に変換するためのクラス
     class List < Array
       attr_accessor :tag
       def to_h(opts = {})
@@ -99,6 +104,7 @@ module Ezframe
       end
     end
 
+    # 配列を<UL>要素に変換するためのクラス
     class Ul < List
       def to_h(opts = {})
         @tag = "ul"
@@ -106,6 +112,7 @@ module Ezframe
       end
     end
 
+    # 配列を<OL>要素に変換するためのクラス
     class Ol < List
       def to_h(opts = {})
         @tag = "ol"
@@ -113,8 +120,12 @@ module Ezframe
       end
     end
 
+    # テーブルを生成するためのクラス
+    # @matrix ... テーブルの内容となる二次元配列
+    # @header ... テーブルの先頭に付ける項目名の配列
+    # @class_a ... <table><tr><td>の各ノードにそれぞれ設定したいclass属性を配列として定義
     class Table
-      attr_accessor :class_a, :header
+      attr_accessor :class_a, :header, :matrix
 
       def initialize(matrix = nil)
         set(matrix) if matrix
