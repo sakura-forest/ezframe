@@ -1,3 +1,0 @@
-default_page_class: BasicPages
-template_file: base.html
-favicon: /image/favicon.ico
