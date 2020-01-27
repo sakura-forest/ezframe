@@ -48,4 +48,4 @@ $ bundle exec create_tables.rb
 bundle exec rackup
 ```
 
-6. ブラウザでhttp://localhost:9292を開きます。
+6. ブラウザで(http://localhost:9292)を開きます。
