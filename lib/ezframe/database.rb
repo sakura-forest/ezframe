@@ -31,7 +31,7 @@ module Ezframe
       # puts "create_table: #{table_name}"
       if @dbfile.index("postgres")
         @sequel.create_table(table_name) do 
-          serial :id
+          primary_key :id, identity: true
           dbtype_h.each do |key, dbtype|
             column(key, dbtype)
           end

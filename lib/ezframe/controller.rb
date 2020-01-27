@@ -1,14 +1,17 @@
 # frozen_string_literal: true
 
 module Ezframe
-  class Boot
+  class Controller
     class << self
-      def exec(request, response)
-        @request = request
+      def init
         Config.load_files("./config")
         Model.init
-        model = Model.get_clone
         Auth.init_warden if defined?(Warden)
+      end
+
+      def exec(request, response)
+        @request = request
+        model = Model.get_clone
         @request.env["model"] = model
 
         mylog("exec: path=#{request.path_info} params=#{request.params}")

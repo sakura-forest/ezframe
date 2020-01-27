@@ -5,7 +5,7 @@ module Ezframe
     def self.call(env)
       req = Rack::Request.new(env)
       res = Rack::Response.new
-      Boot.exec(req, res)
+      Controller.exec(req, res)
       if res.body.empty?
         raise "no body in response"
       end

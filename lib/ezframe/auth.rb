@@ -39,7 +39,7 @@ module Ezframe
       def authenticate(env, account, pass)
         model = env["model"]
         raise "model is not initialized" unless model
-        @user = model.db.dataset(:user).where(account: account).first
+        @user = model.db.dataset(Config[:login_table]).where(Config[:login_account].to_sym => account ).first
         if @user
           mylog "Auth: authenticate: user=#{@user.inspect}"
         else
@@ -60,7 +60,12 @@ module Ezframe
 
     def initialize(model, account)
       self.account = account
-      @user = model.db.dataset(:user).where(Sequel.or(account: account, id: account)).first
+      dataset = model.db.dataset(Config[:login_table])
+      if account.is_a?(Integer)
+        @user = dataset.where(id: account).first
+      else
+        @user = dataset.where(Config[:login_account].to_sym => account).first
+      end
       unless @user
         mylog "Auth.initialize: This user does not exist: #{account}"
       end
