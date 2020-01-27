@@ -60,7 +60,6 @@ module Ezframe
           ht_h[:tag] = "textarea"
           ht_h[:child] = ht_h[:value]
           ht_h.delete(:value)
-          p ht_h
         end
       end
 

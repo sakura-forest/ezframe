@@ -14,9 +14,7 @@ module Ezframe
       def load_one_file(filename)
         instr = File.open(filename, &:read)
         if instr.index("\#{")
-          puts "use ENV: #{ENV['PG_USER']}"
           instr = Template.fill_in_text(instr)
-          puts "instr=#{instr}"
         end
         begin
           yaml = YAML.load(instr)
