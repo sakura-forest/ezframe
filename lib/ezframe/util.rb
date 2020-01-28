@@ -75,17 +75,6 @@ class Object
   end
 end
 
-def multi_div(class_a, child)
-  class_a.reverse.each do |klass|
-    child = { tag: "div", class: klass, child: child }
-  end
-  return child
-end
-
-
-
-
-
 def mylog(msg)
   File.open("log/mylog.log", "a"){|f| f.puts "#{Time.now}:[#{$$}]:#{msg}" }
 end

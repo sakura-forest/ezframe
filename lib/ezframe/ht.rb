@@ -88,6 +88,10 @@ module Ezframe
         end
         return child
       end
+
+      def small_text(text)
+        return small(class: %w[teal-text], child: text)
+      end
     end
 
     # 配列を<UL><OL>要素に変換するためのクラス

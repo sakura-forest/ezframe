@@ -187,6 +187,12 @@ module Ezframe
     def db_type
       return "text"
     end
+
+    def view(opts = {})
+      return nil if no_view? && !opts[:force]
+      items = @attribute[:items]
+      return items[@value]
+    end
   end
 
   class CheckboxType < TypeBase
