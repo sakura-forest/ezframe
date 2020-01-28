@@ -85,12 +85,16 @@ module Ezframe
     def no_view?
       return (@attribute[:hidden] && !@attribute[:force])
     end
+
+    def multi_inputs?
+      nil
+    end
   end
 
   class TextType < TypeBase
     def normalize
       return unless @value
-      @value = @value.to_s
+      @value = @value.dup.to_s
       @value.gsub!(/　/, " ")
       @value.gsub!(/\s+/, " ")
       @value.strip!
@@ -103,7 +107,7 @@ module Ezframe
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      h = { tag: "input", type: "text", name: @attribute[:key], key: @attribute[:key], label: @attribute[:label], value: @value || "" }
+      h = Ht.input(type: "text", name: self.key, label: @attribute[:label], value: @value || "")
       h[:size] = @attribute[:size] if @attribute[:size]
       h
     end
@@ -132,14 +136,12 @@ module Ezframe
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      { tag: "input", type: "number", key: @attribute[:key], label: @attribute[:label], value: @value || "" }
+      return Ht.input(type: "number", name: self.key, label: @attribute[:label], value: @value || "")
     end
 
     def db_type
       "int"
     end
-
-
   end
 
   class ForeignType < IntType
@@ -169,7 +171,7 @@ module Ezframe
   class PasswordType < TextType
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      return { tag: "input", type: "password", label: @attribute[:label], value: @value || "" }
+      return { tag: "input", type: "password", name: self.key, label: @attribute[:label], value: @value || "" }
     end
 
     def db_value
@@ -181,7 +183,7 @@ module Ezframe
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
       # puts "selectType: #{@attribute[:items].inspect}"
-      return { tag: "select", key: @attribute[:key], label: @attribute[:label], items: @attribute[:items], value: @value }
+      return { tag: "select", name: self.key, label: @attribute[:label], items: @attribute[:items], value: @value }
     end
 
     def db_type
@@ -198,7 +200,7 @@ module Ezframe
   class CheckboxType < TypeBase
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      return { tag: "checkbox", key: @attribute[:key], name: @attribute[:key], value: parent[:id].value, label: @attribute[:label] }
+      return Ht.checkbox(name: self.key, value: parent[:id].value, label: @attribute[:label])
     end
 
     def db_type
@@ -211,7 +213,7 @@ module Ezframe
       return nil if no_edit? && !opts[:force]
       h = super
       if h
-        #        h[:type] = 'date'
+        # h[:type] = 'date'
         h[:type] = "text"
         h[:class] = "datepicker"
         h[:value] = value || ""
@@ -241,7 +243,6 @@ module Ezframe
           return
         end
         y, m, d = v.split(/[\-\/]/)
-        # puts "date=#{v.inspect}"
         @value = Date.new(y.to_i, m.to_i, d.to_i)
         return
       end
@@ -271,23 +272,50 @@ module Ezframe
     end
   end
 
-  class BirthdayType < DateType
+  class BirthdayType < TextType
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      prefix = @attribute[:key]
+      prefix = self.key
       now = Time.now
       year_list = []
       110.times do |y|
         year = now.year - y - 10
         year_list.push [year, "#{year}年 (#{Japanese.convert_wareki(year)})"]
       end
+
+      year, mon, mday = parse_date(@value)
       mon_list = (1..12).map { |m| [m, "#{m}月"] }
       mon_list.unshift([0, "(月)"])
       mday_list = (1..31).map { |d| [d, "#{d}日"] }
       mday_list.unshift([0, "(日)"])
-      return [Ht.select(name: "#{prefix}_year", items: year_list),
-              Ht.select(name: "#{prefix}_mon", items: mon_list),
-              Ht.select(name: "#{prefix}_mday", items: mday_list)]
+      return [Ht.select(name: "#{prefix}_year", items: year_list, value: year),
+              Ht.select(name: "#{prefix}_mon", items: mon_list, value: mon),
+              Ht.select(name: "#{prefix}_mday", items: mday_list, value: mday)]
+    end
+
+    def view(opts = {})
+      return nil if no_view? && !opts[:force]
+      return nil unless @value
+      year, mon, mday = parse_date(@value)
+      mon = "?" if mon == 0
+      mday = "?" if mday == 0
+      return "#{year}年 #{mon}月 #{mday}日"
+    end
+
+    def parse_date(date)
+      if date && date =~ /(\d+)\-(\d+)\-(\d+)/
+        return [ $1.to_i,$2.to_i,$3.to_i ]
+      end
+      return nil
+    end
+
+    def multi_inputs?
+      true
+    end
+
+    def form_to_value(form)
+      y, m, d = form["#{self.key}_year".to_sym], form["#{self.key}_mon".to_sym], form["#{self.key}_mday".to_sym]
+      return "#{y.to_i}-#{m.to_i}-#{d.to_i}"
     end
   end
 
@@ -370,6 +398,7 @@ module Ezframe
     end
 
     def view
+      return nil if no_view? && !opts[:force]
       return @pref_h[@value.to_i]
     end
   end

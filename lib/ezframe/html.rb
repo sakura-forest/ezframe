@@ -75,7 +75,8 @@ module Ezframe
               h[:selected] = "selected" if selected
             end
             h[:child] = v
-            if ht_h[:default] && ht_h[:default] == v
+            # mylog "select: hash: k=#{k}, v=#{v}, value=#{ht_h[:value]}"
+            if ht_h[:value] && ht_h[:value].to_s == k.to_s
               h[:selected] = "selected"
             end
             h
@@ -86,7 +87,8 @@ module Ezframe
             if %w[selected default].include?(v[2])
               h[:selected] = "selected"
             end
-            if ht_h[:default] && ht_h[:default] == v
+            # mylog "select: array: v=#{v}, value=#{ht_h[:value]}"
+            if ht_h[:value] && ht_h[:value].to_s == v[0].to_s
               h[:selected] = "selected"
             end
             # puts h.inspect

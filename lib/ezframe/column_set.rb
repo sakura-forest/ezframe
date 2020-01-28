@@ -61,6 +61,7 @@ module Ezframe
       end
     end
 
+    # 配列を初期化する
     def set(attr_a)
       @columns[:id] = IdType.new(key: "id", label: "ID", no_edit: true)
       attr_a.each do |attributes|
@@ -93,6 +94,7 @@ module Ezframe
       return data
     end
 
+    # 新規に値を登録する
     def save
       col_h = get_hash(:value)
       col_h.delete(:id)
@@ -107,14 +109,30 @@ module Ezframe
       end
     end
 
+    # データベース上の値の更新
     def update(id, value_h)
-      values = {}
-      colkeys = @columns.keys
-      value_h.each do |k, v|
-        values[k] = v if colkeys.include?(k)
+      self.set_from_db(id)
+      updated_values = {}
+      @columns.each do |colkey, column|
+        next if column.no_edit?
+        if column.multi_inputs?
+          new_value = column.form_to_value(value_h)
+        else
+          new_value = value_h[colkey]
+        end
+        prev_value = column.value
+        column.value = new_value
+        if prev_value != column.value
+          updated_values[colkey] = column.value
+        end
       end
-      dataset.where(id: id).update(values)
-      set_values(values)
+#      values = {}
+#      colkeys = @columns.keys
+#      value_h.each do |k, v|
+#        values[k] = v if colkeys.include?(k)
+#      end
+      mylog "column_set.updated_values = #{updated_values.inspect}"
+      dataset.where(id: id).update(updated_values) if updated_values.length > 0
     end
 
     def values=(value_h)
