@@ -34,9 +34,9 @@ module Ezframe
       return @target
     end
 
-    def public_login_page
+    def public_login_get
       flash_area = ""
-      mylog "public_login_page: #{@request}"
+      mylog "public_login_get: #{@request}"
       if @request
         mylog "flash=#{@request.env['x-rack.flash']}"
         flash_area = Ht.div(class: %w[teal], child: @request['env']['x-rack.flash'].error)
@@ -47,25 +47,25 @@ module Ezframe
             Materialize.input(type: "password", name: "password", label: "Password"),
             Ht.button(type: "submit", class: %w[btn], child: "login")
           ]))
-      common_page(title: "Login", body: Html.convert(Materialize.convert([flash_area, form])))
+      common_get(title: "Login", body: Html.convert(Materialize.convert([flash_area, form])))
     end
 
     def public_login_post
       mylog "public_login_post: #{@params.inspect}, #{@json}"
       warden.authenticate
-      public_index_page
+      public_index_get
     end
 
     #--------------------------------------------------------------------------------------------------------
     # add new parts
-    def public_new_page
+    def public_new_get
       matrix = @column_set.map do |column|
         [column.label, column.form]
       end
       matrix.push([Ht.button(child: "送信", class: %w[btn], event: "on=click:branch=add_new:url=/#{@target}/new:with=form")])
       tb = Ht::Table.new(matrix)
       layout = main_layout(left: sidenav, center: Ht.form(child: tb.to_h))
-      common_page(title: "新規登録", body: Html.convert(Materialize.convert(layout)))
+      common_get(title: "新規登録", body: Html.convert(Materialize.convert(layout)))
     end
 
     def public_new_post
@@ -76,11 +76,11 @@ module Ezframe
 
     #--------------------------------------------------------------------------------------------------------
     # index parts
-    def public_index_page
+    def public_index_get
       data_a = @dataset.all
       htb = make_index_table(data_a)
       layout = index_layout(left: sidenav, center: Ht.form(child: htb))
-      common_page(title: "データ一覧", body: Html.convert(Materialize.convert(layout)))
+      common_get(title: "データ一覧", body: Html.convert(Materialize.convert(layout)))
     end
 
     def make_index_table(data_a)
@@ -99,7 +99,7 @@ module Ezframe
       table.make_table(data_a)
     end
 
-    alias_method :public_default_page, :public_index_page
+    alias_method :public_default_get, :public_index_get
 
     #--------------------------------------------------------------------------------------------------------
     # search parts
@@ -113,15 +113,15 @@ module Ezframe
 
     #--------------------------------------------------------------------------------------------------------
     # detail parts
-    def public_detail_page
-      mylog "pubilc_detail_page: #{@request.params.inspect}"
+    def public_detail_get
+      mylog "pubilc_detail_get: #{@request.params.inspect}"
       @target_id ||= @request.params["id"]
       data = @column_set.set_from_db(@target_id)
-      return common_page(title: "no data", body: "no customer data: #{@target_id}") unless data
-      common_page(title: "データ一覧", body: Html.convert(make_detail_page))
+      return common_get(title: "no data", body: "no customer data: #{@target_id}") unless data
+      common_get(title: "データ一覧", body: Html.convert(make_detail_get))
     end
 
-    def make_detail_page
+    def make_detail_get
       layout = main_layout( left: sidenav, center: detail_table )
       @request.env['rack.session'][@target] = @target_id
       layout[:event] = "on=load:branch=set_global@target=#{@target_id}"

@@ -27,7 +27,7 @@ module Ezframe
         if request.post?
           method_full_name = "public_#{method}_post"
         else
-          method_full_name = "public_#{method}_page"
+          method_full_name = "public_#{method}_get"
         end
         if page.auth
           warden.authenticate! 
@@ -42,7 +42,7 @@ module Ezframe
                     page.send(method_full_name)
                   else
                     mylog "no such method: #{method_full_name}"
-                    page.public_default_page
+                    page.public_default_get
                   end
         if body.is_a?(Hash) || body.is_a?(Array)
           response.body = [ JSON.generate(body) ]

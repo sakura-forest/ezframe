@@ -7,48 +7,6 @@ require_relative "util"
 
 module Ezframe
   class PageBase
-    class << self
-      def decide_route(path_info)
-        default_class = Config[:default_page_class]||"App"
-        default_method = Config[:default_page_method]||"default"
-        path_parts = path_info.split('/').drop(1)
-        case path_parts.length
-        when 0
-          [get_class(default_class), default_method]
-        when 1
-          filename = path_parts[0]
-          if filename.index(".")
-            return nil
-          end
-          klass = get_class(path_parts)
-          if klass
-            return [klass, default_method]
-          else
-            return [get_class(default_class), path_parts[0]]
-          end
-        else
-          klass = get_class(path_parts)
-          if klass
-            [klass, default_method]
-          else
-            method = path_parts.pop
-            klass = get_class(path_parts)
-            [klass, method]
-          end
-        end
-      end
-
-      def get_class(keys)
-        keys = [keys] if keys.is_a?(String)
-        klass = (%w[Ezframe] + keys.map { |k| k.to_camel }).join("::")
-        mylog "get_class: #{klass}"
-        if Object.const_defined?(klass)
-          return Object.const_get(klass)
-        end
-        return nil
-      end
-    end
-
     attr_accessor :auth
 
     def initialize(request = nil, model = nil)
@@ -77,7 +35,7 @@ module Ezframe
       res_h
     end
 
-    def common_page(opts = {})
+    def common_get(opts = {})
       args = {
         title: opts[:title],
         body: opts[:body],

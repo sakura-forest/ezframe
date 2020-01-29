@@ -24,6 +24,7 @@ require_relative 'ezframe/server'
 require_relative 'ezframe/auth.rb'
 require_relative 'ezframe/editor.rb'
 require_relative 'ezframe/loader'
+require_relative 'ezframe/route'
 
 
 

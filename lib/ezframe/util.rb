@@ -76,5 +76,7 @@ class Object
 end
 
 def mylog(msg)
-  File.open("log/mylog.log", "a"){|f| f.puts "#{Time.now}:[#{$$}]:#{msg}" }
+  if File.exist?("log")
+    File.open("log/mylog.log", "a"){|f| f.puts "#{Time.now}:[#{$$}]:#{msg}" }
+  end
 end
