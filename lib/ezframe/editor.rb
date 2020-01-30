@@ -13,8 +13,8 @@ module Ezframe
         end
         @dataset = @column_set.dataset
       end
-      if @json
-        @event = @json[:event] || {}
+      if @parsed_body
+        @event = @parsed_body[:event] || {}
         @target_id = @event[@target]
       end
       @auth = false
@@ -47,28 +47,28 @@ module Ezframe
             Materialize.input(type: "password", name: "password", label: "Password"),
             Ht.button(type: "submit", class: %w[btn], child: "login")
           ]))
-      common_get(title: "Login", body: Html.convert(Materialize.convert([flash_area, form])))
+      show_base_template(title: "Login", body: Html.convert(Materialize.convert([flash_area, form])))
     end
 
     def public_login_post
-      mylog "public_login_post: #{@params.inspect}, #{@json}"
+      mylog "public_login_post: #{@params.inspect}, #{@parsed_body}"
       warden.authenticate
       public_index_get
     end
 
     #--------------------------------------------------------------------------------------------------------
     # add new parts
-    def public_new_get
+    def public_create_get
       matrix = @column_set.map do |column|
         [column.label, column.form]
       end
-      matrix.push([Ht.button(child: "送信", class: %w[btn], event: "on=click:branch=add_new:url=/#{@target}/new:with=form")])
+      matrix.push([Ht.button(child: "送信", class: %w[btn], event: "on=click:url=/#{@target}/create:with=form")])
       tb = Ht::Table.new(matrix)
       layout = main_layout(left: sidenav, center: Ht.form(child: tb.to_h))
-      common_get(title: "新規登録", body: Html.convert(Materialize.convert(layout)))
+      show_base_template(title: "新規登録", body: Html.convert(Materialize.convert(layout)))
     end
 
-    def public_new_post
+    def public_create_post
       @column_set.values = @event[:form]
       @column_set[:id].value = @target_id = @column_set.save
       { redirect: "/#{@target}/detail?id=#{@target_id}" }
@@ -80,7 +80,7 @@ module Ezframe
       data_a = @dataset.all
       htb = make_index_table(data_a)
       layout = index_layout(left: sidenav, center: Ht.form(child: htb))
-      common_get(title: "データ一覧", body: Html.convert(Materialize.convert(layout)))
+      show_base_template(title: "データ一覧", body: Html.convert(Materialize.convert(layout)))
     end
 
     def make_index_table(data_a)
@@ -104,7 +104,7 @@ module Ezframe
     #--------------------------------------------------------------------------------------------------------
     # search parts
     def public_search_post
-      mylog "public_search_post: #{@json.inspect}"
+      mylog "public_search_post: #{@parsed_body.inspect}"
       word = @event[:form][:word]
       pattern = "%#{word}%"
       data_a = @dataset.where(Sequel.|(Sequel.like(:name_kana, pattern), Sequel.like(:name, pattern))).all
@@ -117,8 +117,8 @@ module Ezframe
       mylog "pubilc_detail_get: #{@request.params.inspect}"
       @target_id ||= @request.params["id"]
       data = @column_set.set_from_db(@target_id)
-      return common_get(title: "no data", body: "no customer data: #{@target_id}") unless data
-      common_get(title: "データ一覧", body: Html.convert(make_detail_get))
+      return show_base_template(title: "no data", body: "no customer data: #{@target_id}") unless data
+      show_base_template(title: "データ一覧", body: Html.convert(make_detail_get))
     end
 
     def make_detail_get
@@ -129,9 +129,9 @@ module Ezframe
     end
 
     def public_detail_post
-      mylog "public_detail_post: #{@request.params.inspect}: #{@json}"
-      if @json[:global]
-        @target_id ||= @json[:global][@target]
+      mylog "public_detail_post: #{@request.params.inspect}: #{@parsed_body}"
+      if @parsed_body[:global]
+        @target_id ||= @parsed_body[:global][@target]
       end
       @column_set.set_from_db(@target_id)
       case @event[:branch]

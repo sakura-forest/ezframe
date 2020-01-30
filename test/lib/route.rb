@@ -53,9 +53,15 @@ class RouteTest < Minitest::Test
     req.path_info = "/top/123/second/456/third/789"
     res = Ezframe::Route.choose(req, route_h)
     assert(res.is_a?(Array))
-    p res[0]
+    # p res[0]
     assert(res[0].instance_of?(Ezframe::Third))
     assert_equal("public_default_get", res[1])
     assert_equal({top: "123", second: "456", third: "789"}, res[2])
+  end
+
+  def test_scan_path
+    route_h = { top: { second: { third: nil }, v2: { fourth: nil }}}
+    assert_equal([ :top, :second, :third ], Ezframe::Route.get_path(:third, route_h))
+    assert_equal([ :top, :v2, :fourth ], Ezframe::Route.get_path(:fourth, route_h))
   end
 end

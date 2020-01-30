@@ -75,6 +75,25 @@ class Object
   end
 end
 
+# クラス名をsnake caseにする。
+def class_to_snake(class_name)
+  return nil unless class_name
+  class_name = class_name.to_s
+  if class_name.index("::")
+    return class_name.split("::")[-1].to_snake.to_sym
+  else
+    return class_name.to_snake.to_sym
+  end
+end
+
+# URLのオプションを解析
+def parse_query_string(str)
+  query_a = URI::decode_www_form(str)
+  res_h = {}
+  query_a.map { |a| res_h[a[0].to_sym] = a[1] }
+  return res_h
+end
+
 def mylog(msg)
   if File.exist?("log")
     File.open("log/mylog.log", "a"){|f| f.puts "#{Time.now}:[#{$$}]:#{msg}" }

@@ -10,18 +10,18 @@ module Ezframe
         while path_parts.length > 0
           part = path_parts.shift
           # break if part.empty?
-          puts "part=#{part}, route_h=#{route_h.inspect}"
+          # puts "part=#{part}, route_h=#{route_h.inspect}"
           if route_h.has_key?(part.to_sym)
-            puts "has_route: #{part}"
+            # puts "has_route: #{part}"
             class_a.push(part)
             if path_parts[0].to_i > 0
               args[part.to_sym] = path_parts.shift
             end
             route_h = route_h[part.to_sym]
-            puts "route_h changed: #{route_h}"
+            # puts "route_h changed: #{route_h}"
           else
             # routeに無ければ、メソッドを探す
-            puts "no_route: #{part}"
+            # puts "no_route: #{part}"
             klass = get_class(class_a[-1])
             instance = klass.new
             method_name = make_method_name(part, request.request_method)
@@ -33,14 +33,38 @@ module Ezframe
           end
         end
         # 最後にメソッド名が無い場合はpublic_default_#{method}を実行。
-        # p class_a
         klass = get_class(class_a[-1])
+        return [404] unless klass
         method_name = make_method_name("default", request.request_method)
         instance = klass.new
         if instance.respond_to?(method_name)
           return [instance, method_name, args]
         end
-        return 404
+        return [404]
+      end
+
+      # ページクラスの階層を辿る
+      def get_path(class_snake, route_h = nil)
+        route_h = Config[:route] unless route_h
+        @get_path_found_it = nil
+        return scan_hash(class_snake, route_h).reverse
+      end
+
+      def scan_hash(target, hash)
+        if hash.keys.include?(target)
+          @get_path_found_it = true
+          return [ target ]
+        else
+          hash.each do |k, v|
+            if v.is_a?(Hash)
+              a = scan_hash(target, v)
+              if @get_path_found_it
+                a.push(k)
+                return a
+              end
+            end
+          end
+        end
       end
 
       def make_method_name(base_name, method)
@@ -48,11 +72,11 @@ module Ezframe
       end
 
       def get_class(keys)
-        puts "get_class: #{keys.inspect}"
+        # puts "get_class: #{keys.inspect}"
         return nil unless keys
         keys = [keys] if keys.is_a?(String)
         klass = (%w[Ezframe] + keys.map { |k| k.to_camel }).join("::")
-        mylog "get_class: #{klass}"
+        # mylog "get_class: #{klass}"
         if Object.const_defined?(klass)
           return Object.const_get(klass)
         end
@@ -67,7 +91,7 @@ module Ezframe
             return [200, { "Content-Type" => Rack::Mime.mime_type(suffix) }, [File.open(file, &:read)]]
           end
         end
-        return 404
+        return [404]
       end
     end
   end
