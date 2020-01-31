@@ -10,7 +10,7 @@ module Ezframe
 
     def initialize(request = nil)
       @class_snake = class_to_snake(self.class)
-      puts "class_snake = #{@class_snake}"
+      # puts "class_snake = #{@class_snake}"
       set_request(request) if request
       init_vars
     end
@@ -22,9 +22,12 @@ module Ezframe
     def set_request(request)
       @request = request
       @model = request.env["model"]
-      @column_set = @model.column_sets[@class_snake]
-      @dataset = @column_set.dataset
       mylog "[WARN] model is not defined" unless @model
+      @column_set = @model.column_sets[@class_snake.to_sym]
+      # mylog "[WARN] column_set is not defined: #{@class_snake}" unless @column_set
+      if @column_set
+        @dataset = @column_set.dataset
+      end
       @params = parse_query_string(request.env["QUERY_STRING"])
       @params.update(request.params)
       mylog "params=#{@params.inspect}" if @params.length > 0
@@ -40,11 +43,12 @@ module Ezframe
           @parsed_body = parse_query_string(body)
         end
         # mylog "parsed_body=#{@parsed_body.inspect}"
+        @event = @parsed_body[:event] || {}
       end
     end
 
     # routeから基本URLを生成
-    def make_base_url(opts)
+    def make_base_url
       path = Route::get_path(@class_snake)
       params = @request.env["url_params"]
       path_s = path.map do |p|

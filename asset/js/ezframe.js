@@ -1,3 +1,4 @@
+// version. 2020?01?31?(?)
 function add_event(obj) {
   var elems = obj.querySelectorAll('[event]')
   if (elems) {

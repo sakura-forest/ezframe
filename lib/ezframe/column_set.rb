@@ -126,13 +126,11 @@ module Ezframe
           updated_values[colkey] = column.value
         end
       end
-#      values = {}
-#      colkeys = @columns.keys
-#      value_h.each do |k, v|
-#        values[k] = v if colkeys.include?(k)
-#      end
       mylog "column_set.updated_values = #{updated_values.inspect}"
-      dataset.where(id: id).update(updated_values) if updated_values.length > 0
+      if updated_values.length > 0
+        updated_values[:updated_at] = Time.now
+        dataset.where(id: id).update(updated_values) 
+      end
     end
 
     def values=(value_h)

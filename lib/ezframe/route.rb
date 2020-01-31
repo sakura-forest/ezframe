@@ -3,7 +3,7 @@ module Ezframe
     class << self
       def choose(request, route_h = nil)
         path_parts = request.path_info.split("/").drop(1)
-        route_h = Config[:route] unless route_h
+        route_h ||= Config[:route]
         class_a = []
         args = {}
         # URLを解析して、クラスの決定とIDの取得を行う
@@ -28,7 +28,7 @@ module Ezframe
             if instance.respond_to?(method_name)
               return [instance, method_name, args]
             else
-              mylog "undefined method: #{method_name}: full path=#{request.path_info}"
+              mylog "undefined method: #{klass}.#{method_name}: full path=#{request.path_info}"
             end
           end
         end
@@ -50,6 +50,7 @@ module Ezframe
         return scan_hash(class_snake, route_h).reverse
       end
 
+      # targetに対応する名称のクラスまでの経路を返す
       def scan_hash(target, hash)
         if hash.keys.include?(target)
           @get_path_found_it = true
