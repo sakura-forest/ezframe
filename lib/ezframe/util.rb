@@ -1,6 +1,10 @@
-class Util
-  def self.add_comma(value)
-    value.to_s.reverse.gsub(/(\d{3})/) { "#{$1}," }.reverse
+class Integer
+  def to_sym
+    return self.to_s.to_sym
+  end
+
+  def add_comma
+    return self.to_s.reverse.gsub(/(\d{3})(\d)/) { "#{$1},#{$2}" }.reverse
   end
 end
 

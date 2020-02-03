@@ -48,11 +48,14 @@ module Ezframe
     end
 
     # routeから基本URLを生成
-    def make_base_url
+    def make_base_url(id = nil)
       path = Route::get_path(@class_snake)
       params = @request.env["url_params"]
+      # params[@class_snake.to_sym] = id
       path_s = path.map do |p|
-        if params[p]
+        if p == @class_snake.to_sym && id
+          "#{p}/#{id}"
+        elsif params[p]
           "#{p}/#{params[p]}"
         else
           p

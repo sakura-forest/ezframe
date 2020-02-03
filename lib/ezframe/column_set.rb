@@ -141,6 +141,7 @@ module Ezframe
     def set_values(value_h)
       return unless value_h
       value_h.each do |k, v|
+        next if k.nil? || k.to_s.empty?
         col = @columns[k.to_sym]
         next unless col
         col.value = v

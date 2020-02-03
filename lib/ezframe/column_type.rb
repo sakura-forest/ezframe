@@ -120,7 +120,7 @@ module Ezframe
   class IntType < TextType
     def view(opts = {})
       return nil if no_view? && !opts[:force]
-      return Util.add_comma(@value.to_i)
+      return @value.to_i.add_comma
     end
 
     def value=(v)
@@ -145,6 +145,11 @@ module Ezframe
   end
 
   class ForeignType < IntType
+    def initialize(attr = nil)
+      super
+      @attribute[:no_edit] = true
+    end
+
     def view(opts = {})
       return nil if no_view? && !opts[:force]
       dataset = @parent.db.dataset[self.type.inner]
