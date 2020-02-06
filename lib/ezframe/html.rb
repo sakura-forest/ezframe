@@ -4,6 +4,7 @@ module Ezframe
   class Html
     class << self
       def convert(ht_h = {})
+        ht_h = hook_for_convert(ht_h)
         return "" if ht_h.nil? || ht_h.to_s.empty?
         return ht_h.to_html if ht_h.respond_to?(:to_html)
         return ht_h.to_s if ht_h.is_a?(String) || ht_h.is_a?(Symbol) || ht_h.is_a?(Integer) || ht_h.is_a?(Time)
@@ -103,6 +104,10 @@ module Ezframe
         attr[:final] = true
         attr.delete(:items)
         Html.convert(attr)
+      end
+
+      def hook_for_convert(ht_h)
+        return ht_h
       end
     end
   end

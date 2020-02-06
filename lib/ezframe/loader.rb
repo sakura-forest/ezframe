@@ -3,9 +3,9 @@
 if File.exist?("pages/common.rb")
   require "#{Dir.pwd}/pages/common.rb"
 end
-Dir["models/*.rb"].each do |file|
+Dir["models/*.rb"].sort.each do |file|
   require "#{Dir.pwd}/#{file}"
 end
-Dir["pages/*.rb"].each do |file|
+Dir["pages/*.rb"].sort.each do |file|
   require "#{Dir.pwd}/#{file}"
 end
