@@ -39,6 +39,7 @@ module Ezframe
           response['Content-Type'] = 'text/html; charset=utf-8'
         end
         response.status = 200
+        p response.body
       end
 
       def file_not_found(response)

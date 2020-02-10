@@ -34,27 +34,27 @@ module Ezframe
       return @target
     end
 
-    def public_login_get
-      flash_area = ""
-      mylog "public_login_get: #{@request}"
-      if @request
-        mylog "flash=#{@request.env['x-rack.flash']}"
-        flash_area = Ht.div(class: %w[teal], child: @request['env']['x-rack.flash'].error)
-      end
-      form = Ht.multi_div([ %w[container], %w[row]], 
-          Ht.form(class: "col s6 offset-s3", action: "/#{@target}/login", method: "post", child: [
-            Materialize.input(type: "text", name: "account", label: "User ID"),
-            Materialize.input(type: "password", name: "password", label: "Password"),
-            Ht.button(type: "submit", class: %w[btn], child: "login")
-          ]))
-      show_base_template(title: "Login", body: Html.convert(Materialize.convert([flash_area, form])))
-    end
+#    def public_login_get
+#      flash_area = ""
+#      mylog "public_login_get: #{@request}"
+#      if @request
+#        mylog "flash=#{@request.env['x-rack.flash']}"
+#        flash_area = Ht.div(class: %w[teal], child: @request['env']['x-rack.flash'].error)
+#      end
+#      form = Ht.multi_div([ %w[container], %w[row]], 
+#          Ht.form(class: "col s6 offset-s3", action: "/#{@target}/login", method: "post", child: [
+#            Materialize.input(type: "text", name: "account", label: "User ID"),
+#            Materialize.input(type: "password", name: "password", label: "Password"),
+#            Ht.button(type: "submit", class: %w[btn], child: "login")
+#          ]))
+#      show_base_template(title: "Login", body: Html.convert(Materialize.convert([flash_area, form])))
+#    end
 
-    def public_login_post
-      mylog "public_login_post: #{@params.inspect}, #{@parsed_body}"
-      warden.authenticate
-      public_index_get
-    end
+#    def public_login_post
+#      mylog "public_login_post: #{@params.inspect}, #{@parsed_body}"
+#      warden.authenticate
+#    public_index_get
+#    end
 
     #--------------------------------------------------------------------------------------------------------
     # add new parts

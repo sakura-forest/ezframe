@@ -7,6 +7,16 @@ module Ezframe
         # puts  "config=#{Config[:route]}, route_h=#{route_h}"
         args = {}
         class_a = []
+        # p path_parts
+        if path_parts.empty?
+          root_conf = route_h[:/]
+          # p root_conf
+          if root_conf
+            klass = get_class(root_conf[:class])
+            return [ klass.new, make_method_name("default", request.request_method) ]
+          end
+          raise "no root class: #{path_parts.inspect}"
+        end
         # URLを解析して、クラスの決定とIDの取得を行う
         while path_parts.length > 0
           part = path_parts.shift
@@ -26,6 +36,7 @@ module Ezframe
             # routeに無ければ、メソッドを探す
             # mylog "no_route: #{part}"
             klass = get_class(class_a[-1])
+            return [ 404 ] unless klass
             instance = klass.new
             method_name = make_method_name(part, request.request_method)
             if instance.respond_to?(method_name)
@@ -78,7 +89,7 @@ module Ezframe
         end
       end
 
-      def make_method_name(base_name, method)
+      def make_method_name(base_name, method = "get")
         return ["public", base_name, method.downcase].join("_")
       end
 
@@ -90,6 +101,8 @@ module Ezframe
         # mylog "get_class: #{klass}"
         if Object.const_defined?(klass)
           return Object.const_get(klass)
+        else
+          raise "get_class: undefined class: #{klass}"
         end
         return nil
       end

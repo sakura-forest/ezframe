@@ -30,7 +30,6 @@ module Ezframe
     def initialize(column_sets, db)
       @column_sets, @db = column_sets, db
       @column_sets.model = self
-      # @column_sets.each {|name, colset| colset.model = self }
     end
 
     def create_tables
