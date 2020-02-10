@@ -68,10 +68,14 @@ module Ezframe
       @value
     end
 
-    def validate
-      if !@value || @value.empty?
-        if @attribute[:must]
-          @error = "必須項目です。"
+    def normalize(val)
+      return val
+    end
+
+    def validate(val)
+      if !val || val.empty?
+        if @attribute[:required] == "true"
+          @error = "required"
           return @error
         end
       end  
@@ -92,12 +96,13 @@ module Ezframe
   end
 
   class TextType < TypeBase
-    def normalize
-      return unless @value
-      @value = @value.dup.to_s
-      @value.gsub!(/　/, " ")
-      @value.gsub!(/\s+/, " ")
-      @value.strip!
+    def normalize(val)
+      return nil unless val
+      val = val.dup.to_s
+      val.gsub!(/　/, " ")
+      val.gsub!(/\s+/, " ")
+      val.strip!
+      return val
     end
 
     def value=(v)
@@ -332,52 +337,82 @@ module Ezframe
       return h
     end
 
-    def normalize
-      return unless @value
-      @value = NKF.nkf('-w -Z4', @value)
+    def normalize(val)
+      return nil unless val
+      return NKF.nkf('-w -Z4', val)
     end
 
-    def validate
-      super
+    def validate(val)
+      super(val)
       return @error if @error
-      if email_format?
-        @error = "形式が正しくありません"
+      if email_format?(val)
+        @error = :format_error
         return @error
       end
       return nil
     end
 
-    def email_format?
-      return nil unless @value
-      return @value =~ /^[a-zA-Z0-9.!\#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+    def email_format?(val)
+      return nil unless val
+      return val.to_s =~ /^[a-zA-Z0-9.!\#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
     end
   end
 
   class TelType < TextType
-    def validate
-      super
+    def validate(val)
+      super(val)
       return @error if @error
-      unless /^0\d{9,10}$/ =~ @value
-        @error = "形式が正しくありません"
+      unless /^0\d{9,10}$/ =~ val.to_s
+        @error = :format_error
         return @error
       end
+      return nil
+    end
+
+    def normalize(val)
+      return nil unless val
+      val = super(val)
+      val = val.tr("０-９", "0-9")
+      val = val.gsub(/\D+/, "")
+      return val
     end
   end
 
   class JpnameType < TextType
   end
 
-  class JpnameKanaType < TextType
-    def normalize
-      return unless @value
-      super
-      @value.tr!("ァ-ン", "ぁ-ん")
+  class KatakanaType < TextType
+    def normalize(val)
+      val = super(val)
+      return val.tr("ァ-ン", "ぁ-ん")
     end
 
-    def validation
-      unless /^[ぁ-ん ]+$/ =~ @value
-        "ひらがなのみで入力してください。"
+    def validate(val)
+      super(val)
+      return @error if @error
+      unless /^[ぁ-ん ]+$/ =~ val.to_s
+        @error = :hiragana_only
+        return @error
       end
+      return nil
+    end
+  end
+
+  class KatakanaType < TextType
+    def normalize(val)
+      return nil unless val
+      val = super(val)
+      return val.tr("ぁ-ん", "ァ-ン")
+    end
+
+    def validate(val)
+      super(val)
+      return @error if @error
+      unless /^[ァ-ン ]+$/ =~ val
+        @error = :katakana_only
+        return @error
+      end
+      return nil
     end
   end
 
@@ -418,6 +453,23 @@ module Ezframe
 
     def db_type
       return "text"
+    end
+
+    def normalize(val)
+      val = super(val)
+      return nil unless val
+      val = val.tr("０-９", "0-9")
+      return val
+    end
+
+    def validate(val)
+      super(v)
+      return @error if @error
+      if /^\d{7}$/ =~ v.to_s
+        @error = :format_error
+        return @error
+      end
+      return nil
     end
   end
 end
