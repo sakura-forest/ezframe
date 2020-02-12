@@ -6,6 +6,7 @@ module Ezframe
       def init
         Config.load_files("./config")
         Model.init
+        Message.init
         Auth.init_warden if defined?(Warden)
       end
 
