@@ -346,7 +346,7 @@ module Ezframe
       super(val)
       return @error if @error
       if email_format?(val)
-        @error = :format_error
+        @error = :invalid_value
         return @error
       end
       return nil
@@ -363,7 +363,7 @@ module Ezframe
       super(val)
       return @error if @error
       unless /^0\d{9,10}$/ =~ val.to_s
-        @error = :format_error
+        @error = :invalid_value
         return @error
       end
       return nil
@@ -463,10 +463,10 @@ module Ezframe
     end
 
     def validate(val)
-      super(v)
+      super(val)
       return @error if @error
-      if /^\d{7}$/ =~ v.to_s
-        @error = :format_error
+      unless /^\d{7}$/ =~ val.to_s
+        @error = :invalid_value
         return @error
       end
       return nil
