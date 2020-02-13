@@ -9,17 +9,14 @@ module Ezframe
         unless @catalog
           @catalog = {}
           Dir["#{dir}/*.yml"].each do |file|
-            # p file
             load_one_file(file)
           end
         end
-        # puts "catelog=#{@catalog}"
       end
 
       def load_one_file(file)
         begin
           yaml = YAML.load_file(file)
-          p yaml
         rescue
           mylog("YAML load error: #{file}")
           return 
