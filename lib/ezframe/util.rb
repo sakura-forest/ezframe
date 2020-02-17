@@ -81,7 +81,7 @@ end
 
 class Time
   def to_date_key
-    return "%d-02d-%02d"%[ self.year, self.mon, self.mday ]
+    return "%d-%02d-%02d"%[ self.year, self.mon, self.mday ]
   end
 end
 
