@@ -73,7 +73,7 @@ class MaterializeTest < Minitest::Test
   end
 
   def test_select
-    hthash = Ht.select(label: "label1", name: "mytest", dummy: 1, items: [ ["k1", "v1"], ["k2", "v2"], ["k3", "v3", "default"] ])
+    hthash = Ht.select(label: "label1", name: "mytest", dummy: 1, item: [ ["k1", "v1"], ["k2", "v2"], ["k3", "v3", "default"] ])
     res = Materialize.convert(hthash)
     html = Html.convert(res)
     doc = Nokogiri::HTML(html)
@@ -88,7 +88,7 @@ class MaterializeTest < Minitest::Test
     assert_equal("v3", tmp.children[0].text.strip)
     assert(tmp.attr("selected"))
 
-    hthash = Ht.select(name: "mytest", items: { k1: "v1", k2: "v2", k3: ["v3", "default"] } )
+    hthash = Ht.select(name: "mytest", item: { k1: "v1", k2: "v2", k3: ["v3", "default"] } )
     res = Materialize.convert(hthash)
     html = Html.convert(res)
     doc = Nokogiri::HTML(html)

@@ -15,7 +15,7 @@ module Ezframe
         when "input"
           input(ht_h)
         when "select"
-          return select(ht_h) if ht_h[:items]
+          return select(ht_h) if ht_h[:item]
         when "icon"
           tag = "i"
         end
@@ -66,10 +66,10 @@ module Ezframe
 
       def select(ht_h = {})
         attr = ht_h.clone
-        items = attr[:items]
-        # puts "Html.select: #{items}"
-        if items.is_a?(Hash)
-          option_a = ht_h[:items].map do |k, v|
+        item = attr[:item]
+        # puts "Html.select: #{item}"
+        if item.is_a?(Hash)
+          option_a = ht_h[:item].map do |k, v|
             h = { tag: "option", value: k }
             if v.is_a?(Array)
               v, selected = v
@@ -82,8 +82,8 @@ module Ezframe
             end
             h
           end
-        elsif items.is_a?(Array)
-          option_a = items.map do |v|
+        elsif item.is_a?(Array)
+          option_a = item.map do |v|
             h = { tag: "option", value: v[0], child: v[1] }
             if %w[selected default].include?(v[2])
               h[:selected] = "selected"
@@ -96,13 +96,13 @@ module Ezframe
             h
           end
         else
-          warn "unknown items: #{ht_h.inspect}"
+          warn "unknown item: #{ht_h.inspect}"
         end
         attr[:tag] = "select"
         attr[:child] = option_a
         attr[:name] ||= attr[:key]
         attr[:final] = true
-        attr.delete(:items)
+        attr.delete(:item)
         Html.convert(attr)
       end
 

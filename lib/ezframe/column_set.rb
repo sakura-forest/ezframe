@@ -16,12 +16,11 @@ module Ezframe
 
     def load_one_file(filename)
       table_name = $1 if filename =~ /(\w+).ya?ml$/
-      begin
+      #begin
         yaml = YAML.load_file(filename)
-      rescue
-        mylog("YAML load error: #{filename}")
-        return 
-      end
+      #rescue
+      #  raise "YAML load error: #{filename}"
+      #end
       if yaml.length == 0
         mylog("[ERROR] columns file is empty: #{filename}")
         return
@@ -95,12 +94,12 @@ module Ezframe
     end
 
     # 新規に値を登録する
-    def save
+    def create
       col_h = get_hash(:value)
       col_h.delete(:id)
       col_h.delete(:created_at)
       col_h[:updated_at] = Time.now
-      mylog "save: #{col_h.inspect}"
+      mylog "create: #{col_h.inspect}"
       id = @columns[:id]
       if id.value.to_i > 0
         dataset.where(id: id.value).update(col_h)

@@ -107,18 +107,18 @@ module Ezframe
 
     def value=(v)
       super(v)
-      normalize
+      return normalize(v)
     end
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
       h = Ht.input(type: "text", name: self.key, label: @attribute[:label], value: @value || "")
       h[:size] = @attribute[:size] if @attribute[:size]
-      h
+      return h
     end
 
     def db_type
-      "text"
+      return "text"
     end
   end
 
@@ -145,7 +145,7 @@ module Ezframe
     end
 
     def db_type
-      "int"
+      return "int"
     end
   end
 
@@ -192,8 +192,8 @@ module Ezframe
   class SelectType < TypeBase
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      # puts "selectType: #{@attribute[:items].inspect}"
-      return { tag: "select", name: self.key, label: @attribute[:label], items: @attribute[:items], value: @value }
+      # puts "selectType: #{@attribute[:item].inspect}"
+      return { tag: "select", name: self.key, label: @attribute[:label], item: @attribute[:item], value: @value }
     end
 
     def db_type
@@ -202,8 +202,8 @@ module Ezframe
 
     def view(opts = {})
       return nil if no_view? && !opts[:force]
-      items = @attribute[:items]
-      return items[@value]
+      item = @attribute[:item]
+      return item[@value]
     end
   end
 
@@ -298,9 +298,9 @@ module Ezframe
       mon_list.unshift([0, "(月)"])
       mday_list = (1..31).map { |d| [d, "#{d}日"] }
       mday_list.unshift([0, "(日)"])
-      return [Ht.select(name: "#{prefix}_year", items: year_list, value: year),
-              Ht.select(name: "#{prefix}_mon", items: mon_list, value: mon),
-              Ht.select(name: "#{prefix}_mday", items: mday_list, value: mday)]
+      return [Ht.select(name: "#{prefix}_year", item: year_list, value: year),
+              Ht.select(name: "#{prefix}_mon", item: mon_list, value: mon),
+              Ht.select(name: "#{prefix}_mday", item: mday_list, value: mday)]
     end
 
     def view(opts = {})
@@ -433,7 +433,7 @@ module Ezframe
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
       h = super
-      h[:items] = @pref_h
+      h[:item] = @pref_h
       return h
     end
 

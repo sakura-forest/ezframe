@@ -62,15 +62,15 @@ module Ezframe
       matrix = @column_set.map do |column|
         [column.label, column.form]
       end
-      matrix.push([Ht.button(child: "送信", class: %w[btn], event: "on=click:url=/#{@target}/create:with=form")])
+      matrix.push([Ht.button(child: Message[:create_finish_button_label], class: %w[btn], event: "on=click:url=/#{@target}/create:with=form")])
       tb = Ht::Table.new(matrix)
       layout = main_layout(left: sidenav, center: Ht.form(child: tb.to_h))
-      show_base_template(title: "新規登録", body: Html.convert(Materialize.convert(layout)))
+      show_base_template(title: Message[:create_page_title], body: Html.convert(Materialize.convert(layout)))
     end
 
     def public_create_post
       @column_set.values = @event[:form]
-      @column_set[:id].value = @target_id = @column_set.save
+      @column_set[:id].value = @target_id = @column_set.create
       { redirect: "/#{@target}/detail?id=#{@target_id}" }
     end
 
@@ -80,7 +80,7 @@ module Ezframe
       data_a = @dataset.all
       htb = make_index_table(data_a)
       layout = index_layout(left: sidenav, center: Ht.form(child: htb))
-      show_base_template(title: "データ一覧", body: Html.convert(Materialize.convert(layout)))
+      show_base_template(title: Message[:index_page_title], body: Html.convert(Materialize.convert(layout)))
     end
 
     def make_index_table(data_a)
@@ -118,7 +118,7 @@ module Ezframe
       @target_id ||= @request.params["id"]
       data = @column_set.set_from_db(@target_id)
       return show_base_template(title: "no data", body: "no customer data: #{@target_id}") unless data
-      show_base_template(title: "データ一覧", body: Html.convert(make_detail_get))
+      show_base_template(title: Message[:index_page_title], body: Html.convert(make_detail_get))
     end
 
     def make_detail_get

@@ -8,7 +8,7 @@ class ColumnTypeTest < Minitest::Test
     columns = [
       { key: 'v1', type: 'string', label: 'label1' },
       { key: 'v2', type: 'int', label: 'label2' },
-      { key: 'menu', type: 'select', label: 'menulabel', items: { opt1: 'value1', opt2: 'value2', opt3: 'value3' } }
+      { key: 'menu', type: 'select', label: 'menulabel', item: { opt1: 'value1', opt2: 'value2', opt3: 'value3' } }
     ]
     colset = EzModel::ColumnSet.new(name: 'testcols', columns: columns)
     form = colset.form
