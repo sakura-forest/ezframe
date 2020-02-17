@@ -36,5 +36,10 @@ class Japanese
       return nil if !str
       return str.tr("ぁ-ん\-ー―−", "ァ-ン\-ー―−")
     end
+
+    def to_wday(wday)
+      return nil unless wday
+      return %w(日 月 火 水 木 金 土)[wday]
+    end
   end
 end

@@ -79,6 +79,12 @@ class Object
   end
 end
 
+class Time
+  def to_date_key
+    return "%d-02d-%02d"%[ self.year, self.mon, self.mday ]
+  end
+end
+
 # クラス名をsnake caseにする。
 def class_to_snake(class_name)
   return nil unless class_name
