@@ -31,3 +31,4 @@ module Ezframe
       end
     end
   end
+end

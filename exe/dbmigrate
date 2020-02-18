@@ -8,8 +8,6 @@ Config.load_files("./config")
 Model.init
 $model = Model.get_clone
 
-# get db status
-
 def get_db_info(table_name)
   dbcol = {}
   sql = "SELECT column_name,data_type FROM information_schema.columns WHERE table_name = '#{table_name}'"
@@ -48,6 +46,7 @@ def check_diff(column_set)
   table_name = column_set.name
   dbcols = get_db_info(table_name)
   column_set.each do |column|
+    next if %w[id updated_at created_at].include?(column.key.to_s)
     dbtype = dbcols[column.key]
     new_type = column.db_type
     unless dbtype
