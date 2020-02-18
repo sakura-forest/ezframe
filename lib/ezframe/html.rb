@@ -20,10 +20,10 @@ module Ezframe
           tag = "i"
         end
         opt_s, child_s = join_attributes(ht_h)
-        if child_s.length >= 0
+        if !child_s.strip.empty? || %w[div span].include?(tag)
           return "<#{ht_h[:tag]} #{opt_s}>\n#{child_s}\n</#{ht_h[:tag]}>\n"
         end
-        "<#{ht_h[:tag]} #{opt_s}/>"
+        "<#{ht_h[:tag]} #{opt_s} />"
       end
 
       def join_attributes(attrs)
