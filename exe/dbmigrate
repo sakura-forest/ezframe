@@ -14,7 +14,7 @@ def get_db_info(table_name)
   dbcol = {}
   sql = "SELECT column_name,data_type FROM information_schema.columns WHERE table_name = '#{table_name}'"
   $model.db.sequel[sql].each do |row|
-    dbcol[row[:column_name]] = row[:data_type]
+    dbcol[row[:column_name].to_sym] = normalize_dbtype(row[:data_type])
   end
   return dbcol
 end
@@ -31,21 +31,34 @@ def normalize_dbtype(dbtype)
   return nil unless dbtype
   return "int" if dbtype == "integer"
   return "timestamp" if dbtype.index("timestamp")
+  return dbtype
+end
+
+def set_default(column)
+  default_value = column.attribute[:default]
+  if default_value
+    unless %w[int].include?(column.db_type)
+      default_value = "'#{default_value}'"
+    end
+    exec_sql("ALTER TABLE #{column.parent.name} ALTER #{column.key} SET DEFAULT #{default_value}")
+  end
 end
 
 def check_diff(column_set)
   table_name = column_set.name
   dbcols = get_db_info(table_name)
   column_set.each do |column|
-    dbtype = normalize_dbtype(dbcols[column.key])
+    dbtype = dbcols[column.key]
     new_type = column.db_type
-    puts "dbtype=#{dbtype}, new_type=#{new_type}"
     unless dbtype
       exec_sql("ALTER TABLE #{table_name} ADD #{column.key} #{new_type};")
+      set_default(column)
       next
     end
-    if dbtype!=new_type
+    if dbtype != new_type
+      exec_sql("ALTER TABLE #{table_name} ALTER COLUMN #{column.key} DROP DEFAULT;")
       exec_sql("ALTER TABLE #{table_name} ALTER #{column.key} TYPE #{new_type};")
+      set_default(column)
     end
   end
 end
