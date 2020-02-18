@@ -60,7 +60,7 @@ function execute_event(obj) {
   // console.dir(obj)
   var event_s = obj.getAttribute("event")
   var event = parse_event(event_s)
-  switch(event.branch) {
+  switch(event.cmd) {
     case "switch":
       var a = event.between
       for(var i = 0; i < a.length; i++) {
@@ -70,7 +70,7 @@ function execute_event(obj) {
     case "set_global":
       if (!window.ezframe) { window.ezframe = {} }
       for(key in event) {
-        if ([ "branch", "on", "url" ].indexOf(key) >= 0) { continue }
+        if ([ "cmd", "branch", "on", "url" ].indexOf(key) >= 0) { continue }
         window.ezframe[key] = event[key]
       }
       // console.log("set_global:" + JSON.stringify(window.ezframe))

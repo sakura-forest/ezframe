@@ -124,7 +124,7 @@ module Ezframe
     def make_detail_get
       layout = main_layout( left: sidenav, center: detail_table )
       @request.env['rack.session'][@target] = @target_id
-      layout[:event] = "on=load:branch=set_global@target=#{@target_id}"
+      layout[:event] = "on=load:cmd=set_global@target=#{@target_id}"
       Materialize.convert(layout)
     end
 

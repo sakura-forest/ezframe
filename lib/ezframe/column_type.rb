@@ -157,9 +157,10 @@ module Ezframe
 
     def view(opts = {})
       return nil if no_view? && !opts[:force]
-      dataset = @parent.db.dataset[self.type.inner]
-      data = dataset.get(id: @value)
-      return data[@attribute[:view]]
+      return nil
+#      dataset = @parent.parent.model.db.dataset(self.key)
+#      data = dataset.get(id: @value)
+#      return data[@attribute[:view]]
     end
 
     def form
