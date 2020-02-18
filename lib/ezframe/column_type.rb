@@ -29,7 +29,7 @@ module Ezframe
     end
 
     def key
-      @attribute[:key]
+      @attribute[:key].to_sym
     end
 
     def label
@@ -214,7 +214,7 @@ module Ezframe
     end
 
     def db_type
-      return "int"
+      return "text"
     end
   end
 
@@ -449,10 +449,6 @@ module Ezframe
       return nil if no_view? && !opts[:force]
       return "" unless @value
       return @value.to_s.gsub(/(\d{3})(\d{4})/) { "#{$1}-#{$2}" }
-    end
-
-    def db_type
-      return "text"
     end
 
     def normalize(val)
