@@ -1,0 +1,55 @@
+#!/usr/bin/env ruby
+#coding: utf-8
+require "ezframe"
+
+include Ezframe
+# get column set
+Config.load_files("./config")
+Model.init
+$model = Model.get_clone
+
+# get db status
+
+def get_db_info(table_name)
+  dbcol = {}
+  sql = "SELECT column_name,data_type FROM information_schema.columns WHERE table_name = '#{table_name}'"
+  $model.db.sequel[sql].each do |row|
+    dbcol[row[:column_name]] = row[:data_type]
+  end
+  return dbcol
+end
+
+def exec_sql(sql)
+  begin
+    $model.db.sequel.run(sql)
+  rescue => exception
+    p exception
+  end
+end
+
+def normalize_dbtype(dbtype)
+  return nil unless dbtype
+  return "int" if dbtype == "integer"
+  return "timestamp" if dbtype.index("timestamp")
+end
+
+def check_diff(column_set)
+  table_name = column_set.name
+  dbcols = get_db_info(table_name)
+  column_set.each do |column|
+    dbtype = normalize_dbtype(dbcols[column.key])
+    new_type = column.db_type
+    puts "dbtype=#{dbtype}, new_type=#{new_type}"
+    unless dbtype
+      exec_sql("ALTER TABLE #{table_name} ADD #{column.key} #{new_type};")
+      next
+    end
+    if dbtype!=new_type
+      exec_sql("ALTER TABLE #{table_name} ALTER #{column.key} TYPE #{new_type};")
+    end
+  end
+end
+
+$model.column_sets.each do |table_name, column_set|
+  check_diff(column_set)
+end
