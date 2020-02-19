@@ -93,6 +93,22 @@ module Ezframe
       def small_text(text)
         return small(class: %w[teal-text], child: text)
       end
+
+      def search(ht_h, opts)
+        @found ||= []
+        if ht_h.is_a?(Hash)
+          puts ht_h[:tag]
+          if opts[:tag] && ht_h[:tag] && ht_h[:tag] == opts[:tag]
+            @found.push(ht_h)
+          end
+          if ht_h[:child]
+            search(ht_h[:child], opts)
+          end
+        elsif ht_h.is_a?(Array)
+          ht_h.map { |h| search(h, opts) }
+        end
+        return @found
+      end
     end
 
     # 配列を<UL><OL>要素に変換するためのクラス
