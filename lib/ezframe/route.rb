@@ -15,7 +15,7 @@ module Ezframe
             klass = get_class(root_conf[:class])
             return [ klass.new, make_method_name("default", request.request_method) ]
           end
-          raise "no root class: #{path_parts.inspect}"
+          return [ 404 ]
         end
         # URLを解析して、クラスの決定とIDの取得を行う
         while path_parts.length > 0
@@ -61,7 +61,7 @@ module Ezframe
         if instance.respond_to?(method_name)
           return [instance, method_name, args]
         end
-        return [404]
+        return [ 404 ]
       end
 
       # ページクラスの階層を辿る
@@ -115,7 +115,7 @@ module Ezframe
             return [200, { "Content-Type" => Rack::Mime.mime_type(suffix) }, [File.open(file, &:read)]]
           end
         end
-        return [404]
+        return [ 404 ]
       end
     end
   end
