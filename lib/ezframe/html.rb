@@ -57,6 +57,7 @@ module Ezframe
         if size && (size.index("x") || size.index("*"))
           if /(\d+)\s*[x\*]\s*(\d+)/ =~ size
             ht_h[:cols], ht_h[:rows] = $1, $2
+            ht_h.delete(:size)
           end
           ht_h[:tag] = "textarea"
           ht_h[:child] = ht_h[:value]
