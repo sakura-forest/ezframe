@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require "oj"
 
 module Ezframe
   class Controller
@@ -30,14 +31,16 @@ module Ezframe
 
         # 戻り値によるレスポンス生成
         if body.is_a?(Hash) || body.is_a?(Array)
+          puts  "Controller: body = #{body}"
           response.body = [ JSON.generate(body) ]
+          # response.body = [ Oj.dump(body) ]
           response['Content-Type'] = 'application/json; charset=utf-8'
         else
           response.body = [ body ]
           response['Content-Type'] = 'text/html; charset=utf-8'
         end
         response.status = 200
-        p response.body
+        puts response.body
       end
 
       def file_not_found(response)

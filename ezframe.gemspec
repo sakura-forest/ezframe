@@ -41,4 +41,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'rack', '~> 2.0.7'
   spec.add_runtime_dependency 'sequel', '~> 5.27.0'
   spec.add_runtime_dependency 'sqlite3', '~> 1.4.0'
+  spec.add_runtime_dependency 'oj', '~> 3.10.2'
 end
