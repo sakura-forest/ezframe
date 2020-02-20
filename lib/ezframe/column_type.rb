@@ -26,6 +26,7 @@ module Ezframe
 
     def initialize(attr = nil)
       @attribute = attr || {}
+      @value = @attribute[:default]
     end
 
     def key
@@ -107,7 +108,7 @@ module Ezframe
 
     def value=(v)
       super(v)
-      return normalize(v)
+      @value = normalize(v)
     end
 
     def form(opts = {})
@@ -129,6 +130,16 @@ module Ezframe
     end
 
     def value=(v)
+      if v.nil?
+        default = @attribute[:default]
+        if default
+          @value = default
+        else
+          @value = nil
+        end
+        return
+      end
+
       if v.nil?
         @value = nil
         return
@@ -245,7 +256,12 @@ module Ezframe
 
     def value=(v)
       if v.nil?
-        @value = nil
+        default = @attribute[:default]
+        if default
+          @value = default
+        else
+          @value = nil
+        end
         return
       end
       if v.is_a?(String)
