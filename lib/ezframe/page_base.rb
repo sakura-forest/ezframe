@@ -52,13 +52,13 @@ module Ezframe
       path = Route::get_path(@class_snake)
       params = @request.env["url_params"]
       # params[@class_snake.to_sym] = id
-      path_s = path.map do |p|
-        if p == @class_snake.to_sym && id
-          "#{p}/#{id}"
+      path_s = path.map do |pa|
+        if pa == @class_snake.to_sym && id
+          "#{pa}/#{id}"
         elsif params[p]
-          "#{p}/#{params[p]}"
+          "#{pa}/#{params[p]}"
         else
-          p
+          pa
         end
       end.join("/")
       return "/#{path_s}"

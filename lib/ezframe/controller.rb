@@ -31,7 +31,7 @@ module Ezframe
 
         # 戻り値によるレスポンス生成
         if body.is_a?(Hash) || body.is_a?(Array)
-          puts  "Controller: body = #{body}"
+          # puts  "Controller: body = #{body}"
           response.body = [ JSON.generate(body) ]
           # response.body = [ Oj.dump(body) ]
           response['Content-Type'] = 'application/json; charset=utf-8'
