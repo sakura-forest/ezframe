@@ -34,6 +34,10 @@ class Hash
 
   def add_class(klass)
     return unless klass
+    if klass.is_a?(Array)
+      klass.each {|k| add_class(k) }
+      return
+    end
     c = self[:class]
     if !c
       self[:class] = c = []
@@ -41,12 +45,8 @@ class Hash
       a = [ c ]
       self[:class] = c = a
     end
-    if klass.is_a?(Array)
-      klass.each {|k| add_class(k) }
-    else
-      return if c.include?(klass)
-      c.push(klass)
-    end
+    return if c.include?(klass)
+    c.push(klass)
   end
 
   def remove_class(klass)

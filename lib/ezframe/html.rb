@@ -19,9 +19,10 @@ module Ezframe
         when "icon"
           tag = "i"
         end
+        tag = ht_h[:tag]
         opt_s, child_s = join_attributes(ht_h)
-        if !child_s.strip.empty? || %w[div span table tr td th].include?(tag)
-          return "<#{ht_h[:tag]} #{opt_s}>\n#{child_s}\n</#{ht_h[:tag]}>\n"
+        if !child_s.strip.empty? || %w[div span table tr td th textarea].include?(tag)
+          return "<#{ht_h[:tag]} #{opt_s}>\n#{child_s}\n</#{ht_h[:tag]} #{opt_s}>\n"
         end
         "<#{ht_h[:tag]} #{opt_s} />"
       end
@@ -62,6 +63,7 @@ module Ezframe
           ht_h[:tag] = "textarea"
           ht_h[:child] = ht_h[:value]
           ht_h.delete(:value)
+          p ht_h
         end
       end
 

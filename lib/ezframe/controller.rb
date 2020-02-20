@@ -47,7 +47,7 @@ module Ezframe
         response.status = 404
         response['Content-Type'] = 'text/html; charset=utf-8'
         template_file = ("#{Config[:template_dir]}/404.html")
-        puts template_file
+        # puts template_file
         if File.exist?(template_file) 
           body = File.read(template_file)
         else

@@ -4,7 +4,6 @@ module Ezframe
   class Materialize
     class << self
       def into_html_header
-
         css_a = Config[:extra_css_list].map {|file| "<link href=\"#{file}\" rel=\"stylesheet\">\n" }
         js_a = Config[:extra_js_list].map {|file| "<script src=\"#{file}\"></script>\n" }
 
@@ -27,11 +26,11 @@ module Ezframe
 
       def convert(ht_h)
         return nil unless ht_h
-        return ht_h if (ht_h.kind_of?(Hash) && ht_h[:final])
+        return ht_h if (ht_h.is_a?(Hash) && ht_h[:final])
         new_h = ht_h.clone
-        if ht_h.kind_of?(Array)
+        if ht_h.is_a?(Array)
           new_h = ht_h.map { |v| convert(v) }
-        elsif ht_h.kind_of?(Hash)
+        elsif ht_h.is_a?(Hash)
           unless ht_h[:tag]
             mylog("convert: no tag: #{ht_h.inspect}")
             return nil

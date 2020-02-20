@@ -97,7 +97,6 @@ module Ezframe
       def search(ht_h, opts)
         @found ||= []
         if ht_h.is_a?(Hash)
-          puts ht_h[:tag]
           if opts[:tag] && ht_h[:tag] && ht_h[:tag] == opts[:tag]
             @found.push(ht_h)
           end
