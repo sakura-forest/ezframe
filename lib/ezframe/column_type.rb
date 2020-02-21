@@ -106,20 +106,45 @@ module Ezframe
       return val
     end
 
-    def value=(v)
-      super(v)
-      @value = normalize(v)
+    def value=(val)
+      @value = normalize(val)
     end
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      h = Ht.input(type: "text", name: self.key, label: @attribute[:label], value: @value || "")
-      h[:size] = @attribute[:size] if @attribute[:size]
+      if @attribute[:size]
+        val = @value
+        if val && val.length>0
+          val.gsub!(/\n/, "<br>")
+        end
+        h = Ht.textarea(name: self.key, class: "textarea-size-#{@attribute[:size]}", label: @attribute[:label], child: val)
+      else
+        h = Ht.input(type: "text", name: self.key, label: @attribute[:label], value: @value || "")
+      end
       return h
     end
 
     def db_type
       return "text"
+    end
+  end
+
+  class TextareaType < TextType
+    def value=(val)
+      val = normalize(val)
+      val.gsub!(/<br>/, "\n") if val
+      @value = val
+    end
+
+    def form(opts = {})
+      return nil if no_edit? && !opts[:force]
+      val = @value
+      if val && val.length>0
+        val.gsub!(/\n/, "<br>")
+      end
+      h = Ht.textarea(name: self.key, label: @attribute[:label], child: val)
+      h[:class] = @attribute[:class] if @attribute[:class]
+      return h
     end
   end
 
@@ -152,7 +177,9 @@ module Ezframe
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      return Ht.input(type: "number", name: self.key, label: @attribute[:label], value: @value || "")
+      h = Ht.input(type: "number", name: self.key, label: @attribute[:label], value: @value || "")
+      h[:class] = @attribute[:class] if @attribute[:class]
+      return h
     end
 
     def db_type
@@ -193,7 +220,9 @@ module Ezframe
   class PasswordType < TextType
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      return { tag: "input", type: "password", name: self.key, label: @attribute[:label], value: @value || "" }
+      h = { tag: "input", type: "password", name: self.key, label: @attribute[:label], value: @value || "" }
+      h[:class] = @attribute[:class] if @attribute[:class]
+      return h
     end
 
     def db_value
@@ -205,7 +234,9 @@ module Ezframe
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
       # puts "selectType: #{@attribute[:item].inspect}"
-      return { tag: "select", name: self.key, label: @attribute[:label], item: @attribute[:item], value: @value }
+      h = { tag: "select", name: self.key, label: @attribute[:label], item: @attribute[:item], value: @value }
+      h[:class] = @attribute[:class] if @attribute[:class]
+      return h
     end
 
     def db_type
@@ -222,7 +253,9 @@ module Ezframe
   class CheckboxType < TypeBase
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      return Ht.checkbox(name: self.key, value: parent[:id].value, label: @attribute[:label])
+      h = Ht.checkbox(name: self.key, value: parent[:id].value, label: @attribute[:label])
+      h[:class] = @attribute[:class] if @attribute[:class]
+      return h
     end
 
     def db_type
@@ -237,8 +270,9 @@ module Ezframe
       if h
         # h[:type] = 'date'
         h[:type] = "text"
-        h[:class] = "datepicker"
-        h[:value] = value || ""
+        h[:value] = @value || ""
+        h[:class] = [ "datepicker" ]
+        h[:class].push@attribute[:class] if @attribute[:class]
       end
       return h
     end
@@ -351,6 +385,7 @@ module Ezframe
       return nil if no_edit? && !opts[:force]
       h = super
       h[:type] = "email" if h
+      h[:class] = @attribute[:class] if @attribute[:class]
       return h
     end
 
