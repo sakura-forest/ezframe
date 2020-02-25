@@ -2,14 +2,18 @@
 
 module Ezframe
   class Server
-    def self.call(env)
+    def initialize
+      Controller.init
+    end
+
+    def call(env)
       req = Rack::Request.new(env)
       res = Rack::Response.new
       Controller.exec(req, res)
       if res.body.empty?
         raise "no body in response"
       end
-      res.finish
+      return res.finish
     end
   end
 end

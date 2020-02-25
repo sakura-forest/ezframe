@@ -60,6 +60,10 @@ module Ezframe
       end
     end
 
+    def keys
+      @columns.keys
+    end
+
     # 配列を初期化する
     def set(attr_a)
       @columns[:id] = IdType.new(key: "id", label: "ID", no_edit: true)
@@ -128,6 +132,7 @@ module Ezframe
       mylog "column_set.updated_values = #{updated_values.inspect}"
       if updated_values.length > 0
         updated_values[:updated_at] = Time.now
+        puts dataset.where(id: id).update_sql(updated_values) 
         dataset.where(id: id).update(updated_values) 
       end
     end

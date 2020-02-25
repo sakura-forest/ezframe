@@ -68,18 +68,20 @@ module Ezframe
       def get_path(class_snake, route_h = nil)
         route_h = Config[:route] unless route_h
         @get_path_found_it = nil
-        return scan_hash(class_snake, route_h.deep_dup).reverse
+        return scan_route(class_snake, route_h.deep_dup).reverse
       end
 
       # targetに対応する名称のクラスまでの経路を返す
-      def scan_hash(target, hash)
-        if hash.keys.include?(target)
+      def scan_route(target, route_h)
+        # puts "scan_route: target=#{target}, route_h=#{route_h}"
+        if route_h.keys.include?(target.to_sym)
           @get_path_found_it = true
           return [ target ]
         else
-          hash.each do |k, v|
+          route_h.each do |k, v|
+            next if k == :class
             if v.is_a?(Hash)
-              a = scan_hash(target, v)
+              a = scan_route(target, v)
               if @get_path_found_it
                 a.push(k)
                 return a
@@ -87,6 +89,7 @@ module Ezframe
             end
           end
         end
+        return nil
       end
 
       def make_method_name(base_name, method = "get")

@@ -21,6 +21,7 @@ module Ezframe
       end
 
       def get_clone
+        
         new(@base_column_sets.deep_dup, @base_db)
       end
     end
