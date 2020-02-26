@@ -8,13 +8,17 @@ Config.load_files("./config")
 Model.init
 $model = Model.get_clone
 
-def get_db_info(table_name)
-  dbcol = {}
-  sql = "SELECT column_name,data_type FROM information_schema.columns WHERE table_name = '#{table_name}'"
-  $model.db.sequel[sql].each do |row|
-    dbcol[row[:column_name].to_sym] = normalize_dbtype(row[:data_type])
+class Postgres
+  class << self
+    def get_db_info(table_name)
+      dbcol = {}
+      sql = "SELECT column_name,data_type FROM information_schema.columns WHERE table_name = '#{table_name}'"
+      $model.db.sequel[sql].each do |row|
+        dbcol[row[:column_name].to_sym] = normalize_dbtype(row[:data_type])
+      end
+      return dbcol
+    end
   end
-  return dbcol
 end
 
 def exec_sql(sql)
@@ -44,7 +48,7 @@ end
 
 def check_diff(column_set)
   table_name = column_set.name
-  dbcols = get_db_info(table_name)
+  dbcols = Postgres::get_db_info(table_name)
   column_set.each do |column|
     next if %w[id updated_at created_at].include?(column.key.to_s)
     dbtype = dbcols[column.key]
