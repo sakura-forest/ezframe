@@ -1,4 +1,3 @@
-// version. 2020?01?31?(?)
 function add_event(obj) {
   var elems = obj.querySelectorAll('[event]')
   if (elems) {
@@ -79,9 +78,43 @@ function execute_event(obj) {
       console.log("redirect:" + event.url)
       location.href = event.url
       return
+    case "enable_datatable":
+      enable_datatable(event)
+      return
   }
   with_attr(event, obj)
   post_values(event, obj)
+}
+
+function enable_datatable(event) {
+  // $("#enable_datatable").DataTable();
+  console.log("enable_datatable: target="+event.target)
+  // console.log($(tevent.arget))
+  var list_size = event.size || 5
+  $(event.target).DataTable({
+    lengthChange: false,
+    displayLength: parseInt(list_size),
+    columnDefs: [{ targets: '_all', className: 'ellipsis' }],
+    language: {
+      "decimal": ".",
+      "thousands": ",",
+      "sProcessing": "処理中...",
+      "sLengthMenu": "_MENU_ 件表示",
+      "sZeroRecords": "データはありません。",
+      "sInfo": " _TOTAL_ 件中 _START_ から _END_ まで表示",
+      "sInfoEmpty": " 0 件中 0 から 0 まで表示",
+      "sInfoFiltered": "（全 _MAX_ 件より抽出）",
+      "sInfoPostFix": "",
+      "sSearch": "検索:",
+      "sUrl": "",
+      "oPaginate": {
+        "sFirst": "<< 先頭",
+        "sPrevious": "< 前",
+        "sNext": "次 > ",
+        "sLast": "最終 >>"
+      }
+    }
+  })
 }
 
 function with_attr(event, obj) {
@@ -120,9 +153,8 @@ function post_values(event, obj) {
 
 function manage_response(res, event, obj) {
   var elem
-  /* console.log("manage_response: res="+JSON.stringify(res)+", event=" + JSON.stringify(event) +
+  console.log("manage_response: res="+JSON.stringify(res)+", event=" + JSON.stringify(event) +
     ", obj=" + JSON.stringify(obj)) 
-  */
   if (!res) { return }
   if (Array.isArray(res)) {
     for(var i = 0; i < res.length; i++) {
@@ -138,11 +170,7 @@ function exec_one_response(res) {
     console.log("inject: " + res.inject)
     elem = document.querySelector(res.inject)
     if (elem) {
-      if (res.is_html) {
-        elem.innerHTML = res.body
-      } else {
-        elem.innerHTML = htmlgen(res.body)
-      }
+      elem.innerHTML = res.body.replace(/<br>/g, "\n")
       add_event(elem)
     } else {
       console.log("no such element: "+res.inject)
@@ -175,12 +203,13 @@ function collect_form_values(obj) {
   for (var i = 0; i < inputs.length; i++) {
     var elem = inputs[i]
     if (!elem.name) { continue }
-    console.log("name,value="+elem.name+","+elem.value)
+    // console.log("name,value="+elem.name+","+elem.value)
     if ((elem.type == "checkbox" || elem.type == "radio") && !elem.checked) {
       continue
     }
     var cur_value = res[elem.name]
-    var elem_value = normalize(elem.value)
+    var elem_value = elem.value
+    elem_value = elem_value.replace(/\n/g, '<br>')
     if (cur_value) {
       if (Array.isArray(cur_value)) {
         cur_value.push(elem_value)
@@ -192,10 +221,6 @@ function collect_form_values(obj) {
     }
   }
   return res
-}
-
-function normalize(str) {
-  return str.replace(/^[\s|　]+|[\s|　]+$/g, '').trim()
 }
 
 function switch_hide(button) {
@@ -253,6 +278,11 @@ function register_hover_button(obj) {
   }
 }
 
+/*
 document.addEventListener('DOMContentLoaded', function () {
+  add_event(document)
+})
+*/
+$(document).ready(function () {
   add_event(document)
 })

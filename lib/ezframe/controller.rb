@@ -1,6 +1,4 @@
 # frozen_string_literal: true
-require "oj"
-
 module Ezframe
   class Controller
     class << self
@@ -33,7 +31,6 @@ module Ezframe
         if body.is_a?(Hash) || body.is_a?(Array)
           # puts  "Controller: body = #{body}"
           response.body = [ JSON.generate(body) ]
-          # response.body = [ Oj.dump(body) ]
           response['Content-Type'] = 'application/json; charset=utf-8'
         else
           response.body = [ body ]

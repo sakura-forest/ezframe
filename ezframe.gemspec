@@ -35,11 +35,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "nokogiri", '~> 1.10.7'
   spec.add_development_dependency "rack-test", '~> 1.1.0'
   spec.add_development_dependency "pry", '~> 0.12.2'
-  spec.add_development_dependency "mailcatcher", '~> 0.7.1'
 
   spec.add_runtime_dependency "rake", "~> 13.0"
-  spec.add_runtime_dependency 'rack', '~> 2.0.7'
+  spec.add_runtime_dependency 'rack', '~> 2.0.6'
   spec.add_runtime_dependency 'sequel', '~> 5.27.0'
   spec.add_runtime_dependency 'sqlite3', '~> 1.4.0'
-  spec.add_runtime_dependency 'oj', '~> 3.10.2'
 end

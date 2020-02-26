@@ -46,7 +46,7 @@ module Ezframe
           mylog "authenticate: this user does not exist: #{account}"
           return nil
         end
-        mylog "env=#{env.inspect}"
+        # mylog "env=#{env.inspect}"
         env['rack.session'][:user] = @user[:id]
         password = @user[:password]
         @user.delete(:password)
