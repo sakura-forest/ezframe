@@ -112,15 +112,17 @@ module Ezframe
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      if @attribute[:size]
-        val = @value
-        if val && val.length>0
-          val.gsub!(/\n/, "<br>")
-        end
-        h = Ht.textarea(name: self.key, class: "textarea-size-#{@attribute[:size]}", label: @attribute[:label], child: val)
-      else
-        h = Ht.input(type: "text", name: self.key, label: @attribute[:label], value: @value || "")
-      end
+#      if @attribute[:size]
+#        val = @value
+#        mark = Config[:newline_mark]||"<br>"
+#        if val && val.index("\n")
+#          val.gsub!(/\n/, mark)
+#        end
+#        h = Ht.textarea(name: self.key, label: @attribute[:label], child: val)
+#      else
+      h = Ht.input(type: "text", name: self.key, label: @attribute[:label], value: @value || "")
+      h[:class] = @attribute[:class] if @attribute[:class]
+#      end
       return h
     end
 
@@ -132,15 +134,19 @@ module Ezframe
   class TextareaType < TextType
     def value=(val)
       val = normalize(val)
-      val.gsub!(/<br>/, "\n") if val
+      mark = Config[:newline_mark]||"<br>"
+      if val && val.index(mark)
+        val.gsub!(/#{mark}/, "\n") 
+      end
       @value = val
     end
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
       val = @value
-      if val && val.length>0
-        val.gsub!(/\n/, "<br>")
+      mark = Config[:newline_mark]||"<br>"
+      if val && val.index(mark)
+        val.gsub!(/\n/, mark)
       end
       h = Ht.textarea(name: self.key, label: @attribute[:label], child: val)
       h[:class] = @attribute[:class] if @attribute[:class]
@@ -272,7 +278,7 @@ module Ezframe
         h[:type] = "text"
         h[:value] = @value || ""
         h[:class] = [ "datepicker" ]
-        h[:class].push@attribute[:class] if @attribute[:class]
+        h[:class].push(@attribute[:class]) if @attribute[:class]
       end
       return h
     end
@@ -327,7 +333,18 @@ module Ezframe
   class TimeType < TextType
   end
 
-  class DatetimeType < DateType
+  class DatetimeType < TextType
+    def initialize(attr = nil)
+      super(attr)
+      @attribute[:class] = "datetimepicker"
+    end
+
+    def form(opts = {})
+      form = super(opts)
+      return nil unless form
+      form
+    end
+
     def db_type
       "timestamp"
     end
