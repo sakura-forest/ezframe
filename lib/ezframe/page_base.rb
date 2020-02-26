@@ -51,7 +51,7 @@ module Ezframe
     def make_base_url(id = nil)
       path = Route::get_path(@class_snake)
       params = @request.env["url_params"]
-      mylog "make_base_url: params=#{params}"
+      # mylog "make_base_url: params=#{params}"
       # params[@class_snake.to_sym] = id
       path_s = path.map do |pa|
         if pa == @class_snake.to_sym && id
@@ -62,7 +62,7 @@ module Ezframe
           pa
         end
       end.join("/")
-      mylog "path_s=#{path_s}"
+      # mylog "path_s=#{path_s}"
       return "/#{path_s}"
     end
 
