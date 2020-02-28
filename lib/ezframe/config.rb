@@ -5,9 +5,18 @@ module Ezframe
 
       def load_files(dir)
         unless @value_h
-          Dir["#{dir}/*.yml"].each do |file|
-            load_one_file(file)
+          load_dir(dir)
+          rack_env = ENV['RACK_ENV']
+          env_dir = "#{dir}/#{rack_env}"
+          if rack_env && File.directory?(env_dir)
+            load_dir(env_dir)
           end
+        end
+      end
+
+      def load_dir(dir)
+        Dir["#{dir}/*.yml"].each do |file|
+          load_one_file(file)
         end
       end
 

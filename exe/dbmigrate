@@ -1,22 +1,58 @@
 #!/usr/bin/env ruby
 #coding: utf-8
 require "ezframe"
-
 include Ezframe
-# get column set
+
 Config.load_files("./config")
 Model.init
 $model = Model.get_clone
 
-class Postgres
+class DBInfo
   class << self
-    def get_db_info(table_name)
+    def get_db_info(db, table_name)
+      typ = get_database_type(Config[:database])
+      case typ
+      when "postgres"
+        return get_info_from_postgres(db, table_name)
+      when "sqlite"
+        return get_info_from_sqlite(db, table_name)
+      end
+    end
+
+    def get_info_from_postgres(db, table_name)
       dbcol = {}
       sql = "SELECT column_name,data_type FROM information_schema.columns WHERE table_name = '#{table_name}'"
-      $model.db.sequel[sql].each do |row|
+      data = db.sequel[sql].first
+      puts data
+      data.each do |row|
         dbcol[row[:column_name].to_sym] = normalize_dbtype(row[:data_type])
       end
       return dbcol
+    end
+
+    def get_info_from_sqlite(db, table_name)
+      sql = "SELECT * from sqlite_master WHERE name = '#{table_name}';"
+      data = db.sequel[sql].first
+      return nil unless data
+      sql = data[:sql]
+      return parse_create_sql(sql)
+    end
+
+    def parse_create_sql(sql)
+      sql.gsub(/CREATE TABLE \`\w+\` \(/, "")
+      column_a = sql.split(", ")
+      dbcol = {}
+      column_a.each do |line|
+        if line =~ /\`(\w+)\`\s(\w+)/
+          colkey, dbtype = $1, $2
+          dbcol[colkey.to_sym] = dbtype
+        end
+      end
+      return dbcol
+    end
+
+    def get_database_type(config)
+      return config.split("://")[0]
     end
   end
 end
@@ -48,7 +84,11 @@ end
 
 def check_diff(column_set)
   table_name = column_set.name
-  dbcols = Postgres::get_db_info(table_name)
+  dbcols = DBInfo.get_db_info($model.db, table_name)
+  unless dbcols
+    $model.create_one_table(table_name, $model.column_sets[table_name.to_sym])
+    return
+  end
   column_set.each do |column|
     next if %w[id updated_at created_at].include?(column.key.to_s)
     dbtype = dbcols[column.key]
