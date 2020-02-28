@@ -6,7 +6,7 @@ module Ezframe
         Config.load_files("./config")
         Model.init
         Message.init
-        Auth.init_warden if defined?(Warden)
+        Auth.init_warden if @need_auth # defined?(Warden)
       end
 
       def exec(request, response)
@@ -22,8 +22,11 @@ module Ezframe
           return
         end
         @request.env["url_params"] = url_params
-        warden.authenticate! if page_instance.auth
-        mylog "rack.session.keys=#{request.env['rack.session'].keys}"
+        auth_class = Route.scan_auth(page_instance.class)
+        mylog "auth_class=#{auth_class}"
+        warden.authenticate! if auth_class
+        session = request.env['rack.session']
+        mylog "rack.session.keys=#{session.keys}" if session
         page_instance.set_request(@request)
         body = page_instance.send(method)
 

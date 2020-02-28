@@ -8,12 +8,12 @@ class Request
 end
 
 module Ezframe
-  class Top
+  class Top < PageBase
     def public_default_get
     end
   end
 
-  class Second
+  class Second < PageBase
     def public_default_get
     end
 
@@ -21,7 +21,7 @@ module Ezframe
     end
   end
 
-  class Third
+  class Third < PageBase
     def public_default_get
     end
   end
@@ -63,5 +63,11 @@ class RouteTest < Minitest::Test
     route_h = { top: { second: { third: nil }, v2: { fourth: nil }}}
     assert_equal([ :top, :second, :third ], Ezframe::Route.get_path(:third, route_h))
     assert_equal([ :top, :v2, :fourth ], Ezframe::Route.get_path(:fourth, route_h))
+  end
+
+  def test_scan_auth
+    route_h = { top: { second: { third: nil }}}
+    Ezframe::Top.auth = true
+    assert_equal(Ezframe::Top, Ezframe::Route.scan_auth("third", route_h))
   end
 end

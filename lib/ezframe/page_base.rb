@@ -6,7 +6,11 @@ require_relative "util"
 
 module Ezframe
   class PageBase
-    attr_accessor :auth, :request
+    class << self
+      attr_accessor :auth
+    end
+    
+    attr_accessor :request
 
     def initialize(request = nil)
       @class_snake = class_to_snake(self.class)

@@ -67,13 +67,15 @@ module Ezframe
       # ページクラスの階層を辿る
       def get_path(class_snake, route_h = nil)
         route_h = Config[:route] unless route_h
+        mylog "get_path: route_h=#{route_h}"
         @get_path_found_it = nil
-        return scan_route(class_snake, route_h.deep_dup).reverse
+        route =_scan_route(class_snake, route_h.deep_dup) 
+        return route.reverse if route
+        return nil
       end
 
       # targetに対応する名称のクラスまでの経路を返す
-      def scan_route(target, route_h)
-        # puts "scan_route: target=#{target}, route_h=#{route_h}"
+      def _scan_route(target, route_h)
         if route_h.keys.include?(target.to_sym)
           @get_path_found_it = true
           return [ target ]
@@ -81,7 +83,7 @@ module Ezframe
           route_h.each do |k, v|
             next if k == :class
             if v.is_a?(Hash)
-              a = scan_route(target, v)
+              a = _scan_route(target, v)
               if @get_path_found_it
                 a.push(k)
                 return a
@@ -92,15 +94,28 @@ module Ezframe
         return nil
       end
 
+      # 認証を行うクラスを返す。無ければnil
+      def scan_auth(target, route_h = nil)
+        target = class_to_snake(target) if target.is_a?(Class)
+        path = get_path(target, route_h)
+        mylog "scan_auth: target=#{target} path=#{path}"
+        return nil unless path
+        path.each do |class_snake|
+          klass = get_class([class_snake])
+          puts "path: klass = #{klass}"
+          return klass if klass.auth
+        end
+      end
+
       def make_method_name(base_name, method = "get")
         return ["public", base_name, method.downcase].join("_")
       end
 
       def get_class(keys)
-        mylog "get_class: #{keys.inspect}"
+        # mylog "get_class: #{keys.inspect}"
         return nil unless keys
         keys = [ keys ] if keys.is_a?(String)
-        klass = (%w[Ezframe] + keys.map { |k| k.to_camel }).join("::")
+        klass = (%w[Ezframe] + keys.map { |k| k.to_s.to_camel }).join("::")
         # mylog "get_class: #{klass}"
         if Object.const_defined?(klass)
           return Object.const_get(klass)
@@ -108,17 +123,6 @@ module Ezframe
           raise "get_class: undefined class: #{klass}"
         end
         return nil
-      end
-
-      def find_file(target)
-        Find.find("./asset").each do |file|
-          path_a = file.split("/")
-          if path_a[-1] == target
-            suffix = "." + target.split(".")[-1]
-            return [200, { "Content-Type" => Rack::Mime.mime_type(suffix) }, [File.open(file, &:read)]]
-          end
-        end
-        return [ 404 ]
       end
     end
   end

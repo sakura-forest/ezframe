@@ -3,6 +3,10 @@ module Ezframe
     class << self
       attr_accessor :value_h
 
+      def init(dir = "./config")
+        load_files(dir)
+      end
+
       def load_files(dir)
         unless @value_h
           load_dir(dir)

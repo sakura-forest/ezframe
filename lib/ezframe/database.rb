@@ -11,8 +11,8 @@ module Ezframe
     end  
 
     def connect
-      @dbfile ||= ENV["EZFRAME_DB"] || Config[:database] || "sqlite://db/devel.sqlite"
-      # puts "Database.connect: dbfile=#{@dbfile}"
+      @dbfile ||= ENV["EZFRAME_DB"] || Config[:database] # || "sqlite://db/devel.sqlite"
+      puts "Database.connect: dbfile=#{@dbfile}"
       @sequel = Sequel.connect(@dbfile, loggers: [Logger.new($stdout)])
     end  
 
