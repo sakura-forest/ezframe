@@ -5,13 +5,13 @@ module Ezframe
 
       def init
         Warden::Manager.serialize_into_session do |auth|
-          mylog "serialize_into: #{auth.inspect}"
+          # mylog "serialize_into: #{auth.inspect}"
           auth.user[:id]
         end
         Warden::Manager.serialize_from_session do |account|
-          mylog "serialize_from: account = #{account}"
+          # mylog "serialize_from: account = #{account}"
           inst = Auth.get(account)
-          mylog "inst = #{inst.inspect}"
+          # mylog "inst = #{inst.inspect}"
           inst
         end
         Warden::Strategies.add(:mystrategy) do
@@ -25,7 +25,7 @@ module Ezframe
             if Auth.authenticate(env, params["account"], params["password"])
               success!(Auth.get(params["account"]))
             else
-              fail!('ユーザーが登録されていないか、パスワードが違っています。')
+              fail!(Message[:login_failure])
             end
           end
         end 
@@ -36,16 +36,17 @@ module Ezframe
       end
 
       def authenticate(env, account, pass)
-        @user = Model.current.db.dataset(Config[:login_table]).where(Config[:login_account].to_sym => account ).first
+        auth_conf = Config[:auth]
+        @user = Model.current.db.dataset(auth_conf[:table]).where(auth_conf[:user].to_sym => account ).first
         if @user
-          mylog "Auth: authenticate: user=#{@user.inspect}"
+          mylog "Auth: authenticate"
         else
           mylog "authenticate: this user does not exist: #{account}"
           return nil
         end
         # mylog "env=#{env.inspect}"
         env['rack.session'][:user] = @user[:id]
-        password = @user[:password]
+        password = @user[auth_conf[:password].to_sym]
         @user.delete(:password)
 
         return nil if !pass || !password
@@ -57,16 +58,17 @@ module Ezframe
 
     def initialize(account)
       self.account = account
-      dataset = Model.current.db.dataset(Config[:login_table])
+      auth_conf = Config[:auth]
+      dataset = Model.current.db.dataset(auth_conf[:table])
       if account.is_a?(Integer)
         @user = dataset.where(id: account).first
       else
-        @user = dataset.where(Config[:login_account].to_sym => account).first
+        @user = dataset.where(auth_conf[:user].to_sym => account).first
       end
       unless @user
         mylog "Auth.initialize: This user does not exist: #{account}"
       end
-      self.password = @user[:password]
+      self.password = @user[auth_conf[:password].to_sym]
       @user.delete(:password)
     end
   end

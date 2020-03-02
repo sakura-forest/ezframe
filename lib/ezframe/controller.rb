@@ -3,7 +3,7 @@ module Ezframe
   class Controller
     class << self
       def init
-        Config.load_files("./config")
+        Config.init
         Model.init
         Message.init
         Auth.init if Config[:auth]
@@ -24,7 +24,7 @@ module Ezframe
         # mylog "auth_class=#{auth_class}"
         if Config[:auth]
           warden.authenticate! 
-          mylog "Controller.exec: warden.options = #{@request.env['warden.options']}"
+          # mylog "Controller.exec: warden.options = #{@request.env['warden.options']}"
         end
         session = request.env['rack.session']
         mylog "rack.session.keys=#{session.keys}" if session

@@ -36,7 +36,7 @@ module Ezframe
       # @id, @key = @params[:id], @params[:key]
       @env = @request.env
       @session = @env["rack.session"]
-      mylog "session = #{@session.inspect}"
+      # mylog "session = #{@session.inspect}"
       if %w[POST PUT].include?(request.request_method)
         body = @request.body.read
         if request.content_type.index("json")
@@ -46,6 +46,7 @@ module Ezframe
         end
         # mylog "parsed_body=#{@parsed_body.inspect}"
         @event = @parsed_body[:event] || {}
+        # mylog "event=#{@event}"
       end
     end
 
