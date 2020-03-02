@@ -25,9 +25,7 @@ module Ezframe
     # Rackのrequestを代入し、関連するインスタンス変数を定義
     def set_request(request)
       @request = request
-      @model = request.env["model"]
-      mylog "[WARN] model is not defined" unless @model
-      @column_set = @model.column_sets[@class_snake.to_sym]
+      @column_set = Model.current.column_sets[@class_snake.to_sym]
       # mylog "[WARN] column_set is not defined: #{@class_snake}" unless @column_set
       if @column_set
         @dataset = @column_set.dataset
@@ -38,7 +36,7 @@ module Ezframe
       # @id, @key = @params[:id], @params[:key]
       @env = @request.env
       @session = @env["rack.session"]
-      # mylog "session = #{@session.inspect}"
+      mylog "session = #{@session.inspect}"
       if %w[POST PUT].include?(request.request_method)
         body = @request.body.read
         if request.content_type.index("json")
@@ -92,8 +90,12 @@ module Ezframe
       return json
     end
 
+    def session
+      return @request.env['rack.session']
+    end
+
     def warden
-      @request.env["warden"]
+      return @request.env["warden"]
     end
 
     def login?
@@ -101,7 +103,7 @@ module Ezframe
     end
 
     def user
-      warden.user
+      return warden.user
     end
   end
 end

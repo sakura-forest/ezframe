@@ -6,7 +6,7 @@ require "lib/ezframe.rb"
 class ColumnTypeTest < Minitest::Test
   def test_basic_table_management
     db_file = "db/test.sqlite"
-    db = EzModel::Database.new(db_file)
+    db = Model::Database.new(db_file)
     db.connect
     db.drop_table?
     db.create_table(table_name, { v1: "int", v2: "string" })

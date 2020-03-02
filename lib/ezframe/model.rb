@@ -3,6 +3,7 @@
 module Ezframe
   class Model
     class << self
+      attr_accessor :current
 
       def init_column_sets
         @base_column_sets = ColumnSets.new
@@ -21,8 +22,8 @@ module Ezframe
       end
 
       def get_clone
-        
-        new(@base_column_sets.deep_dup, @base_db)
+        @current = new(@base_column_sets.deep_dup, @base_db)
+        return @current
       end
     end
 

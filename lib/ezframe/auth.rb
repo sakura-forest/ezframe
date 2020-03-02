@@ -1,16 +1,16 @@
 module Ezframe
   class Auth
     class << self
-      attr_accessor :model, :user
+      attr_accessor :user
 
-      def init_warden
+      def init
         Warden::Manager.serialize_into_session do |auth|
           mylog "serialize_into: #{auth.inspect}"
           auth.user[:id]
         end
         Warden::Manager.serialize_from_session do |account|
           mylog "serialize_from: account = #{account}"
-          inst = Auth.get(env['model'], account)
+          inst = Auth.get(account)
           mylog "inst = #{inst.inspect}"
           inst
         end
@@ -23,23 +23,20 @@ module Ezframe
           def authenticate!
             mylog "authenticate!: #{params}"
             if Auth.authenticate(env, params["account"], params["password"])
-              success!(Auth.get(env['model'], params["account"]))
+              success!(Auth.get(params["account"]))
             else
-              env['x-rack.flash'].error = 'ユーザーが登録されていないか、パスワードが違っています。'
-              fail!("authenticate failure")
+              fail!('ユーザーが登録されていないか、パスワードが違っています。')
             end
           end
         end 
       end
 
-      def get(model, account)
-        new(model, account)
+      def get(account)
+        new(account)
       end
 
       def authenticate(env, account, pass)
-        model = env["model"]
-        raise "model is not initialized" unless model
-        @user = model.db.dataset(Config[:login_table]).where(Config[:login_account].to_sym => account ).first
+        @user = Model.current.db.dataset(Config[:login_table]).where(Config[:login_account].to_sym => account ).first
         if @user
           mylog "Auth: authenticate: user=#{@user.inspect}"
         else
@@ -56,11 +53,11 @@ module Ezframe
       end
     end
 
-    attr_accessor :account, :password, :model, :user, :id
+    attr_accessor :account, :password, :user, :id
 
-    def initialize(model, account)
+    def initialize(account)
       self.account = account
-      dataset = model.db.dataset(Config[:login_table])
+      dataset = Model.current.db.dataset(Config[:login_table])
       if account.is_a?(Integer)
         @user = dataset.where(id: account).first
       else

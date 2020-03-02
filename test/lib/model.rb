@@ -5,8 +5,7 @@ require "lib/ezframe.rb"
 
 class ModelTest < Minitest::Test
   def test_model
-    model = EzModel::Bridge.instance
-    # p model.column_sets
+    model = Model::Bridge.instance
     colset = model.column_sets[:customer]
     assert(colset)
     assert(colset[:email])

@@ -67,7 +67,7 @@ module Ezframe
       # ページクラスの階層を辿る
       def get_path(class_snake, route_h = nil)
         route_h = Config[:route] unless route_h
-        mylog "get_path: route_h=#{route_h}"
+        # mylog "get_path: route_h=#{route_h}"
         @get_path_found_it = nil
         route =_scan_route(class_snake, route_h.deep_dup) 
         return route.reverse if route
@@ -103,8 +103,9 @@ module Ezframe
         path.each do |class_snake|
           klass = get_class([class_snake])
           puts "path: klass = #{klass}"
-          return klass if klass.auth
+          return klass if klass.need_auth
         end
+        return nil
       end
 
       def make_method_name(base_name, method = "get")

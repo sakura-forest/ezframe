@@ -6,14 +6,12 @@ module Ezframe
         Config.load_files("./config")
         Model.init
         Message.init
-        Auth.init_warden if @need_auth # defined?(Warden)
+        Auth.init if Config[:auth]
       end
 
       def exec(request, response)
         @request = request
         model = Model.get_clone
-        @request.env["model"] = model
-
         mylog("exec: path=#{request.path_info} params=#{request.params}")
         page_instance, method, url_params = Route::choose(request)
         mylog "page: #{page_instance.class}, method=#{method}, url_params=#{url_params}"
@@ -22,9 +20,12 @@ module Ezframe
           return
         end
         @request.env["url_params"] = url_params
-        auth_class = Route.scan_auth(page_instance.class)
-        mylog "auth_class=#{auth_class}"
-        warden.authenticate! if auth_class
+        # auth_class = Route.scan_auth(page_instance.class)
+        # mylog "auth_class=#{auth_class}"
+        if Config[:auth]
+          warden.authenticate! 
+          mylog "Controller.exec: warden.options = #{@request.env['warden.options']}"
+        end
         session = request.env['rack.session']
         mylog "rack.session.keys=#{session.keys}" if session
         page_instance.set_request(@request)

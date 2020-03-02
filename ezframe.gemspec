@@ -30,14 +30,15 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 1.16"
-  spec.add_development_dependency "minitest", '~> 5.13.0'
-  spec.add_development_dependency "nokogiri", '~> 1.10.7'
-  spec.add_development_dependency "rack-test", '~> 1.1.0'
-  spec.add_development_dependency "pry", '~> 0.12.2'
+  spec.add_development_dependency "bundler", '>= 1.16'
+  spec.add_development_dependency "minitest", '>= 5.13.0'
+  spec.add_development_dependency "nokogiri", '>= 1.10.7'
+  spec.add_development_dependency "rack-test", '>= 1.1.0'
+  spec.add_development_dependency "pry", '>= 0.12.2'
 
-  spec.add_runtime_dependency "rake", "~> 13.0"
-  spec.add_runtime_dependency 'rack', '~> 2.0.6'
-  spec.add_runtime_dependency 'sequel', '~> 5.27.0'
-  spec.add_runtime_dependency 'sqlite3', '~> 1.4.0'
+  spec.add_runtime_dependency "rake", '>= 13.0'
+  spec.add_runtime_dependency 'rack', '>= 2.0.6'
+  spec.add_runtime_dependency 'sequel', '>= 5.27.0'
+  spec.add_runtime_dependency 'sqlite3', '>= 1.4.0'
+  spec.add_runtime_dependency 'bcrypt', '>= 3.1.13'
 end
