@@ -25,7 +25,11 @@ class DBInfo
     def get_info_from_postgres(db, table_name)
       dbcol = {}
       sql = "SELECT column_name,data_type FROM information_schema.columns WHERE table_name = '#{table_name}'"
-      data_a = db.sequel[sql].all
+      begin
+        data_a = db.sequel[sql].all
+      rescue
+        return nil
+      end
       # puts data_a
       data_a.each do |row|
         dbcol[row[:column_name].to_s.to_sym] = normalize_dbtype(row[:data_type])
