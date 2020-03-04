@@ -21,11 +21,12 @@ module Ezframe
         end
         tag = ht_h[:tag]
         opt_s, child_s = join_attributes(ht_h)
-        if !child_s.strip.empty? || %w[div span table tr td th textarea].include?(tag)
-          start_tag = [ht_h[:tag], opt_s].compact.join(" ")
+        if !child_s.strip.empty? || !%w[img input hr br meta].include?(tag)
+          start_tag = [ht_h[:tag], opt_s].compact.join(" ").strip
           return "<#{start_tag}>#{child_s}</#{ht_h[:tag]}>"
         end
-        "<#{ht_h[:tag]} #{opt_s} />"
+        tag_content = [ ht_h[:tag], opt_s ].compact.join(" ")
+        "<#{tag_content}/>"
       end
 
       # attributeの連結文字列化
@@ -71,7 +72,7 @@ module Ezframe
       def textarea(ht_h)
         value = ht_h[:value]
         if value
-          value = value.gsub(/\n/, Config[:newline_mark]||"<br>")
+          # value = value.gsub(/\n/, Config[:newline_mark]||"<br>")
           ht_h[:child] = value
           ht_h.delete(:value)
         end

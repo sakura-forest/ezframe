@@ -101,7 +101,7 @@ module Ezframe
       return nil unless val
       val = val.dup.to_s
       val.gsub!(/　/, " ")
-      val.gsub!(/\s+/, " ")
+      # val.gsub!(/\s+/, " ")
       val.strip!
       return val
     end
@@ -145,9 +145,9 @@ module Ezframe
       return nil if no_edit? && !opts[:force]
       val = @value
       mark = Config[:newline_mark]||"<br>"
-      if val && val.index(mark)
-        val.gsub!(/\n/, mark)
-      end
+      #if val && val.index("\n")
+      #  val.gsub!(/\n/, mark)
+      #end
       h = Ht.textarea(name: self.key, label: @attribute[:label], child: val)
       h[:class] = @attribute[:class] if @attribute[:class]
       return h

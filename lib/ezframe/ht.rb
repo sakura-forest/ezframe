@@ -3,22 +3,29 @@ module Ezframe
   module Ht
     class << self
       # メソッド名の名前のタグのhthashを生成
-      def wrap_tag(opts = {})
-        if opts.is_a?(String) || opts.is_a?(Array)
-          h = { child: opts }
-        elsif opts.is_a?(Hash)
-          if opts[:tag] && !__callee__.to_s.index("wrap_tag")
-            h = { child: opts }
+      def wrap_tag(ht_h = {})
+        if ht_h.is_a?(String) || ht_h.is_a?(Array)
+          h = { child: ht_h }
+        elsif ht_h.is_a?(Hash)
+          if ht_h[:tag] && !__callee__.to_s.index("wrap_tag")
+            h = { child: ht_h }
           else
-            h = opts.dup
+            h = ht_h.dup
           end
         else
-          mylog("wrap_tag: unknown type: #{opts.inspect}")
+          mylog("[WARN] wrap_tag: unknown type: #{ht_h.inspect}")
           return nil
         end
         h[:tag] ||= __callee__.to_s
         raise "no tag" if h[:tag] == "wrap_tag"
         return h
+      end
+
+      def single_tag(ht_h = {})
+        ht_h[:tag] ||= __callee__.to_s
+        raise "no tag" if ht_h[:tag] == "wrap_tag"
+        raise "has child: #{ht_h.inspect}" if ht_h[:child]
+        return ht_h
       end
 
       alias_method :script, :wrap_tag
@@ -30,8 +37,8 @@ module Ezframe
       alias_method :h5, :wrap_tag
       alias_method :h6, :wrap_tag
       alias_method :p, :wrap_tag
-      alias_method :br, :wrap_tag
-      alias_method :hr, :wrap_tag
+      alias_method :br, :single_tag
+      alias_method :hr, :single_tag
       alias_method :div, :wrap_tag
       alias_method :span, :wrap_tag
       alias_method :i, :wrap_tag
@@ -45,10 +52,10 @@ module Ezframe
       alias_method :tr, :wrap_tag
       alias_method :th, :wrap_tag
       alias_method :td, :wrap_tag
-      alias_method :img, :wrap_tag
+      alias_method :img, :single_tag
       alias_method :a, :wrap_tag
       alias_method :form, :wrap_tag
-      alias_method :input, :wrap_tag
+      alias_method :input, :single_tag
       alias_method :select, :wrap_tag
       alias_method :textarea, :wrap_tag
       alias_method :label, :wrap_tag

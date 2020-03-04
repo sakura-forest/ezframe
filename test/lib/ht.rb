@@ -19,4 +19,5 @@ class HthashTest < GenericTest
     assert_equal(%w[c d], res[:child][:class])
     assert_equal("test", res[:child][:child])
   end
+
 end

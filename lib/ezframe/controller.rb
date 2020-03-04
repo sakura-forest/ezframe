@@ -34,7 +34,11 @@ module Ezframe
         # 戻り値によるレスポンス生成
         if body.is_a?(Hash) || body.is_a?(Array)
           # puts  "Controller: body = #{body}"
-          response.body = [ JSON.generate(body) ]
+          # body.gsub!(/\n/, Config[:newline_mark]||"<br>")
+          # mylog("body=#{body}")
+          json = JSON.generate(body)
+          # mylog("json=#{json}")
+          response.body = [ json ]
           response['Content-Type'] = 'application/json; charset=utf-8'
         else
           response.body = [ body ]

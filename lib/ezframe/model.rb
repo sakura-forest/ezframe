@@ -5,7 +5,8 @@ module Ezframe
     class << self
       attr_accessor :current
 
-      def init_column_sets(columns_dir = './columns')
+      def init_column_sets(columns_dir = nil)
+        columns_dir ||= "./columns"
         @base_column_sets = ColumnSets.new
         @base_column_sets.load_files(columns_dir)
       end  

@@ -42,6 +42,12 @@ module Ezframe
     def each
       @tables.each {|k, v| yield(k, v) }
     end
+
+    def inspect
+      @tables.each do |table|
+        "[table.name]:#{table.inspect}"
+      end
+    end
   end
 
   class ColumnSet
@@ -80,7 +86,6 @@ module Ezframe
       end
       @columns[:created_at] = DatetimeType.new(type: "datetime", key: "created_at", label: "生成日時", no_edit: true)
       @columns[:updated_at] = DatetimeType.new(type: "datetime", key: "updated_at", label: "更新日時", no_edit: true)
-      # mylog "set: #{@columns.inspect}"
       @columns.values.each {|col| col.parent = self }
       return @columns
     end
@@ -103,7 +108,6 @@ module Ezframe
       col_h.delete(:id)
       col_h.delete(:created_at)
       col_h[:updated_at] = Time.now
-      mylog "create: #{col_h.inspect}"
       id = @columns[:id]
       if id.value.to_i > 0
         dataset.where(id: id.value).update(col_h)
@@ -129,7 +133,6 @@ module Ezframe
           updated_values[colkey] = column.value
         end
       end
-      mylog "column_set.updated_values = #{updated_values.inspect}"
       if updated_values.length > 0
         updated_values[:updated_at] = Time.now
         puts dataset.where(id: id).update_sql(updated_values) 
@@ -230,6 +233,12 @@ module Ezframe
       return @columns.map do |colkey, coltype|
         { tag: 'input', id: colkey, name: colkey, type: 'hidden', value: coltype.value }
       end
+    end
+
+    def inpsect
+      @columns.map do |colkey, coltype|
+        "#{colkey}=#{coltype.value}"
+      end.join(" ")
     end
   end
 end

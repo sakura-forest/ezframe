@@ -25,6 +25,7 @@ module Ezframe
     # Rackのrequestを代入し、関連するインスタンス変数を定義
     def set_request(request)
       @request = request
+      # mylog "column_sets: #{Model.current.column_sets}"
       @column_set = Model.current.column_sets[@class_snake.to_sym]
       # mylog "[WARN] column_set is not defined: #{@class_snake}" unless @column_set
       if @column_set
@@ -76,7 +77,7 @@ module Ezframe
         into_html_header: Materialize.into_html_header,
         into_bottom_of_body: Materialize.into_bottom_of_body,
       }
-      Template.fill("template/base.html", args)
+      Template.fill_from_file("template/base.html", args)
     end
 
     def parse_json_body(body)

@@ -48,6 +48,10 @@ module Ezframe
         @value_h[k]=v
       end
 
+      def delete(k)
+        @value_h.delete(k) if @value_h[k]
+      end
+
       def inspect
         @value_h.inspect
       end
