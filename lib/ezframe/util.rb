@@ -106,6 +106,7 @@ end
 
 def mylog(msg)
   if File.exist?("log")
-    File.open("log/mylog.log", "a"){|f| f.puts "#{Time.now}:[#{$$}]:#{msg}" }
+    rack_env = ENV['RACK_ENV'] || "development"
+    File.open("log/#{rack_env}.log", "a"){|f| f.puts "#{Time.now}:[#{$$}]:#{msg}" }
   end
 end
