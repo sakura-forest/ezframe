@@ -16,6 +16,10 @@ module Ezframe
       @sequel = Sequel.connect(@dbfile, loggers: [Logger.new($stdout)])
     end  
 
+    def disconnect
+      @sequel.disconnect
+    end
+
     def exec(sql)
       @sequel.run(sql)  
     end  
