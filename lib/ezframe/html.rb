@@ -12,8 +12,8 @@ module Ezframe
 
         tag = ht_h[:tag]
         case tag
-        when "input"
-          input(ht_h)
+        when "textarea"
+          textarea(ht_h)
         when "select"
           return select(ht_h) if ht_h[:item]
         when "icon"
@@ -22,11 +22,13 @@ module Ezframe
         tag = ht_h[:tag]
         opt_s, child_s = join_attributes(ht_h)
         if !child_s.strip.empty? || %w[div span table tr td th textarea].include?(tag)
-          return "<#{ht_h[:tag]} #{opt_s}>#{child_s}</#{ht_h[:tag]}>"
+          start_tag = [ht_h[:tag], opt_s].compact.join(" ")
+          return "<#{start_tag}>#{child_s}</#{ht_h[:tag]}>"
         end
         "<#{ht_h[:tag]} #{opt_s} />"
       end
 
+      # attributeの連結文字列化
       def join_attributes(attrs)
         child_s = ""
         opt_a = attrs.map do |k, v|
@@ -52,7 +54,7 @@ module Ezframe
         [opt_a.compact.join(" "), child_s]
       end
 
-      def input(ht_h)
+      def input_obsolete(ht_h)
         size = ht_h[:size]
         # puts "input: size=#{size.inspect}"
         if size && (size.index("x") || size.index("*"))
@@ -62,6 +64,15 @@ module Ezframe
           end
           ht_h[:tag] = "textarea"
           ht_h[:child] = ht_h[:value]
+          ht_h.delete(:value)
+        end
+      end
+
+      def textarea(ht_h)
+        value = ht_h[:value]
+        if value
+          value = value.gsub(/\n/, Config[:newline_mark]||"<br>")
+          ht_h[:child] = value
           ht_h.delete(:value)
         end
       end

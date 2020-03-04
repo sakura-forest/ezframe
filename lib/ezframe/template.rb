@@ -3,7 +3,7 @@
 module Ezframe
   class Template
     class << self
-      def fill(filename, opts = {})
+      def fill_from_file(filename, opts = {})
         dir = File.dirname(filename)
         unless File.exist?(filename)
           raise "fill_template: file does not exist: #{filename}"

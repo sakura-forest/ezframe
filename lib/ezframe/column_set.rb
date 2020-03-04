@@ -47,7 +47,7 @@ module Ezframe
   class ColumnSet
     attr_accessor :name, :parent, :edit_keys, :view_keys
 
-    def initialize(parent:, name: nil, columns: nil)
+    def initialize(parent: nil, name: nil, columns: nil)
       @parent = parent
       @name = name 
       @columns ||= {}

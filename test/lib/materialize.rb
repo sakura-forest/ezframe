@@ -1,17 +1,15 @@
 # frozen_string_literal: true
-
-require 'minitest/autorun'
-require 'lib/ezframe.rb'
-
+require_relative "../test_helper.rb"
 require 'nokogiri'
 
-class MaterializeTest < Minitest::Test
+class MaterializeTest < GenericTest
   include Ezframe
 
   def test_convert
     hthash = Ht.input(type: 'text', name: 'v1')
     res = Materialize.convert(hthash)
     html = Html.convert(res)
+    p html
     doc = Nokogiri::HTML(html)
     assert_equal(2, doc.search('div').length)
   end

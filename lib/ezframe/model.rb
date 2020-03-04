@@ -5,19 +5,19 @@ module Ezframe
     class << self
       attr_accessor :current
 
-      def init_column_sets
+      def init_column_sets(columns_dir = './columns')
         @base_column_sets = ColumnSets.new
-        @base_column_sets.load_files('./columns')
+        @base_column_sets.load_files(columns_dir)
       end  
 
-      def init_db
-        @base_db = Database.new
+      def init_db(database = nil)
+        @base_db = Database.new(database)
       end
 
-      def init
+      def init(columns_dir: nil, database: nil)
         unless @base_column_sets
-          init_column_sets
-          init_db
+          init_column_sets(columns_dir)
+          init_db(database)
         end
       end
 

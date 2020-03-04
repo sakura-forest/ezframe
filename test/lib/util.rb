@@ -1,9 +1,7 @@
 # frozen_string_literal: true
+require_relative "../test_helper.rb"
 
-require 'minitest/autorun'
-require 'ezframe/util.rb'
-
-class MaterializeTest < Minitest::Test
+class MaterializeTest < GenericTest
   def test_add_class
     h = { a: 1, b: 2, class: "a" }
     h.add_class("b")

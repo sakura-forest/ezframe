@@ -1,14 +1,13 @@
 # frozen_string_literal: true
+require_relative "../test_helper.rb"
 
-require "minitest/autorun"
-require "lib/ezframe.rb"
-
-class ModelTest < Minitest::Test
+class ModelTest < GenericTest
   def test_model
-    model = Model::Bridge.instance
-    colset = model.column_sets[:customer]
+    Model.init(columns_dir: "test/data", database: "sqlite://db/test.sqlite")
+    model = Model.get_clone
+    colset = model.column_sets[:sample]
     assert(colset)
-    assert(colset[:email])
-    assert(colset[:email].respond_to?(:value))
+    assert(colset[:v1])
+    assert(colset[:v1].respond_to?(:value))
   end
 end  

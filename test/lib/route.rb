@@ -1,7 +1,5 @@
 # frozen_string_literal: true
-
-require 'minitest/autorun'
-require 'ezframe.rb'
+require_relative "../test_helper.rb"
 
 class Request
   attr_accessor :path_info, :request_method
@@ -27,7 +25,7 @@ module Ezframe
   end
 end
 
-class RouteTest < Minitest::Test
+class RouteTest < GenericTest
   def test_make_method_name
     assert_equal("public_foo_get", Ezframe::Route.make_method_name("foo", "GET"))
   end
@@ -63,11 +61,5 @@ class RouteTest < Minitest::Test
     route_h = { top: { second: { third: nil }, v2: { fourth: nil }}}
     assert_equal([ :top, :second, :third ], Ezframe::Route.get_path(:third, route_h))
     assert_equal([ :top, :v2, :fourth ], Ezframe::Route.get_path(:fourth, route_h))
-  end
-
-  def test_scan_auth
-    route_h = { top: { second: { third: nil }}}
-    Ezframe::Top.auth = true
-    assert_equal(Ezframe::Top, Ezframe::Route.scan_auth("third", route_h))
   end
 end

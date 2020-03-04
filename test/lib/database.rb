@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-require "minitest/autorun"
-require "lib/ezframe.rb"
+require_relative "../test_helper.rb"
 
-class ColumnTypeTest < Minitest::Test
+class ColumnTypeTest < GenericTest
   def test_basic_table_management
     db_file = "db/test.sqlite"
     db = Model::Database.new(db_file)

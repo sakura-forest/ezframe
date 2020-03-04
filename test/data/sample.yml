@@ -1,0 +1,6 @@
+- key: v1
+  label: label1
+  type: text
+- key: v2
+  label: label2
+  type: int
