@@ -25,12 +25,9 @@ module Ezframe
     # Rackのrequestを代入し、関連するインスタンス変数を定義
     def set_request(request)
       @request = request
-      # mylog "column_sets: #{Model.current.column_sets}"
-      @column_set = Model.current.column_sets[@class_snake.to_sym]
+      @column_set = request[:model].column_sets[@class_snake.to_sym]
       # mylog "[WARN] column_set is not defined: #{@class_snake}" unless @column_set
-      if @column_set
-        @dataset = @column_set.dataset
-      end
+      @dataset = @column_set.dataset if @column_set
       @params = parse_query_string(request.env["QUERY_STRING"])
       @params.update(request.params)
       mylog "params=#{@params.inspect}" if @params.length > 0

@@ -12,6 +12,7 @@ module Ezframe
       def exec(request, response)
         @request = request
         model = Model.get_clone
+        @request[:model] = model
         mylog("exec: path=#{request.path_info} params=#{request.params}")
         page_instance, method, url_params = Route::choose(request)
         mylog "page: #{page_instance.class}, method=#{method}, url_params=#{url_params}"

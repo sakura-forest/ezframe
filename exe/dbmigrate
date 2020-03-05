@@ -5,7 +5,7 @@ include Ezframe
 
 Config.init
 Model.init
-Model.get_clone
+$model = Model.get_clone
 
 class DBInfo
   class << self
@@ -66,7 +66,7 @@ end
 
 def exec_sql(sql)
   begin
-    Model.current.db.sequel.run(sql)
+    $model.db.sequel.run(sql)
   rescue => exception
     p exception
   end
@@ -91,9 +91,9 @@ end
 
 def check_diff(column_set)
   table_name = column_set.name
-  dbcols = DBInfo.get_db_info(Model.current.db, table_name)
+  dbcols = DBInfo.get_db_info($model.db, table_name)
   unless dbcols
-    Model.current.create_one_table(table_name, Model.current.column_sets[table_name.to_sym])
+    $model.create_one_table(table_name, $model.column_sets[table_name.to_sym])
     return
   end
   column_set.each do |column|
@@ -113,6 +113,6 @@ def check_diff(column_set)
   end
 end
 
-Model.current.column_sets.each do |table_name, column_set|
+$model.column_sets.each do |table_name, column_set|
   check_diff(column_set)
 end
