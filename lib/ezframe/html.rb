@@ -72,7 +72,6 @@ module Ezframe
       def textarea(ht_h)
         value = ht_h[:value]
         if value
-          # value = value.gsub(/\n/, Config[:newline_mark]||"<br>")
           ht_h[:child] = value
           ht_h.delete(:value)
         end

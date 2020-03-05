@@ -112,17 +112,8 @@ module Ezframe
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-#      if @attribute[:size]
-#        val = @value
-#        mark = Config[:newline_mark]||"<br>"
-#        if val && val.index("\n")
-#          val.gsub!(/\n/, mark)
-#        end
-#        h = Ht.textarea(name: self.key, label: @attribute[:label], child: val)
-#      else
       h = Ht.input(type: "text", name: self.key, label: @attribute[:label], value: @value || "")
       h[:class] = @attribute[:class] if @attribute[:class]
-#      end
       return h
     end
 
@@ -133,21 +124,13 @@ module Ezframe
 
   class TextareaType < TextType
     def value=(val)
-      val = normalize(val)
-      mark = Config[:newline_mark]||"<br>"
-      if val && val.index(mark)
-        val.gsub!(/#{mark}/, "\n") 
-      end
+      @value = normalize(val)
       @value = val
     end
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
       val = @value
-      mark = Config[:newline_mark]||"<br>"
-      #if val && val.index("\n")
-      #  val.gsub!(/\n/, mark)
-      #end
       h = Ht.textarea(name: self.key, label: @attribute[:label], child: val)
       h[:class] = @attribute[:class] if @attribute[:class]
       return h
