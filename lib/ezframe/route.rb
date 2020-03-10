@@ -81,7 +81,7 @@ module Ezframe
           return [ target ]
         else
           route_h.each do |k, v|
-            next if k == :class
+            next if k.to_s =~ /^option_/
             if v.is_a?(Hash)
               a = _scan_route(target, v)
               if @get_path_found_it
