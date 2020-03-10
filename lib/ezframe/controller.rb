@@ -11,8 +11,7 @@ module Ezframe
 
       def exec(request, response)
         @request = request
-        model = Model.get_clone
-        @request[:model] = model
+        @request[:model] = @model = Model.get_clone
         mylog("exec: path=#{request.path_info} params=#{request.params}")
         page_instance, method, url_params = Route::choose(request)
         mylog "page: #{page_instance.class}, method=#{method}, url_params=#{url_params}"
@@ -27,7 +26,7 @@ module Ezframe
           warden.authenticate! 
           # mylog "Controller.exec: warden.options = #{@request.env['warden.options']}"
         end
-        session = request.env['rack.session']
+        session = @request.env['rack.session']
         mylog "rack.session.keys=#{session.keys}" if session
         page_instance.set_request(@request)
         body = page_instance.send(method)
