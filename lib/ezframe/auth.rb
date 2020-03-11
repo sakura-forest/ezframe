@@ -47,10 +47,13 @@ module Ezframe
         # mylog "env=#{env.inspect}"
         env['rack.session'][:user] = @user[:id]
         password = @user[auth_conf[:password].to_sym]
+        bcrypt = BCrypt::Password.new(password)
         @user.delete(:password)
 
-        return nil if !pass || !password
-        !!(password == pass)
+        return nil if !pass || pass.strip.empty? || !password || password.strip.empty?
+        # 生パスワード比較
+        # !!(password == pass)
+        return bcrypt == pass
       end
     end
 

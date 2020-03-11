@@ -129,7 +129,11 @@ module Ezframe
         end
         prev_value = column.value
         column.value = new_value
-        if prev_value != column.value
+        if column.respond_to?("equal?")
+          unless column.equal?(prev_value, column.value)
+            updated_values[colkey] = column.set_for_db(value)
+          end
+        elsif prev_value != column.value
           updated_values[colkey] = column.value
         end
       end

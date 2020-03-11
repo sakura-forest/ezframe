@@ -210,17 +210,29 @@ module Ezframe
     def initialize(attr = nil)
       super(attr)
       @attribute[:no_view] = true
+      @encrypt_on_set = true
+    end
+
+    def encrypt_value
+      crypt = BCrypt::Password.create(@value)
+      @value = crypt.to_s
+    end
+
+    def equal?(value_from_db, new_value)
+      @crypt = Bcrypt::Password.new(value_from_db)
+      return @crypt == new_value
     end
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      h = { tag: "input", type: "password", name: self.key, label: @attribute[:label], value: @value || "" }
+      h = { tag: "input", type: "password", name: self.key, label: @attribute[:label], value: "" }
       h[:class] = @attribute[:class] if @attribute[:class]
       return h
     end
 
     def db_value
-      return value
+      crypt = Bcrypt::Password.create(@value)
+      return crypt.to_s
     end
   end
 
