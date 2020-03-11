@@ -27,6 +27,7 @@ module Ezframe
           # mylog "Controller.exec: warden.options = #{@request.env['warden.options']}"
         end
         session = @request.env['rack.session']
+        session["in_controller"] = "set in controller"
         mylog "rack.session.keys=#{session.keys}" if session
         page_instance.set_request(@request)
         body = page_instance.send(method)

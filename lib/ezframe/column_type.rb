@@ -88,7 +88,7 @@ module Ezframe
     end
 
     def no_view?
-      return (@attribute[:hidden] && !@attribute[:force])
+      return (@attribute[:hidden] || @attribute[:no_view]) && !@attribute[:force]
     end
 
     def multi_inputs?
@@ -207,6 +207,11 @@ module Ezframe
   end
 
   class PasswordType < TextType
+    def initialize(attr = nil)
+      super(attr)
+      @attribute[:no_view] = true
+    end
+
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
       h = { tag: "input", type: "password", name: self.key, label: @attribute[:label], value: @value || "" }
