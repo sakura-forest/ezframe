@@ -5,23 +5,23 @@ module Ezframe
 
       def init
         Warden::Manager.serialize_into_session do |auth|
-          # mylog "serialize_into: #{auth.inspect}"
+          # Logger.info "serialize_into: #{auth.inspect}"
           auth.user[:id]
         end
         Warden::Manager.serialize_from_session do |account|
-          # mylog "serialize_from: account = #{account}"
+          # Logger.info "serialize_from: account = #{account}"
           inst = Auth.get(account)
-          # mylog "inst = #{inst.inspect}"
+          # Logger.info "inst = #{inst.inspect}"
           inst
         end
         Warden::Strategies.add(:mystrategy) do
           def valid?
-            # mylog "valid?"
+            # Logger.info "valid?"
             params["account"] || params["password"]
           end
 
           def authenticate!
-            mylog "authenticate!: #{params}"
+            Logger.info "authenticate!: #{params}"
             if Auth.authenticate(env, params["account"], params["password"])
               success!(Auth.get(params["account"]))
             else
@@ -39,12 +39,12 @@ module Ezframe
         auth_conf = Config[:auth]
         @user = Model.current.db.dataset(auth_conf[:table]).where(auth_conf[:user].to_sym => account ).first
         if @user
-          mylog "Auth: authenticate"
+          Logger.info "Auth: authenticate"
         else
-          mylog "authenticate: this user does not exist: #{account}"
+          Logger.info "authenticate: this user does not exist: #{account}"
           return nil
         end
-        # mylog "env=#{env.inspect}"
+        # Logger.info "env=#{env.inspect}"
         env['rack.session'][:user] = @user[:id]
         password = @user[auth_conf[:password].to_sym]
         bcrypt = BCrypt::Password.new(password)
@@ -69,7 +69,7 @@ module Ezframe
         @user = dataset.where(auth_conf[:user].to_sym => account).first
       end
       unless @user
-        mylog "Auth.initialize: This user does not exist: #{account}"
+        Logger.info "Auth.initialize: This user does not exist: #{account}"
       end
       self.password = @user[auth_conf[:password].to_sym]
       @user.delete(:password)

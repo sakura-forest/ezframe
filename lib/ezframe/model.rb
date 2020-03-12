@@ -40,14 +40,14 @@ module Ezframe
         begin
           create_one_table(table_name, column_set)
         rescue => e
-          mylog("*** #{e.inspect}\n#{$@.inspect}")
+          Logger.info("*** #{e.inspect}\n#{$@.inspect}")
         end
       end
     end
 
     def create_one_table(table_name, column_set)
       col_h = column_set.get_hash(:db_type)
-      mylog "create_one_table: col_h=#{col_h.inspect}"
+      Logger.info "create_one_table: col_h=#{col_h.inspect}"
       @db.create_table(table_name, col_h)
     end  
   end

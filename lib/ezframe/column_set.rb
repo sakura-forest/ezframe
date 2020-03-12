@@ -22,7 +22,7 @@ module Ezframe
       #  raise "YAML load error: #{filename}"
       #end
       if yaml.length == 0
-        mylog("[ERROR] columns file is empty: #{filename}")
+        Logger.info("[ERROR] columns file is empty: #{filename}")
         return
       end
       column_info = yaml.recursively_symbolize_keys
@@ -104,16 +104,16 @@ module Ezframe
 
     # 新規に値を登録する
     def create
-      col_h = get_hash(:value)
+      col_h = get_hash(:db_value)
       col_h.delete(:id)
       col_h.delete(:created_at)
       col_h[:updated_at] = Time.now
       id = @columns[:id]
-      if id.value.to_i > 0
-        dataset.where(id: id.value).update(col_h)
-      else
-        return dataset.insert(col_h)
-      end
+      #if id.value.to_i > 0
+      #  dataset.where(id: id.value).update(col_h)
+      #else
+      #  return dataset.insert(col_h)
+      #end
     end
 
     # データベース上の値の更新
@@ -139,7 +139,7 @@ module Ezframe
       end
       if updated_values.length > 0
         updated_values[:updated_at] = Time.now
-        puts dataset.where(id: id).update_sql(updated_values) 
+        # puts dataset.where(id: id).update_sql(updated_values) 
         dataset.where(id: id).update(updated_values) 
       end
     end
@@ -208,7 +208,7 @@ module Ezframe
         return @edit_keys.map do |key| 
           col = @columns[key.to_sym]
           unless col
-            mylog "[ERROR] @edit_keys has unknown column:name=#{@name}:key=#{key}"
+            Logger.info "[ERROR] @edit_keys has unknown column:name=#{@name}:key=#{key}"
             next
           end
           col.form
@@ -223,7 +223,7 @@ module Ezframe
         return @view_keys.map do |key| 
           col = @columns[key.to_sym]
           unless col
-            mylog "[ERROR] @view_keys has unknown column:name=#{@name}:key=#{key}"
+            Logger.info "[ERROR] @view_keys has unknown column:name=#{@name}:key=#{key}"
             next
           end
           col.view

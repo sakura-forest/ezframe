@@ -28,17 +28,17 @@ module Ezframe
       @model = request[:model]
       @model = request[:model] = Model.get_clone unless @model
       @column_set = @model.column_sets[@class_snake.to_sym]
-      mylog "[WARN] column_set is not defined: #{@class_snake}" unless @column_set
+      Logger.info "[WARN] column_set is not defined: #{@class_snake}" unless @column_set
       if @column_set
         @dataset = @column_set.dataset if @column_set
       end
       @params = parse_query_string(request.env["QUERY_STRING"])
       @params.update(request.params)
-      # mylog "set_request: params=#{@params.inspect}" if @params.length > 0
+      # Logger.info "set_request: params=#{@params.inspect}" if @params.length > 0
       # @id, @key = @params[:id], @params[:key]
       @env = @request.env
       @session = @env["rack.session"]
-      # mylog "session = #{@session.inspect}"
+      # Logger.info "session = #{@session.inspect}"
       if %w[POST PUT].include?(request.request_method)
         body = @request.body.read
         if request.content_type.index("json")
@@ -46,9 +46,9 @@ module Ezframe
         else
           @parsed_body = parse_query_string(body)
         end
-        # mylog "parsed_body=#{@parsed_body.inspect}"
+        # Logger.info "parsed_body=#{@parsed_body.inspect}"
         @event = @parsed_body[:event] || {}
-        # mylog "event=#{@event}"
+        # Logger.info "event=#{@event}"
       end
     end
 
@@ -56,7 +56,7 @@ module Ezframe
     def make_base_url(id = nil)
       path = Route::get_path(@class_snake)
       params = @request.env["url_params"]
-      # mylog "make_base_url: params=#{params}"
+      # Logger.info "make_base_url: params=#{params}"
       # params[@class_snake.to_sym] = id
       path_s = path.map do |pa|
         if pa == @class_snake.to_sym && id
@@ -67,7 +67,7 @@ module Ezframe
           pa
         end
       end.join("/")
-      # mylog "path_s=#{path_s}"
+      # Logger.info "path_s=#{path_s}"
       return "/#{path_s}"
     end
 
@@ -86,7 +86,7 @@ module Ezframe
       begin
         json = JSON.parse(body)
       rescue => e
-        mylog "ERROR: #{e.class}:#{e.message}\n#{e.backtrace}"
+        Logger.info "ERROR: #{e.class}:#{e.message}\n#{e.backtrace}"
         return nil
       end
       json = json.recursively_symbolize_keys if json.is_a?(Hash) || json.is_a?(Array)

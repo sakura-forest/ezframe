@@ -316,7 +316,7 @@ module Ezframe
       if v.is_a?(Date) || v.is_a?(Time)
         @value = v
       else
-        mylog "[WARN] illegal value for date type: #{v.inspect}"
+        Logger.info "[WARN] illegal value for date type: #{v.inspect}"
       end
     end
 

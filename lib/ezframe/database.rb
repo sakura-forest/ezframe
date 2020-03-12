@@ -13,7 +13,7 @@ module Ezframe
     def connect
       @dbfile ||= ENV["EZFRAME_DB"] || Config[:database] # || "sqlite://db/devel.sqlite"
       # puts "Database.connect: dbfile=#{@dbfile}"
-      @sequel = Sequel.connect(@dbfile, loggers: [Logger.new($stdout)])
+      @sequel = Sequel.connect(@dbfile, loggers: [Logger])
     end  
 
     def disconnect

@@ -20,7 +20,7 @@ module Ezframe
           elsif ENV[keyword]
             ENV[keyword]
           else
-            mylog "[WARN] no value for keyword: #{keyword}"
+            Logger.info "[WARN] no value for keyword: #{keyword}"
             nil
           end
         end

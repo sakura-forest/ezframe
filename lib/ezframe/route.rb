@@ -21,20 +21,20 @@ module Ezframe
         while path_parts.length > 0
           part = path_parts.shift
           # break if part.empty?
-          # mylog "part=#{part}, route_h=#{route_h.inspect}"
+          # Logger.info "part=#{part}, route_h=#{route_h.inspect}"
           if route_h.has_key?(part.to_sym)
-            # mylog "has_route: #{part}"
+            # Logger.info "has_route: #{part}"
             class_a.push(part)
             if path_parts[0].to_i > 0
               args[part.to_sym] = val = path_parts.shift
-              # mylog "value: part=#{part}, val=#{val}"
+              # Logger.info "value: part=#{part}, val=#{val}"
             end
             route_h = route_h[part.to_sym]
             break if route_h.nil?
-            # mylog "route_h changed: #{route_h}"
+            # Logger.info "route_h changed: #{route_h}"
           else
             # routeに無ければ、メソッドを探す
-            # mylog "no_route: #{part}"
+            # Logger.info "no_route: #{part}"
             klass = get_class(class_a[-1])
             return [ 404 ] unless klass
             instance = klass.new
@@ -42,7 +42,7 @@ module Ezframe
             if instance.respond_to?(method_name)
               return [instance, method_name, args]
             else
-              mylog "undefined method: #{klass}.#{method_name}: full path=#{request.path_info}"
+              Logger.info "undefined method: #{klass}.#{method_name}: full path=#{request.path_info}"
             end
           end
         end
@@ -56,7 +56,7 @@ module Ezframe
           part = "default"
         end
         method_name = make_method_name(part, request.request_method)
-        #mylog "method_name=#{method_name}"
+        #Logger.info "method_name=#{method_name}"
         instance = klass.new
         if instance.respond_to?(method_name)
           return [instance, method_name, args]
@@ -67,7 +67,7 @@ module Ezframe
       # ページクラスの階層を辿る
       def get_path(class_snake, route_h = nil)
         route_h = Config[:route] unless route_h
-        # mylog "get_path: route_h=#{route_h}"
+        # Logger.info "get_path: route_h=#{route_h}"
         @get_path_found_it = nil
         route =_scan_route(class_snake, route_h.deep_dup) 
         return route.reverse if route
@@ -99,7 +99,7 @@ module Ezframe
       def scan_auth(target, route_h = nil)
         target = class_to_snake(target) if target.is_a?(Class)
         path = get_path(target, route_h)
-        mylog "scan_auth: target=#{target} path=#{path}"
+        Logger.info "scan_auth: target=#{target} path=#{path}"
         return nil unless path
         path.each do |class_snake|
           klass = get_class([class_snake])
@@ -115,11 +115,11 @@ module Ezframe
       end
 
       def get_class(keys)
-        # mylog "get_class: #{keys.inspect}"
+        # Logger.info "get_class: #{keys.inspect}"
         return nil unless keys
         keys = [ keys ] if keys.is_a?(String)
         klass = (%w[Ezframe] + keys.map { |k| k.to_s.to_camel }).join("::")
-        # mylog "get_class: #{klass}"
+        # Logger.info "get_class: #{klass}"
         if Object.const_defined?(klass)
           return Object.const_get(klass)
         else

@@ -103,10 +103,3 @@ def parse_query_string(str)
   query_a.map { |a| res_h[a[0].to_sym] = a[1] }
   return res_h
 end
-
-def mylog(msg)
-  if File.exist?("log")
-    rack_env = ENV['RACK_ENV'] || "development"
-    File.open("log/#{rack_env}.log", "a"){|f| f.puts "#{Time.now}:[#{$$}]:#{msg}" }
-  end
-end

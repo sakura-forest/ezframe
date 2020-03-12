@@ -12,23 +12,23 @@ module Ezframe
       def exec(request, response)
         @request = request
         @request[:model] = @model = Model.get_clone
-        # mylog("exec: path=#{request.path_info} params=#{request.params}")
+        # Logger.info("exec: path=#{request.path_info} params=#{request.params}")
         page_instance, method, url_params = Route::choose(request)
-        # mylog "page: #{page_instance.class}, method=#{method}, url_params=#{url_params}"
+        # Logger.info "page: #{page_instance.class}, method=#{method}, url_params=#{url_params}"
         if !page_instance || page_instance == 404
           file_not_found(response)
           return
         end
         @request.env["url_params"] = url_params
         # auth_class = Route.scan_auth(page_instance.class)
-        # mylog "auth_class=#{auth_class}"
+        # Logger.info "auth_class=#{auth_class}"
         if Config[:auth]
           warden.authenticate! 
-          # mylog "Controller.exec: warden.options = #{@request.env['warden.options']}"
+          # Logger.info "Controller.exec: warden.options = #{@request.env['warden.options']}"
         end
         session = @request.env['rack.session']
         session["in_controller"] = "set in controller"
-        mylog "rack.session.keys=#{session.keys}" if session
+        Logger.info "rack.session.keys=#{session.keys}" if session
         page_instance.set_request(@request)
         body = page_instance.send(method)
 
@@ -36,9 +36,9 @@ module Ezframe
         if body.is_a?(Hash) || body.is_a?(Array)
           # puts  "Controller: body = #{body}"
           # body.gsub!(/\n/, Config[:newline_mark]||"<br>")
-          # mylog("body=#{body}")
+          # Logger.info("body=#{body}")
           json = JSON.generate(body)
-          # mylog("json=#{json}")
+          # Logger.info("json=#{json}")
           response.body = [ json ]
           response['Content-Type'] = 'application/json; charset=utf-8'
         else
