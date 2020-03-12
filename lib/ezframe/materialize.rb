@@ -8,12 +8,12 @@ module Ezframe
         js_a = Config[:extra_js_list].map {|file| "<script src=\"#{file}\"></script>\n" }
 
         css_files = Dir["./asset/css/*.css"]||[]
-        css_a += css_files.map do |file|
+        css_a += css_files.sort.map do |file|
           file.gsub!("./asset", "")
           "<link href=\"#{file}\" rel=\"stylesheet\">\n"
         end
         js_files = Dir["./asset/js/*.js"]||[]
-        js_a += js_files.map do |file|
+        js_a += js_files.sort.map do |file|
           file.gsub!("./asset", "")
           "<script src=\"#{file}\"></script>\n"
         end

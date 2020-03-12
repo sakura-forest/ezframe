@@ -12,9 +12,9 @@ module Ezframe
       def exec(request, response)
         @request = request
         @request[:model] = @model = Model.get_clone
-        mylog("exec: path=#{request.path_info} params=#{request.params}")
+        # mylog("exec: path=#{request.path_info} params=#{request.params}")
         page_instance, method, url_params = Route::choose(request)
-        mylog "page: #{page_instance.class}, method=#{method}, url_params=#{url_params}"
+        # mylog "page: #{page_instance.class}, method=#{method}, url_params=#{url_params}"
         if !page_instance || page_instance == 404
           file_not_found(response)
           return

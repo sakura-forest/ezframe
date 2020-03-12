@@ -34,7 +34,7 @@ module Ezframe
       end
       @params = parse_query_string(request.env["QUERY_STRING"])
       @params.update(request.params)
-      mylog "set_request: params=#{@params.inspect}" if @params.length > 0
+      # mylog "set_request: params=#{@params.inspect}" if @params.length > 0
       # @id, @key = @params[:id], @params[:key]
       @env = @request.env
       @session = @env["rack.session"]
