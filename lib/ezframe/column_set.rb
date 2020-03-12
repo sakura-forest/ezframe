@@ -112,7 +112,7 @@ module Ezframe
       #if id.value.to_i > 0
       #  dataset.where(id: id.value).update(col_h)
       #else
-      #  return dataset.insert(col_h)
+      return dataset.insert(col_h)
       #end
     end
 

@@ -231,7 +231,7 @@ module Ezframe
     end
 
     def db_value
-      crypt = Bcrypt::Password.create(@value)
+      crypt = BCrypt::Password.create(@value)
       return crypt.to_s
     end
   end
