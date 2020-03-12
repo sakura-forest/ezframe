@@ -58,12 +58,6 @@ module Ezframe
       nil
     end
 
-    def form_html(opts = {})
-      form_h = form(opts)
-      return nil unless form_h
-      return Html.convert(form_h)
-    end
-
     def view(opts = {})
       return nil if no_view?
       @value
@@ -218,7 +212,7 @@ module Ezframe
       @value = crypt.to_s
     end
 
-    def equal?(value_from_db, new_value)
+    def value_equal?(value_from_db, new_value)
       @crypt = Bcrypt::Password.new(value_from_db)
       return @crypt == new_value
     end
@@ -339,6 +333,42 @@ module Ezframe
       @attribute[:class] = "datetimepicker"
     end
 
+    def value=(v)
+      if v.nil?
+        default = @attribute[:default]
+        if default
+          @value = default
+        else
+          @value = nil
+        end
+        return
+      end
+      if v.is_a?(String)
+        if v.strip.empty?
+          @value = nil
+          return
+        end
+        begin
+          @value = Datetime.parse(v)
+        rescue
+          @value = nil
+        end
+        return
+      end
+      if v.is_a?(Date) || v.is_a?(Time) || v.is_a?(DateTime)
+        @value = v
+      else
+        Logger.info "[WARN] illegal value for date type: #{v.inspect}"
+      end
+    end
+
+    def view
+      return nil if no_view? && !opts[:force]
+      if @value.is_a?(Time) || @value.is_a?(DateTime)
+        return "%d/%02d/%02d %02d:%02d:%02d"%[@value.year, @value.mon, @value.mday, @value.hour, @value.min, @value.sec]
+      end
+    end
+
     def form(opts = {})
       form = super(opts)
       return nil unless form
@@ -360,6 +390,7 @@ module Ezframe
         year = now.year - y - 10
         year_list.push [year, "#{year}年 (#{Japanese.convert_wareki(year)})"]
       end
+      year_list.unshift([ 0, "(年)" ])
 
       year, mon, mday = parse_date(@value)
       mon_list = (1..12).map { |m| [m, "#{m}月"] }
