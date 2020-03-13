@@ -65,6 +65,7 @@ module Ezframe
 
       alias_method :small, :wrap_tag
       alias_method :pre, :wrap_tag
+      alias_method :iframe, :wrap_tag
 
       alias_method :checkbox, :wrap_tag
       alias_method :radio, :wrap_tag
