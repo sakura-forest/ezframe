@@ -2,7 +2,7 @@
 require "logger"
 
 module Ezframe
-  class Model
+  module Model
     class DB
       class << self
         attr_accessor :sequel, :pool

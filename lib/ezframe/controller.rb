@@ -4,14 +4,14 @@ module Ezframe
     class << self
       def init
         Config.init
-        Model.init
+        ColumnSets.init
+        DB.init
         Message.init
         Auth.init if Config[:auth]
       end
 
       def exec(request, response)
         @request = request
-        @request[:model] = @model = Model.get_clone
         # Logger.info("exec: path=#{request.path_info} params=#{request.params}")
         page_instance, method, url_params = Route::choose(request)
         # Logger.info "page: #{page_instance.class}, method=#{method}, url_params=#{url_params}"

@@ -3,7 +3,7 @@
 require_relative "../test_helper.rb"
 
 class ColumnTypeTest < GenericTest
-  include Ezframe
+  include Ezframe::Model
 
   def test_basic_table_management
     basic_test(use_connnection_pool: true)

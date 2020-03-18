@@ -1,6 +1,7 @@
 module Ezframe
   class Auth
     class << self
+      include Model
       attr_accessor :user
 
       def init
@@ -37,7 +38,7 @@ module Ezframe
 
       def authenticate(env, account, pass)
         auth_conf = Config[:auth]
-        @user = Model.current.db.dataset(auth_conf[:table]).where(auth_conf[:user].to_sym => account ).first
+        @user = DB.dataset(auth_conf[:table]).where(auth_conf[:user].to_sym => account ).first
         if @user
           Logger.info "Auth: authenticate"
         else
@@ -62,7 +63,7 @@ module Ezframe
     def initialize(account)
       self.account = account
       auth_conf = Config[:auth]
-      dataset = Model.current.db.dataset(auth_conf[:table])
+      dataset = DB.dataset(auth_conf[:table])
       if account.is_a?(Integer)
         @user = dataset.where(id: account).first
       else

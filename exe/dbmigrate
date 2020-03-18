@@ -2,10 +2,7 @@
 #coding: utf-8
 require "ezframe"
 include Ezframe
-
-Config.init
-Model.init
-$model = Model.get_clone
+include Ezframe::Model
 
 class DBInfo
   class << self
@@ -66,7 +63,7 @@ end
 
 def exec_sql(sql)
   begin
-    $model.db.sequel.run(sql)
+    DB.sequel.run(sql)
   rescue => exception
     p exception
   end
@@ -93,7 +90,7 @@ def check_diff(column_set)
   table_name = column_set.name
   dbcols = DBInfo.get_db_info($model.db, table_name)
   unless dbcols
-    $model.create_one_table(table_name, $model.column_sets[table_name.to_sym])
+    DB.create_one_table(table_name, $model.column_sets[table_name.to_sym])
     return
   end
   column_set.each do |column|
@@ -113,6 +110,10 @@ def check_diff(column_set)
   end
 end
 
-$model.column_sets.each do |table_name, column_set|
+Config.init
+DB.init
+ColumnSets.init
+
+ColumnSets.each do |table_name, column_set|
   check_diff(column_set)
 end
