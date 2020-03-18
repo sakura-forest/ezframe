@@ -2,7 +2,7 @@
 
 require_relative "../test_helper.rb"
 
-class ColumnTypeTest < GenericTest
+class DatabaseTest < GenericTest
   include Ezframe::Model
 
   def test_basic_table_management

@@ -6,24 +6,24 @@ include Ezframe::Model
 
 class DBInfo
   class << self
-    def get_db_info(db, table_name)
+    def get_db_info(table_name)
       typ = get_database_type(Config[:database])
       case typ
       when "postgresql"
-        return get_info_from_postgres(db, table_name)
+        return get_info_from_postgres(table_name)
       when "sqlite"
-        return get_info_from_sqlite(db, table_name)
+        return get_info_from_sqlite(table_name)
       else
         raise "unknown database"
       end
       return nil
     end
 
-    def get_info_from_postgres(db, table_name)
+    def get_info_from_postgres(table_name)
       dbcol = {}
       sql = "SELECT column_name,data_type FROM information_schema.columns WHERE table_name = '#{table_name}'"
       begin
-        data_a = db.sequel[sql].all
+        data_a = Model::DB.sequel[sql].all
       rescue
         return nil
       end
@@ -34,9 +34,9 @@ class DBInfo
       return dbcol
     end
 
-    def get_info_from_sqlite(db, table_name)
+    def get_info_from_sqlite(table_name)
       sql = "SELECT * from sqlite_master WHERE name = '#{table_name}';"
-      data = db.sequel[sql].first
+      data = Model::DB.sequel[sql].first
       return nil unless data
       sql = data[:sql]
       return parse_create_sql(sql)
@@ -63,7 +63,7 @@ end
 
 def exec_sql(sql)
   begin
-    DB.sequel.run(sql)
+    Model::DB.sequel.run(sql)
   rescue => exception
     p exception
   end
@@ -88,9 +88,9 @@ end
 
 def check_diff(column_set)
   table_name = column_set.name
-  dbcols = DBInfo.get_db_info($model.db, table_name)
+  dbcols = DBInfo.get_db_info(table_name)
   unless dbcols
-    DB.create_one_table(table_name, $model.column_sets[table_name.to_sym])
+    Model::ColumnSets.create_one_table(table_name, Model::ColumnSets.get(table_name.to_sym))
     return
   end
   column_set.each do |column|

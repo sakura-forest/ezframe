@@ -4,7 +4,7 @@ module Ezframe
   module Model
     class ColumnSets
       class << self
-        def init(dir)
+        def init(dir = nil)
           dir ||= "./column"
           unless @colset_h
             @colset_h = {}

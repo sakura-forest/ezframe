@@ -63,7 +63,7 @@ module Ezframe
     def initialize(account)
       self.account = account
       auth_conf = Config[:auth]
-      dataset = DB.dataset(auth_conf[:table])
+      dataset = Model::DB.dataset(auth_conf[:table])
       if account.is_a?(Integer)
         @user = dataset.where(id: account).first
       else

@@ -4,8 +4,8 @@ module Ezframe
     class << self
       def init
         Config.init
-        ColumnSets.init
-        DB.init
+        Model::ColumnSets.init
+        Model::DB.init
         Message.init
         Auth.init if Config[:auth]
       end
