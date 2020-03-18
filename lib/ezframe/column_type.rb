@@ -187,6 +187,10 @@ module Ezframe
     def form
       return nil
     end
+
+    def db_type
+      return "int"
+    end
   end
 
   class IdType < IntType
