@@ -44,6 +44,10 @@ module Ezframe
           return @colset_h[colset_name.to_sym].deep_dup
         end
 
+        def [](colset_name)
+          return get(colset_name)
+        end
+
         def each
           @colset_h.each { |k, v| yield(k, v) }
         end

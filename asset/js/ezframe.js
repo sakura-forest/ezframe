@@ -48,9 +48,6 @@ function parse_event(event) {
       }
     }
   }
-  /*if (!ev.url) {
-    ev.url = location.pathname
-  }*/
   return ev
 }
 
@@ -67,10 +64,9 @@ function execute_event(obj) {
       }
       return
     case "set_global":
-      if (!window.ezframe) { window.ezframe = {} }
       for(key in event) {
-        if ([ "command", "branch", "on", "url" ].indexOf(key) >= 0) { continue }
-        window.ezframe[key] = event[key]
+        if ([ "command", "on", "url" ].indexOf(key) >= 0) { continue }
+        window.ez_global[key] = event[key]
       }
       // console.log("set_global:" + JSON.stringify(window.ezframe))
       return
@@ -278,11 +274,14 @@ function register_hover_button(obj) {
   }
 }
 
-/*
+
 document.addEventListener('DOMContentLoaded', function () {
+  if (!window.ez_global) { window.ez_global = {} }
   add_event(document)
 })
-*/
+
+/*
 $(document).ready(function () {
   add_event(document)
 })
+*/
