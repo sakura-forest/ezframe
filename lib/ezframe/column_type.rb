@@ -366,7 +366,7 @@ module Ezframe
       end
     end
 
-    def view
+    def view(opts = {})
       return nil if no_view? && !opts[:force]
       if @value.is_a?(Time) || @value.is_a?(DateTime)
         return "%d/%02d/%02d %02d:%02d:%02d"%[@value.year, @value.mon, @value.mday, @value.hour, @value.min, @value.sec]
