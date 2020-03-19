@@ -208,8 +208,8 @@ module Ezframe
 
       def get_matrix(method_a)
         return @columns.map do |_key, col|
-                 method_a.map { |method| col.send(method) }
-               end
+                  method_a.map { |method| col.send(method) }
+        end
       end
 
       def get_hash(method)
