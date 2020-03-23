@@ -47,4 +47,28 @@ class ColumnTypeTest < GenericTest
       "columns2.columns1","columns1.id","columns1.v1","columns1.v2", "columns1.created_at", "columns1.updated_at"].sort,
       structure[:column_list].sort)
   end
+
+  def test_column_set_collection
+    ColumnSets.init
+    columns1 = [
+      { key: 'v1', type: 'int', label: 'label1' },
+      { key: 'v2', type: 'int', label: 'label2' },
+    ]
+    columns2 = [
+      { key: 'v1', type: 'int', label: 'label1' },
+      { key: 'v2', type: 'int', label: 'label2' },
+      { key: 'columns1', type: 'foreign', label: 'foregin3' },
+    ]
+    colset1 = ColumnSets.add(:columns1, columns1)
+    colset2 = ColumnSets.add(:columns2, columns2)
+
+    collection = ColumnSetCollection.new
+    collection.values = { "columns1.v1": 1, "columns1.v2": 2, "columns2.v1": 3, "columns2.v2": 4 }
+    column = collection.get("columns1", "v1")
+    assert column
+    assert_equal(1, column.value)
+    assert_equal(2, collection.get("columns1", "v2").value)
+    assert_equal(3, collection.get("columns2", "v1").value)
+    assert_equal(4, collection.get("columns2", "v2").value)
+  end
 end

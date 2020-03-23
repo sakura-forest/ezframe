@@ -53,6 +53,7 @@ module Ezframe
         @sequel[table_name.to_sym]
       end
 
+      # テーブルを連結して、全てのデータを返す。
       def get_join_table(structure, where: nil)
         col_h = {}
         reverse_col_h = {}

@@ -110,6 +110,49 @@ module Ezframe
         end
         return struct
       end
+
+      # get_join_tableで取得した値を保存
+      def deep_set_values()
+      end
+    end
+  end
+
+  # ColumnSetを複数組み合わせて扱う
+  class ColumnSetCollection
+    attr_accessor :colset_list
+
+    def initialize
+      @colset_h = {}
+    end
+
+    def values=(data)
+      @colset_h.each {|key, colset| colset.clear }
+      set_values(data)
+    end
+
+    def set_values(data, default_table=nil)
+      data.each do |key, value|
+        if key.to_s.index(".")
+          table_key, col_key = key.to_s.split(".")
+          colset = @colset_h[table_key.to_sym]
+          unless colset
+            @colset_h[table_key.to_sym] = colset = ColumnSets[table_key]
+          end
+        elsif default_table
+          col_key = key
+          colset = @colset_h[default_table.to_sym]
+          unless colset
+            @colset_h[table_key.to_sym] = colset = ColumnSets[default_table]
+          end
+        end
+        colset[col_key].value = value
+      end
+    end
+
+    def get(colset_key, col_key)
+      colset = @colset_h[colset_key.to_sym]
+      return nil unless colset
+      return colset[col_key]
     end
   end
 
@@ -295,9 +338,9 @@ module Ezframe
       end
     end
 
-    def get_full_join
+    def get_full_join(where: nil)
       struct = ColumnSets.full_join_structure(self.name)
-      DB.get_join_table(struct)
+      return DB.get_join_table(struct, where)
     end
 
     def hidden_form

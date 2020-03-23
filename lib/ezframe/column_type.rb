@@ -180,12 +180,15 @@ module Ezframe
       @attribute[:no_edit] = true
     end
 
+    def target_table
+      table = @attribute[:table]
+      return table if table
+      return self.key
+    end
+
     def view(opts = {})
       return nil if no_view? && !opts[:force]
       return nil
-#      dataset = @parent.parent.model.db.dataset(self.key)
-#      data = dataset.get(id: @value)
-#      return data[@attribute[:view]]
     end
 
     def form
