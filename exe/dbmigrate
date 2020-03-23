@@ -2,7 +2,6 @@
 #coding: utf-8
 require "ezframe"
 include Ezframe
-include Ezframe::Model
 
 class DBInfo
   class << self
