@@ -295,6 +295,11 @@ module Ezframe
       end
     end
 
+    def get_full_join
+      struct = ColumnSets.full_join_structure(self.name)
+      DB.get_join_table(struct)
+    end
+
     def hidden_form
       return @columns.map do |colkey, coltype|
                { tag: "input", id: colkey, name: colkey, type: "hidden", value: coltype.value }

@@ -32,4 +32,32 @@ class DatabaseTest < GenericTest
     assert_equal(100, data_a.length)
     DB.disconnect
   end
+
+  def test_get_join_table
+    init_test_db
+    DB.create_table(:table1, { v1: "int", v2: "int", table2: "int" })
+    DB.create_table(:table2, { v1: "int", v2: "int" })
+    DB.insert(:table1, { v1: 1, v2: 2, table2: 1 })
+    DB.insert(:table2, { v1: 5, v2: 6 })
+    DB.insert(:table1, { v1: 3, v2: 4, table2: 2 })
+    DB.insert(:table2, { v1: 7, v2: 8 })
+
+    struct = { tables: [ :table1, :table2 ], column_list: %w[table1.v1 table1.v2 table2.v1 table2.v2 ]  }
+    data_a = DB.get_join_table(struct, where: "table1.id=1")
+    p data_a
+    assert_equal(1, data_a.length)
+    data = data_a[0]
+    assert_equal(1, data["table1.v1"])
+    assert_equal(2, data["table1.v2"])
+    assert_equal(5, data["table2.v1"])
+    assert_equal(6, data["table2.v2"])
+
+    data_a = DB.get_join_table(struct, where: "table1.id=2")
+    assert_equal(1, data_a.length)
+    data = data_a[0]
+    assert_equal(3, data["table1.v1"])
+    assert_equal(4, data["table1.v2"])
+    assert_equal(7, data["table2.v1"])
+    assert_equal(8, data["table2.v2"])
+  end
 end

@@ -27,16 +27,66 @@ module Ezframe
         @sequel.disconnect
       end
 
-      def exec(sql)
+      def get_conn
         if @pool
-          @pool.hold { |conn| conn.execute(sql) }
+          @pool.hold {|conn| return conn }
         else
-          @sequel.run(sql)
+          @sequel
         end
+      end
+
+      def exec(sql, first: nil)
+        conn = get_conn
+        if first
+          return conn[sql].first
+        else
+          return conn[sql].all
+        end
+      end
+
+      def run(sql)
+        conn = get_conn
+        conn.run(sql)
       end
 
       def dataset(table_name)
         @sequel[table_name.to_sym]
+      end
+
+      def get_join_table(structure, where: nil)
+        col_h = {}
+        reverse_col_h = {}
+        query_a = []
+        table_a = []
+        structure[:column_list].each_with_index do |k, i|
+          key = "_x_joint_value#{i+1}"
+          col_h[k.to_sym] = key.to_sym
+          reverse_col_h[key.to_sym] = k
+          query_a.push "#{k} AS #{key}"
+        end
+        tables = structure[:tables].clone
+        tb = tables.shift
+        table_part = [ tb]
+        tables.each do |table|
+          table_part.push " LEFT JOIN #{table} ON #{tb}.#{table} = #{table}.id"
+        end
+        sql = "SELECT #{query_a.join(', ')} FROM #{table_part.join(' ')}"
+        sql += " WHERE #{where}" if where
+        puts sql
+        data_a = self.exec(sql)
+        res_a = []
+        p data_a
+        data_a.each do |data|
+          puts "data=#{data.inspect}"
+          new_data = {}
+          data.each do |k, v|
+            orig_key = reverse_col_h[k.to_sym]
+            next unless orig_key
+            new_data[orig_key] = v
+          end
+          res_a.push(new_data)
+        end
+        return res_a
       end
 
       def create_table(table_name, dbtype_h)
