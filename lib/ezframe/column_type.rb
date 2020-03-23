@@ -38,6 +38,10 @@ module Ezframe
       @attribute[:label]
     end
 
+    def type
+      @attribute[:type]
+    end
+
     def value(_situation = nil)
       @value
     end

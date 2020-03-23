@@ -25,8 +25,8 @@ module Ezframe
     # Rackのrequestを代入し、関連するインスタンス変数を定義
     def set_request(request)
       @request = request
-      @column_set = Model::ColumnSets.get(@class_snake)
-      @dataset = Model::DB.dataset(@class_snake)
+      @column_set = ColumnSets.get(@class_snake)
+      @dataset = DB.dataset(@class_snake)
       Logger.info "[WARN] column_set is not defined: #{@class_snake}" unless @column_set
       @params = parse_query_string(request.env["QUERY_STRING"])
       @params.update(request.params)

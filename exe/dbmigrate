@@ -23,7 +23,7 @@ class DBInfo
       dbcol = {}
       sql = "SELECT column_name,data_type FROM information_schema.columns WHERE table_name = '#{table_name}'"
       begin
-        data_a = Model::DB.sequel[sql].all
+        data_a = DB.sequel[sql].all
       rescue
         return nil
       end
@@ -36,7 +36,7 @@ class DBInfo
 
     def get_info_from_sqlite(table_name)
       sql = "SELECT * from sqlite_master WHERE name = '#{table_name}';"
-      data = Model::DB.sequel[sql].first
+      data = DB.sequel[sql].first
       return nil unless data
       sql = data[:sql]
       return parse_create_sql(sql)
@@ -63,7 +63,7 @@ end
 
 def exec_sql(sql)
   begin
-    Model::DB.sequel.run(sql)
+    DB.sequel.run(sql)
   rescue => exception
     p exception
   end
@@ -90,7 +90,7 @@ def check_diff(column_set)
   table_name = column_set.name
   dbcols = DBInfo.get_db_info(table_name)
   unless dbcols
-    Model::ColumnSets.create_one_table(table_name, Model::ColumnSets.get(table_name.to_sym))
+    ColumnSets.create_one_table(table_name, ColumnSets.get(table_name.to_sym))
     return
   end
   column_set.each do |column|

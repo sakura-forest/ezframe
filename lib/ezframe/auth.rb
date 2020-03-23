@@ -1,7 +1,6 @@
 module Ezframe
   class Auth
     class << self
-      include Model
       attr_accessor :user
 
       def init
@@ -63,7 +62,7 @@ module Ezframe
     def initialize(account)
       self.account = account
       auth_conf = Config[:auth]
-      dataset = Model::DB.dataset(auth_conf[:table])
+      dataset = DB.dataset(auth_conf[:table])
       if account.is_a?(Integer)
         @user = dataset.where(id: account).first
       else

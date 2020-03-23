@@ -20,7 +20,7 @@ module Ezframe
           tag = "i"
         end
         tag = ht_h[:tag]
-        opt_s, child_s = join_attributes(ht_h)
+        opt_s, child_s = join_attribute(ht_h)
         if !child_s.strip.empty? || !%w[img input hr br meta].include?(tag)
           start_tag = [ht_h[:tag], opt_s].compact.join(" ").strip
           return "<#{start_tag}>#{child_s}</#{ht_h[:tag]}>"
@@ -30,7 +30,7 @@ module Ezframe
       end
 
       # attributeの連結文字列化
-      def join_attributes(attrs)
+      def join_attribute(attrs)
         child_s = ""
         opt_a = attrs.map do |k, v|
           case k
