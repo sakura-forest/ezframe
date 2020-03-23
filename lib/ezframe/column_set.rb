@@ -87,7 +87,7 @@ module Ezframe
       # foreignを反映させたテーブル連結情報を返す
       def full_join_structure(colset_id)
         struct = { tables: [colset_id] }
-        colset = @colset_h[colset_id]
+        colset = @colset_h[colset_id.to_sym]
         colset_keys = colset.keys
         struct[:column_list] = colset_keys.map { |k| "#{colset_id}.#{k}" }
         colset_keys.each do |key|
@@ -110,10 +110,6 @@ module Ezframe
         end
         return struct
       end
-
-      # get_join_tableで取得した値を保存
-      def deep_set_values()
-      end
     end
   end
 
@@ -121,8 +117,9 @@ module Ezframe
   class ColumnSetCollection
     attr_accessor :colset_list
 
-    def initialize
+    def initialize(default_table=nil)
       @colset_h = {}
+      @default_table = default_table
     end
 
     def values=(data)
@@ -130,7 +127,7 @@ module Ezframe
       set_values(data)
     end
 
-    def set_values(data, default_table=nil)
+    def set_values(data)
       data.each do |key, value|
         if key.to_s.index(".")
           table_key, col_key = key.to_s.split(".")
@@ -138,18 +135,28 @@ module Ezframe
           unless colset
             @colset_h[table_key.to_sym] = colset = ColumnSets[table_key]
           end
-        elsif default_table
+        elsif @default_table
           col_key = key
-          colset = @colset_h[default_table.to_sym]
+          colset = @colset_h[@default_table.to_sym]
           unless colset
-            @colset_h[table_key.to_sym] = colset = ColumnSets[default_table]
+            @colset_h[table_key.to_sym] = colset = ColumnSets[@default_table]
           end
         end
         colset[col_key].value = value
       end
     end
 
-    def get(colset_key, col_key)
+    def get(colset_key, col_key=nil)
+      if col_key.nil?
+        if colset_key.to_s.index(".")
+          colset_key, col_key = colset_key.to_s.split(".")
+        elsif @default_table
+          colset_key, col_key =  @default_table, colset_key
+        else
+          Logger.error "ColumnSetCollection.get: illegal arguments: #{colset_key}, #{col_key}"
+          return nil
+        end
+      end
       colset = @colset_h[colset_key.to_sym]
       return nil unless colset
       return colset[col_key]
@@ -340,7 +347,7 @@ module Ezframe
 
     def get_full_join(where: nil)
       struct = ColumnSets.full_join_structure(self.name)
-      return DB.get_join_table(struct, where)
+      return DB.get_join_table(struct, where: where)
     end
 
     def hidden_form
