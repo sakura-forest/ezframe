@@ -141,6 +141,13 @@ module Ezframe
       return @value.to_i.add_comma
     end
 
+    def normalize(val)
+      if val.is_a?(String)
+        val = val.tr("０-９", "0-9").strip
+      end
+      return val
+    end
+
     def value=(v)
       if v.nil?
         default = @attribute[:default]
@@ -156,9 +163,7 @@ module Ezframe
         @value = nil
         return
       end
-      if v.is_a?(String)
-        v = v.tr("０-９", "0-9").strip
-      end
+      v = normalize(v)
       @value = v.to_i
     end
 
@@ -167,6 +172,14 @@ module Ezframe
       h = Ht.input(type: "number", name: self.key, label: @attribute[:label], value: @value || "")
       h[:class] = @attribute[:class] if @attribute[:class]
       return h
+    end
+
+    def validate(val)
+      return nil unless val
+      unless /^\d+$/ =~ val.to_s
+        return :invalid_value
+      end
+      return nil
     end
 
     def db_type

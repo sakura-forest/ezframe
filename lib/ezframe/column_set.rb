@@ -271,14 +271,15 @@ module Ezframe
       end
     end
 
-    def validate
+    def validate(value_h)
       clear_error
-      errors = []
+      result = {}
       @columns.values.each do |col|
-        err = col.validate
-        errors.push([col.key, err]) if err
+        new_val = col.normalize(value_h[col.key])
+        err = col.validate(new_val)
+        result[col.key] = [ new_val, err ]
       end
-      return errors
+      return result
     end
 
     def clear_error

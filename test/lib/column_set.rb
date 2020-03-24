@@ -22,6 +22,11 @@ class ColumnTypeTest < GenericTest
     # colset[:id].attribute.delete(:hidden)
     labels = colkeys.map {|k| colset[k].label }
     assert_equal(%w[label1 label2 menulabel], labels)
+
+    res = colset.validate({ v2: "abcd０１２" })
+    assert_equal([ "abcd012", :invalid_value], res[:v2])
+    res = colset.validate({ v2: "１２" })
+    assert_equal([ "12", nil ], res[:v2])
   end
 
   def test_full_join_structure
@@ -40,7 +45,6 @@ class ColumnTypeTest < GenericTest
     colset2 = ColumnSets.add(:columns2, columns2)
 
     structure = ColumnSets.full_join_structure(:columns2)
-    puts  "structure=#{structure}"
     assert_equal([ :columns2, :columns1 ], structure[ :tables ])
     assert_equal([ 
       "columns2.id","columns2.v1", "columns2.v2", "columns2.created_at", "columns2.updated_at",
