@@ -72,7 +72,7 @@ module Ezframe
     end
 
     def validate(val)
-      if !val || val.empty?
+      if !val || val.to_s.empty?
         if @attribute[:required] == "true"
           @error = "required"
           return @error

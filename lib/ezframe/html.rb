@@ -20,13 +20,17 @@ module Ezframe
           tag = "i"
         end
         tag = ht_h[:tag]
+        error_box = ""
+        if %w[input select textarea].include?(tag)
+          error_box = "<div id=\"error-box-#{ht_h[:name]}\" class=\"error-box hide\"></div>"
+        end
         opt_s, child_s = join_attribute(ht_h)
         if !child_s.strip.empty? || !%w[img input hr br meta].include?(tag)
           start_tag = [ht_h[:tag], opt_s].compact.join(" ").strip
-          return "<#{start_tag}>#{child_s}</#{ht_h[:tag]}>"
+          return "<#{start_tag}>#{child_s}</#{ht_h[:tag]}>"+error_box
         end
         tag_content = [ ht_h[:tag], opt_s ].compact.join(" ")
-        "<#{tag_content}/>"
+        return "<#{tag_content}/>"+error_box
       end
 
       # attributeの連結文字列化
@@ -53,20 +57,6 @@ module Ezframe
           end
         end
         [opt_a.compact.join(" "), child_s]
-      end
-
-      def input_obsolete(ht_h)
-        size = ht_h[:size]
-        # puts "input: size=#{size.inspect}"
-        if size && (size.index("x") || size.index("*"))
-          if /(\d+)\s*[x\*]\s*(\d+)/ =~ size
-            ht_h[:cols], ht_h[:rows] = $1, $2
-            ht_h.delete(:size)
-          end
-          ht_h[:tag] = "textarea"
-          ht_h[:child] = ht_h[:value]
-          ht_h.delete(:value)
-        end
       end
 
       def textarea(ht_h)
