@@ -94,22 +94,6 @@ module Ezframe
         return nil
       end
 
-      # 認証を行うクラスを返す。無ければnil
-=begin
-      def scan_auth(target, route_h = nil)
-        target = class_to_snake(target) if target.is_a?(Class)
-        path = get_path(target, route_h)
-        Logger.info "scan_auth: target=#{target} path=#{path}"
-        return nil unless path
-        path.each do |class_snake|
-          klass = get_class([class_snake])
-          puts "path: klass = #{klass}"
-          return klass if klass.need_auth
-        end
-        return nil
-      end
-=end      
-
       def make_method_name(base_name, method = "get")
         return ["public", base_name, method.downcase].join("_")
       end

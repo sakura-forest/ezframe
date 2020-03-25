@@ -73,10 +73,10 @@ module Ezframe
         end
         sql = "SELECT #{query_a.join(', ')} FROM #{table_part.join(' ')}"
         sql += " WHERE #{where}" if where
-        puts sql
+        # puts sql
         data_a = self.exec(sql)
         res_a = []
-        p data_a
+        # p data_a
         data_a.each do |data|
           puts "data=#{data.inspect}"
           new_data = {}

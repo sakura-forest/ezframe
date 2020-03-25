@@ -24,4 +24,14 @@ class ColumnTypeTest < GenericTest
     v = "abcdef"
     assert_equal(:invalid_value, obj.validate(v))
   end
+
+  def test_tel_type
+    obj = TelType.new({ key: "k1", type: "tel", label: "label1"})
+    puts "result=#{obj.validate('0921234567')}"
+    assert !obj.validate("0921234567")
+    assert !obj.validate("09012345678")
+    assert_equal :invalid_value,  obj.validate("092")
+    assert_equal :invalid_value, obj.validate("0901231341234123412")
+    assert "090", obj.normalize("０９０")
+  end
 end

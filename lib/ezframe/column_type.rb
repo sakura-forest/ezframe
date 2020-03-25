@@ -175,7 +175,7 @@ module Ezframe
     end
 
     def validate(val)
-      return nil unless val
+      return nil if !val || val.to_s.strip.empty?
       unless /^\d+$/ =~ val.to_s
         return :invalid_value
       end
@@ -271,6 +271,10 @@ module Ezframe
       return nil if no_view? && !opts[:force]
       item = @attribute[:item]
       return item[@value]
+    end
+
+    def validate(val)
+      return nil
     end
   end
 
@@ -469,7 +473,8 @@ module Ezframe
     def validate(val)
       super(val)
       return @error if @error
-      if email_format?(val)
+      return nil if !val || val.strip.empty?
+      unless email_format?(val)
         @error = :invalid_value
         return @error
       end
@@ -477,28 +482,28 @@ module Ezframe
     end
 
     def email_format?(val)
-      return nil unless val
       return val.to_s =~ /^[a-zA-Z0-9.!\#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
     end
   end
 
   class TelType < TextType
+    def normalize(val)
+      return nil unless val
+      val = super(val)
+      val = val.tr("０-９", "0-9")
+      # val = val.gsub(/\D+/, "")
+      return val
+    end
+
     def validate(val)
       super(val)
       return @error if @error
+      return nil if !val || val.strip.empty?
       unless /^0\d{9,10}$/ =~ val.to_s
         @error = :invalid_value
         return @error
       end
       return nil
-    end
-
-    def normalize(val)
-      return nil unless val
-      val = super(val)
-      val = val.tr("０-９", "0-9")
-      val = val.gsub(/\D+/, "")
-      return val
     end
   end
 
@@ -514,6 +519,7 @@ module Ezframe
     def validate(val)
       super(val)
       return @error if @error
+      return nil if !val || val.strip.empty?
       unless /^[ぁ-ん ]+$/ =~ val.to_s
         @error = :hiragana_only
         return @error
@@ -532,6 +538,7 @@ module Ezframe
     def validate(val)
       super(val)
       return @error if @error
+      return nil if !val || val.strip.empty?
       unless /^[ァ-ン ]+$/ =~ val
         @error = :katakana_only
         return @error
@@ -577,7 +584,7 @@ module Ezframe
 
     def normalize(val)
       val = super(val)
-      return nil unless val
+      return nil if !val || val.strip.empty?
       val = val.tr("０-９", "0-9")
       return val
     end
@@ -585,6 +592,8 @@ module Ezframe
     def validate(val)
       super(val)
       return @error if @error
+      return nil if !val || val.to_s.strip.empty?
+
       unless /^\d{7}$/ =~ val.to_s
         @error = :invalid_value
         return @error

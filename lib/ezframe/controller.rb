@@ -12,9 +12,9 @@ module Ezframe
 
       def exec(request, response)
         @request = request
-        # Logger.info("exec: path=#{request.path_info} params=#{request.params}")
+        Logger.debug("exec: path=#{request.path_info} params=#{request.params}")
         page_instance, method, url_params = Route::choose(request)
-        # Logger.info "page: #{page_instance.class}, method=#{method}, url_params=#{url_params}"
+        Logger.debug("page: #{page_instance.class}, method=#{method}, url_params=#{url_params}")
         if !page_instance || page_instance == 404
           file_not_found(response)
           return
@@ -27,18 +27,15 @@ module Ezframe
           # Logger.info "Controller.exec: warden.options = #{@request.env['warden.options']}"
         end
         session = @request.env['rack.session']
-        session["in_controller"] = "set in controller"
-        Logger.info "rack.session.keys=#{session.keys}" if session
+        # session["in_controller"] = "set in controller"
+        Logger.debug "rack.session.keys=#{session.keys}" if session
         page_instance.set_request(@request)
         body = page_instance.send(method)
 
         # 戻り値によるレスポンス生成
         if body.is_a?(Hash) || body.is_a?(Array)
           # puts  "Controller: body = #{body}"
-          # body.gsub!(/\n/, Config[:newline_mark]||"<br>")
-          # Logger.info("body=#{body}")
           json = JSON.generate(body)
-          # Logger.info("json=#{json}")
           response.body = [ json ]
           response['Content-Type'] = 'application/json; charset=utf-8'
         else
@@ -46,7 +43,7 @@ module Ezframe
           response['Content-Type'] = 'text/html; charset=utf-8'
         end
         response.status = 200
-        # puts response.body
+        Logger.debug("Controller.exec: response.body=#{response.body}")
       end
 
       def file_not_found(response)
