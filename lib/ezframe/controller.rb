@@ -43,7 +43,7 @@ module Ezframe
           response['Content-Type'] = 'text/html; charset=utf-8'
         end
         response.status = 200
-        Logger.debug("Controller.exec: response.body=#{response.body}")
+        # Logger.debug("Controller.exec: response.body=#{response.body}")
       end
 
       def file_not_found(response)

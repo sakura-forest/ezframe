@@ -258,7 +258,7 @@ module Ezframe
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
       # puts "selectType: #{@attribute[:item].inspect}"
-      h = { tag: "select", name: self.key, label: @attribute[:label], item: @attribute[:item], value: @value }
+      h = { tag: "select", class: %w[browser-default], name: self.key, label: @attribute[:label], item: @attribute[:item], value: @value }
       h[:class] = @attribute[:class] if @attribute[:class]
       return h
     end
