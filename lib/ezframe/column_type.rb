@@ -458,7 +458,7 @@ module Ezframe
         mday_s = "%2d" % [mday]
       end
       mday = "?" if mday == 0
-      return "#{year}年%#{mon}月#{mday}日"
+      return "#{year}年#{mon}月#{mday}日"
     end
 
     def parse_date(date)

@@ -264,7 +264,7 @@ module Ezframe
         next if key.nil? || key.to_s.empty?
         column = @columns[key.to_sym]
         next unless column
-        if column.respond_to?(:form_to_value)
+        if column.respond_to?(:form_to_value) && !value_h.has_key?(key)
           val = column.form_to_value(value_h)
         else
           val = value_h[key]

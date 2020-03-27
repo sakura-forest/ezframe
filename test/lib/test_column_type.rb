@@ -1,3 +1,4 @@
+# coding: utf-8
 require_relative "../test_helper.rb"
 
 class ColumnTypeTest < GenericTest
@@ -31,6 +32,15 @@ class ColumnTypeTest < GenericTest
     assert !obj.validate("09012345678")
     assert_equal :invalid_value,  obj.validate("092")
     assert_equal :invalid_value, obj.validate("0901231341234123412")
-    assert "090", obj.normalize("＝９＝")
+    assert "090", obj.normalize("０９０")
+  end
+
+  def test_birthday
+    obj = BirthdayType.new({ key: "k1", type: "birthday", label: "label1"})
+    form = { k1_year: 1988, k1_mon: 11, k1_mday: 22 }
+    new_val = obj.form_to_value(form)
+    assert_equal("1988-11-22", new_val)
+    obj.value = new_val
+    assert_equal("1988年11月22日", obj.view)
   end
 end
