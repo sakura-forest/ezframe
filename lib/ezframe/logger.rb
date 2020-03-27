@@ -22,6 +22,10 @@ module Ezframe
         writer("debug", msg)
       end
 
+      def warn(msg)
+        writer("warn", msg)
+      end
+
       def error(msg)
         writer("debug", msg)
       end
