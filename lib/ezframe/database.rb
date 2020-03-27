@@ -59,8 +59,9 @@ module Ezframe
         reverse_col_h = {}
         query_a = []
         table_a = []
+        prefix="_x_"
         structure[:column_list].each_with_index do |k, i|
-          key = "_x_joint_value#{i+1}"
+          key = "#{prefix}#{i+1}"
           col_h[k.to_sym] = key.to_sym
           reverse_col_h[key.to_sym] = k
           query_a.push "#{k} AS #{key}"
@@ -78,7 +79,7 @@ module Ezframe
         res_a = []
         # p data_a
         data_a.each do |data|
-          puts "data=#{data.inspect}"
+          # puts "data=#{data.inspect}"
           new_data = {}
           data.each do |k, v|
             orig_key = reverse_col_h[k.to_sym]

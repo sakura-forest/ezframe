@@ -231,9 +231,13 @@ module Ezframe
       @encrypt_on_set = true
     end
 
-    def encrypt_value
-      crypt = BCrypt::Password.create(@value)
-      @value = crypt.to_s
+    def form_to_value(val)
+      return encrypt_value(val)
+    end
+
+    def encrypt_value(val)
+      crypt = BCrypt::Password.create(val)
+      return crypt.to_s
     end
 
     def value_equal?(value_from_db, new_value)
@@ -416,27 +420,45 @@ module Ezframe
       year_list = []
       110.times do |y|
         year = now.year - y - 10
-        year_list.push [year, "#{year}年 (#{Japanese.convert_wareki(year)})"]
+        year_list.push [year, "#{year}(#{Japanese.convert_wareki(year)})"]
       end
       year_list.unshift([ 0, "(年)" ])
 
       year, mon, mday = parse_date(@value)
-      mon_list = (1..12).map { |m| [m, "#{m}月"] }
+      mon_list = (1..12).map { |m| [m, "#{m}"] }
       mon_list.unshift([0, "(月)"])
-      mday_list = (1..31).map { |d| [d, "#{d}日"] }
+      mday_list = (1..31).map { |d| [d, "#{d}"] }
       mday_list.unshift([0, "(日)"])
-      return [Ht.select(name: "#{prefix}_year", item: year_list, value: year),
-              Ht.select(name: "#{prefix}_mon", item: mon_list, value: mon),
-              Ht.select(name: "#{prefix}_mday", item: mday_list, value: mday)]
+      return [Ht.div([Ht.select(name: "#{prefix}_year", class: %w[browser-default], item: year_list, value: year),
+              Ht.small_text("年")]),
+              Ht.select(name: "#{prefix}_mon", class: %w[browser-default], item: mon_list, value: mon),
+              Ht.small_text("月"),
+              Ht.select(name: "#{prefix}_mday", class: %w[browser-default], item: mday_list, value: mday),
+              Ht.small_text("日")
+      ]
     end
 
     def view(opts = {})
       return nil if no_view? && !opts[:force]
       return nil unless @value
       year, mon, mday = parse_date(@value)
-      mon = "?" if mon == 0
+      if year.to_i == 0
+        year_s = "?" 
+      else
+        year_s = "%d" % [year]
+      end
+      if mon.to_i == 0
+        mon_s = "?" 
+      else
+        mon_s = "%2d" % [mon]
+      end
+      if mday.to_i == 0
+        mday_s = "?" 
+      else
+        mday_s = "%2d" % [mday]
+      end
       mday = "?" if mday == 0
-      return "#{year}年 #{mon}月 #{mday}日"
+      return "#{year}年%#{mon}月#{mday}日"
     end
 
     def parse_date(date)
@@ -452,7 +474,7 @@ module Ezframe
 
     def form_to_value(form)
       y, m, d = form["#{self.key}_year".to_sym], form["#{self.key}_mon".to_sym], form["#{self.key}_mday".to_sym]
-      return "#{y.to_i}-#{m.to_i}-#{d.to_i}"
+      return "%d-%02d-%02d"%[y.to_i, m.to_i, d.to_i]
     end
   end
 

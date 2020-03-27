@@ -214,18 +214,14 @@ module Ezframe
       return data
     end
 
-    # 新規に値を登録する
-    def create
-      col_h = get_hash(:db_value)
-      col_h.delete(:id)
-      col_h.delete(:created_at)
-      col_h[:updated_at] = Time.now
-      id = @columns[:id]
-      #if id.value.to_i > 0
-      #  dataset.where(id: id.value).update(col_h)
-      #else
-      return dataset.insert(col_h)
-      #end
+    # データベースに新規に値を登録する
+    def create(value_h)
+      self.set_values(value_h)
+      db_value_h = self.get_hash(:db_value)
+      Logger.debug("column_set.create: #{db_value_h}")
+      db_value_h.delete(:id)
+      db_value_h[:updated_at] = Time.now
+      return dataset.insert(db_value_h)
     end
 
     # データベース上の値の更新
@@ -261,14 +257,21 @@ module Ezframe
       set_values(value_h)
     end
 
+    # 各カラムに値を格納する
     def set_values(value_h)
       return unless value_h
-      value_h.each do |k, v|
-        next if k.nil? || k.to_s.empty?
-        col = @columns[k.to_sym]
-        next unless col
-        col.value = v
+      @columns.keys.each do |key|
+        next if key.nil? || key.to_s.empty?
+        column = @columns[key.to_sym]
+        next unless column
+        if column.respond_to?(:form_to_value)
+          val = column.form_to_value(value_h)
+        else
+          val = value_h[key]
+        end
+        column.value = val
       end
+      return self
     end
 
     def validate(value_h)

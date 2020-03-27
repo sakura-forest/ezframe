@@ -29,6 +29,18 @@ class ColumnTypeTest < GenericTest
     assert_equal([ "12", nil ], res[:v2])
   end
 
+  def test_birthday_type
+    columns = [
+      { key: 'v1', type: 'text', label: 'label' },
+      { key: 'v2', type: 'birthday', label: 'birthday' },
+    ]
+    colset = ColumnSet.new(name: 'testcols', columns: columns)
+
+    colset.set_values({ v1: "testvalue", v2_year: 1989, v2_mon: 9, v2_mday: 10 })
+    assert_equal("1989-09-10", colset[:v2].value)
+    assert_equal("1989年 9月10日", colset[:v2].view)
+  end
+
   def test_full_join_structure
     ColumnSets.init
     # 複数のcolumn setの組み合わせで取得したいカラムの構造生成
