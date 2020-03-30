@@ -54,7 +54,7 @@ module Ezframe
       end
 
       # テーブルを連結して、全てのデータを返す。
-      def get_join_table(structure, where: nil)
+      def get_join_table(structure, opts = {})
         col_h = {}
         reverse_col_h = {}
         query_a = []
@@ -73,13 +73,12 @@ module Ezframe
           table_part.push " LEFT JOIN #{table} ON #{tb}.#{table} = #{table}.id"
         end
         sql = "SELECT #{query_a.join(', ')} FROM #{table_part.join(' ')}"
-        sql += " WHERE #{where}" if where
-        # puts sql
+        sql += " WHERE #{opts[:where]}" if opts[:where]
+        sql += " ORDER BY #{opts[:order]}" if opts[:order]
+        sql += " LIMIT #{opts[:limit]}" if opts[:limit]
         data_a = self.exec(sql)
         res_a = []
-        # p data_a
         data_a.each do |data|
-          # puts "data=#{data.inspect}"
           new_data = {}
           data.each do |k, v|
             orig_key = reverse_col_h[k.to_sym]
@@ -91,6 +90,7 @@ module Ezframe
         return res_a
       end
 
+      # テーブル生成
       def create_table(table_name, dbtype_h)
         %w[id created_at updated_at].each do |key|
           dbtype_h.delete(key.to_sym)

@@ -103,6 +103,7 @@ module Ezframe
               end
             end
             raise "no table" unless table
+            table = table.to_sym
             next if struct[:tables].include?(table)
             struct[:tables].push(table)
             struct[:column_list] += ColumnSets.refer(table).keys.map { |k| "#{table}.#{k}" }
@@ -349,9 +350,9 @@ module Ezframe
       end
     end
 
-    def get_full_join(where: nil)
+    def get_full_join(opts = {})
       struct = ColumnSets.full_join_structure(self.name)
-      return DB.get_join_table(struct, where: where)
+      return DB.get_join_table(struct, opts)
     end
 
     def hidden_form

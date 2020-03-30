@@ -65,6 +65,19 @@ class ColumnTypeTest < GenericTest
       "columns2.id","columns2.v1", "columns2.v2", "columns2.created_at", "columns2.updated_at",
       "columns2.columns1","columns1.id","columns1.v1","columns1.v2", "columns1.created_at", "columns1.updated_at"].sort,
       structure[:column_list].sort)
+
+    columns3 = [
+      { key: 'v1', type: 'text', label: 'label1' },
+      { key: 'foreign_value', type: 'foreign', table: "columns1", label: 'foregin_special_name' },
+    ]
+    colset3 = ColumnSets.add(:columns3, columns3)
+
+    structure = ColumnSets.full_join_structure(:columns3)
+    assert_equal([ :columns3, :columns1 ], structure[ :tables ])
+    assert_equal([ 
+      "columns3.id","columns3.v1", "columns3.created_at", "columns3.updated_at",
+      "columns3.foreign_value","columns1.id","columns1.v1","columns1.v2", "columns1.created_at", "columns1.updated_at"].sort,
+      structure[:column_list].sort)
   end
 
   def test_column_set_collection

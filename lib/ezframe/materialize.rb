@@ -36,9 +36,6 @@ module Ezframe
             return nil
           end
           case ht_h[:tag].to_sym
-#          when :input, :select
-#            new_h = input(ht_h) if "hidden" != ht_h[:type]
-#            return new_h
           when :checkbox
             return checkbox(ht_h)
           when :radio
