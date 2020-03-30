@@ -58,7 +58,7 @@ module Ezframe
       def icon(ht_h)
         new_h = ht_h.clone
         Logger.info "[warn] no name attribute for icon ht_h: #{ht_h.inspect}" unless new_h[:name]
-        new_h.add_class("material-icons")
+        new_h.add_class(%w[material-icons align-icon])
         new_h.update({ tag: "i", child: ht_h[:name] })
         new_h.delete(:name)
         return new_h
