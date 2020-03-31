@@ -102,7 +102,7 @@ module Ezframe
                 next
               end
             end
-            raise "no table" unless table
+            raise "no table: key=#{key}" unless table
             table = table.to_sym
             next if struct[:tables].include?(table)
             struct[:tables].push(table)
