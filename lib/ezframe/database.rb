@@ -53,6 +53,25 @@ module Ezframe
         @sequel[table_name.to_sym]
       end
 
+      class JointHash < Hash
+        def initialize(default_table, values = {})
+          @default_table = default_table
+          self.update(values)
+        end
+
+        def []=(key, value)
+          super(key.to_s, value)
+        end
+
+        def [](key)
+          key = key.to_s
+          return fetch(key) if has_key?(key)
+          alt_key = "#{@default_table}.#{key}"
+          return fetch(alt_key) if has_key?(alt_key)
+          return nil
+        end
+      end
+
       # テーブルを連結して、全てのデータを返す。
       def get_join_table(structure, opts = {})
         col_h = {}
@@ -68,7 +87,7 @@ module Ezframe
         end
         tables = structure[:tables].clone
         tb = tables.shift
-        table_part = [ tb]
+        table_part = [ tb ]
         tables.each do |table|
           table_part.push " LEFT JOIN #{table} ON #{tb}.#{table} = #{table}.id"
         end
@@ -79,7 +98,7 @@ module Ezframe
         data_a = self.exec(sql)
         res_a = []
         data_a.each do |data|
-          new_data = {}
+          new_data = JointHash.new(tb)
           data.each do |k, v|
             orig_key = reverse_col_h[k.to_sym]
             next unless orig_key

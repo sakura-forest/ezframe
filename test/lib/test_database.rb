@@ -51,6 +51,8 @@ class DatabaseTest < GenericTest
     assert_equal(2, data["table1.v2"])
     assert_equal(5, data["table2.v1"])
     assert_equal(6, data["table2.v2"])
+    assert_equal(1, data["v1"])
+    assert_equal(2, data["v2"])
 
     data_a = DB.get_join_table(struct, where: "table1.id=2")
     assert_equal(1, data_a.length)
@@ -59,5 +61,7 @@ class DatabaseTest < GenericTest
     assert_equal(4, data["table1.v2"])
     assert_equal(7, data["table2.v1"])
     assert_equal(8, data["table2.v2"])
+    assert_equal(3, data["v1"])
+    assert_equal(4, data["v2"])
   end
 end
