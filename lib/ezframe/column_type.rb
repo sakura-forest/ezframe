@@ -9,8 +9,6 @@ module Ezframe
       return nil unless key
       upper = Object.const_get("Ezframe")
       key_camel = "#{key}_type".to_camel
-      # puts "get_class: #{key_camel}"
-      # puts "const_get: #{upper.const_get(key_camel).inspect}"
       if upper.const_defined?(key_camel)
         return upper.const_get(key_camel)
       end
@@ -570,6 +568,8 @@ module Ezframe
   end
 
   class PrefectureType < SelectType
+    attr_accessor :pref_h
+
     def initialize(attr)
       super(attr)
       @pref_a = %w[() 北海道 青森県 岩手県 宮城県 秋田県 山形県 福島県
