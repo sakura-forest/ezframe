@@ -86,10 +86,16 @@ module Ezframe
           query_a.push "#{k} AS #{key}"
         end
         tables = structure[:tables].clone
+        join_cond = structure[:join_condition]
         tb = tables.shift
         table_part = [ tb ]
         tables.each do |table|
-          table_part.push " LEFT JOIN #{table} ON #{tb}.#{table} = #{table}.id"
+          cond = join_cond[table.to_sym]
+          if cond
+            table_part.push " LEFT JOIN #{table} ON #{cond}"
+          else
+            table_part.push " LEFT JOIN #{table} ON #{tb}.#{table} = #{table}.id"
+          end
         end
         sql = "SELECT #{query_a.join(', ')} FROM #{table_part.join(' ')}"
         sql += " WHERE #{opts[:where]}" if opts[:where]

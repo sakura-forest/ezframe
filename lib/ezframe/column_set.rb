@@ -84,32 +84,44 @@ module Ezframe
         DB.create_table(table_name, col_h)
       end
 
-      # foreignを反映させたテーブル連結情報を返す
+      # foreignから生成したテーブル連結情報を返す
       def full_join_structure(colset_id)
         struct = { tables: [colset_id] }
         colset = @colset_h[colset_id.to_sym]
         colset_keys = colset.keys
         struct[:column_list] = colset_keys.map { |k| "#{colset_id}.#{k}" }
+        join_cond_h = {}
         colset_keys.each do |key|
           column = colset[key]
           if column.type.to_s == "foreign"
-            table = column.attribute[:table]
-            unless table
+            # 連結するテーブル名をtable: で指定する。
+            foreign_table = column.attribute[:table]
+            # 指定されてなければ、キーの名称をテーブル名とする
+            # そのテーブルが定義されてなければ、エラーとしてログに残す。
+            unless foreign_table
               if @colset_h[key]
-                table = key
+                foreign_table = key
               else
                 Logger.error "There is no related table: #{key}"
                 next
               end
             end
-            raise "no table: key=#{key}" unless table
-            table = table.to_sym
-            next if struct[:tables].include?(table)
-            struct[:tables].push(table)
-            struct[:column_list] += ColumnSets.refer(table).keys.map { |k| "#{table}.#{k}" }
+            raise "no table: key=#{key}" unless foreign_table
+            foreign_column = column.attribute[:column]&.to_sym || :id
+            foreign_table = foreign_table.to_sym
+            next if struct[:tables].include?(foreign_table)
+            # join_cond_h["#{colset_id}.#{key}"] = "#{colset_id}.#{key} = #{foreign_table}.#{foreign_column}"
+            join_cond_h[foreign_table] = "#{colset_id}.#{key} = #{foreign_table}.#{foreign_column}"
+            struct[:tables].push(foreign_table)
+            struct[:column_list] += ColumnSets.refer(foreign_table).keys.map {|k| "#{foreign_table}.#{k}" }
           end
         end
+        struct[:join_condition] = join_cond_h
         return struct
+      end
+
+      def join_complex_column
+
       end
     end
   end

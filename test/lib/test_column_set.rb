@@ -68,16 +68,43 @@ class ColumnTypeTest < GenericTest
 
     columns3 = [
       { key: 'v1', type: 'text', label: 'label1' },
-      { key: 'foreign_value', type: 'foreign', table: "columns1", label: 'foregin_special_name' },
+      { key: 'foreign_value', type: 'foreign', table: "columns1", column: "v2", label: 'foregin_special_name' },
     ]
     colset3 = ColumnSets.add(:columns3, columns3)
 
     structure = ColumnSets.full_join_structure(:columns3)
     assert_equal([ :columns3, :columns1 ], structure[ :tables ])
+    join_condition = structure[:join_condition]
+    assert_equal([ :columns1 ], join_condition.keys)
+    assert_equal("columns3.foreign_value = columns1.v2", join_condition[:columns1])
     assert_equal([ 
       "columns3.id","columns3.v1", "columns3.created_at", "columns3.updated_at",
       "columns3.foreign_value","columns1.id","columns1.v1","columns1.v2", "columns1.created_at", "columns1.updated_at"].sort,
       structure[:column_list].sort)
+
+    # １つのテーブルから、同じテーブルへのforeignが複数ある場合
+    # とりあえず今は実装しない。
+=begin
+    columns4 = [
+      { key: 'v1', type: 'text', label: 'label1' },
+      { key: 'foreign1', type: 'foreign', table: "columns1",label: 'foregin_name1' },
+      { key: 'foreign2', type: 'foreign', table: "columns1",label: 'foregin_name2' },
+    ]
+    colset4 = ColumnSets.add(:columns4, columns4)
+
+
+    structure = ColumnSets.full_join_structure(:columns4)
+    assert_equal([ :columns4, :columns1 ], structure[ :tables ])
+    assert_equal([ ["foreign1", "column1", "columns1.id=columns4.foreign1"  ],
+                    [ "foreign2", "column1", "columns1.id=columns4.foreign2"  ]
+                  ], structure[ :join_condition ])
+    assert_equal([ 
+      "columns4.id","columns4.v1", "columns4.created_at", "columns4.updated_at",
+      "foreign1.id","foreign1.v1","foreign1.v2","foreign2.v1","foreign2.v2",
+      "columns1.id","columns1.v1","columns1.v2", "columns1.created_at", "columns1.updated_at"].sort,
+      structure[:column_list].sort)
+    end
+=end
   end
 
   def test_column_set_collection
