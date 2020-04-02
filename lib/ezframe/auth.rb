@@ -69,7 +69,8 @@ module Ezframe
         @user = dataset.where(auth_conf[:user].to_sym => account).first
       end
       unless @user
-        Logger.info "Auth.initialize: This user does not exist: #{account}"
+        Logger.error "Auth.initialize: This user does not exist: #{account}"
+        return
       end
       self.password = @user[auth_conf[:password].to_sym]
       @user.delete(:password)
