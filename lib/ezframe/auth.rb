@@ -47,6 +47,7 @@ module Ezframe
         # Logger.info "env=#{env.inspect}"
         env['rack.session'][:user] = @user[:id]
         password = @user[auth_conf[:password].to_sym]
+        Logger.debug("@user=#{@user}, password=#{password}")
         bcrypt = BCrypt::Password.new(password)
         @user.delete(:password)
 

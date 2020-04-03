@@ -198,7 +198,7 @@ module Ezframe
 
     # 配列を初期化する
     def set(attr_a)
-      @columns[:id] = IdType.new(key: "id", label: "ID", no_edit: true)
+      @columns[:id] = IdType.new(key: "id", label: "ID", hidden: true)
       attr_a.each do |attribute|
         attr = attribute.clone
         col_key = attr[:key]

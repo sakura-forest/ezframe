@@ -151,5 +151,24 @@ module Ezframe
         dataset.update(val_h)
       end
     end
+
+    class Cache
+      class << self
+
+        def [](table)
+          @store ||= {}
+          dataset = DB.dataset(table.to_sym)
+          Logger.debug("DB::Cache: #{table}")
+          unless @store[table.to_sym]
+            data_a = dataset.all
+            h = {}
+            data_a.each {|data| h[data[:id]] = data }
+            @store[table.to_sym] = h
+          end
+          Logger.debug(@store[table.to_sym])
+          return @store[table.to_sym]
+        end
+      end
+    end
   end
 end

@@ -199,6 +199,12 @@ module Ezframe
 
     def view(opts = {})
       return nil if no_view? && !opts[:force]
+      colkey = @attribute[:view_column]
+      if @value && colkey
+        data_h = DB::Cache[target_table.to_sym]
+        data = data_h[@value.to_i]
+        return data[colkey.to_sym]
+      end
       return nil
     end
 
