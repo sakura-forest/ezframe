@@ -188,7 +188,6 @@ module Ezframe
   class ForeignType < IntType
     def initialize(attr = nil)
       super
-      @attribute[:no_edit] = true
     end
 
     def target_table
@@ -209,7 +208,14 @@ module Ezframe
     end
 
     def form
-      return nil
+      return nil if no_edit? && !opts[:force]
+      view_key = @attribute[:menu_column] || @attribute[:view_column]
+      data_h = DB::Cache[target_table.to_sym]
+      menu_a = data_h.map do |id, data|
+        p data
+        [ data[:id], data[view_key.to_sym] ]
+      end
+      return Ht.select(name: self.key, class: %w[browser-default], item: menu_a)
     end
 
     def db_type
@@ -318,6 +324,7 @@ module Ezframe
     end
 
     def value
+      return nil if @value.nil? || @value.strip.empty?
       if @value.is_a?(Date) || @value.is_a?(Time)
         return "%d-%02d-%02d" % [@value.year, @value.mon, @value.mday]
       end
@@ -361,6 +368,10 @@ module Ezframe
   end
 
   class TimeType < TextType
+    def db_value
+      return nil if @value.nil? || @value.strip.empty?
+      return @value
+    end
   end
 
   class DatetimeType < TextType
@@ -413,6 +424,11 @@ module Ezframe
 
     def db_type
       "timestamp"
+    end
+
+    def value
+      return nil if @value.nil? || @value.strip.empty?
+      return DateTime.parse(@value) if @value.is_a?(String)
     end
   end
 
