@@ -6,6 +6,7 @@ module Ezframe
       def writer(level="", msg)
         unless @instance
           @instance = File.open("log/#{ENV['RACK_ENV']||'development'}.log", "a+")
+          @instance.sync = true
         end
         @instance.puts "#{Time.now.to_s}:#{level.upcase}:#{msg}"
       end

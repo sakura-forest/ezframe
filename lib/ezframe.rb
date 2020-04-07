@@ -4,6 +4,7 @@ require 'yaml'
 require "sequel"
 require "json"
 require "nkf"
+require "date"
 
 require_relative 'ezframe/version'
 require_relative 'ezframe/util'
