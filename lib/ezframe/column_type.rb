@@ -211,6 +211,7 @@ module Ezframe
       if @value && colkey
         data_h = DB::Cache[target_table.to_sym]
         data = data_h[@value.to_i]
+        return nil unless data
         return data[colkey.to_sym]
       end
       return nil
