@@ -482,23 +482,10 @@ module Ezframe
       return nil if no_view? && !opts[:force]
       return nil unless @value
       year, mon, mday = parse_date(@value)
-      if year.to_i == 0
-        year_s = "?" 
-      else
-        year_s = "%d" % [year]
-      end
-      if mon.to_i == 0
-        mon_s = "?" 
-      else
-        mon_s = "%2d" % [mon]
-      end
-      if mday.to_i == 0
-        mday_s = "?" 
-      else
-        mday_s = "%2d" % [mday]
-      end
-      mday = "?" if mday == 0
-      return "#{year}年#{mon}月#{mday}日"
+      year_s = if year.to_i == 0 then "?" else "%d" % [year]; end
+      mon_s = if mon.to_i == 0 then "?" else "%2d" % [mon]; end
+      mday_s = if mday.to_i == 0 then "?" else "%2d" % [mday]; end
+      return "#{year_s}<small>年</small>#{mon_s}<small>月</small>#{mday_s}<small>日</small>"
     end
 
     def parse_date(date)
