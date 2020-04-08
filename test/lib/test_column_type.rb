@@ -43,4 +43,13 @@ class ColumnTypeTest < GenericTest
     obj.value = new_val
     assert_equal("1988年11月22日", obj.view)
   end
+
+  def test_view_format
+    obj = DateType.new({ key: "k1", type: "date", label: "label1", view_format: ["%d/%02d/%02d", :year, :mon, :mday] })    
+    obj.value = "2020-04-05"
+    assert_equal("2020/04/05", obj.view)
+    obj = DateType.new({ key: "k1", type: "date", label: "label1", view_format: ["%d<tag>%02d</tag>%02d", :year, :mon, :mday] })    
+    obj.value = "2020-04-05"
+    assert_equal("2020<tag>04</tag>05", obj.view)
+  end
 end

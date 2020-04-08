@@ -83,6 +83,10 @@ class Time
   def to_date_key
     return "%d-%02d-%02d"%[ self.year, self.mon, self.mday ]
   end
+
+  def wday_jp
+    return %w[日 月 火 水 木 金 土 日][self.wday]
+  end
 end
 
 # クラス名をsnake caseにする。

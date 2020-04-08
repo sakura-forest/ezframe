@@ -34,6 +34,7 @@ module Ezframe
       # @id, @key = @params[:id], @params[:key]
       @env = @request.env
       @session = @env["rack.session"]
+
       # Logger.info "session = #{@session.inspect}"
       if %w[POST PUT].include?(request.request_method)
         body = @request.body.read
@@ -44,6 +45,8 @@ module Ezframe
         end
         # Logger.info "parsed_body=#{@parsed_body.inspect}"
         @event = @parsed_body[:event] || {}
+        @form = @event[:form]
+
         # Logger.info "event=#{@event}"
       end
     end

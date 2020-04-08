@@ -87,8 +87,17 @@ module Ezframe
       return (@attribute[:hidden] || @attribute[:no_view]) && !@attribute[:force]
     end
 
+    # 複数のinputを持っているか？
     def multi_inputs?
       nil
+    end
+
+    # 日時をフォーマットに従って表示する
+    def use_view_format(format_a, tm)
+      fmt_a = format_a.clone
+      pattern = fmt_a.shift
+      value_a = fmt_a.map {|key| tm.send(key) }
+      return pattern % value_a
     end
   end
 
@@ -323,7 +332,7 @@ module Ezframe
     end
 
     def value
-      return nil if @value.nil? || @value.strip.empty?
+      return nil if @value.nil? || (@value.is_a?(String) && @value.strip.empty?)
       if @value.is_a?(Date) || @value.is_a?(Time)
         return "%d-%02d-%02d" % [@value.year, @value.mon, @value.mday]
       end
@@ -359,7 +368,11 @@ module Ezframe
     def view(opts = {})
       return nil if no_view? && !opts[:force]
       if @value.is_a?(Time) || @value.is_a?(Date)
-        return "#{@value.year}/#{@value.mon}/#{@value.mday}"
+        if @attribute[:view_format]
+          return use_view_format(@attribute[:view_format], @value)
+        else
+          return "%d-%02d-%02d" % [@value.year, @value.mon, @value.mday]
+        end
       else
         return @value
       end
@@ -411,8 +424,14 @@ module Ezframe
 
     def view(opts = {})
       return nil if no_view? && !opts[:force]
-      if @value.is_a?(Time) || @value.is_a?(DateTime)
-        return "%d/%02d/%02d %02d:%02d:%02d"%[@value.year, @value.mon, @value.mday, @value.hour, @value.min, @value.sec]
+      if @value.is_a?(Time) || @value.is_a?(Date)
+        if @attribute[:view_format]
+          return use_view_format(@attribute[:view_format], @value)
+        else
+          return "%d/%02d/%02d %02d:%02d:%02d"%[@value.year, @value.mon, @value.mday, @value.hour, @value.min, @value.sec]
+        end
+      else
+        return @value
       end
     end
 
