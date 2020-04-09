@@ -439,9 +439,18 @@ module Ezframe
     end
 
     def form(opts = {})
-      form = super(opts)
-      return nil unless form
-      form
+      Logger.debug("DatetimeType: key=#{self.key}, opts=#{opts}")
+      return nil if no_edit? && !opts[:force]
+      h = super
+      if h
+        # h[:type] = 'date'
+        h[:type] = "text"
+        h[:value] = @value || ""
+        h[:class] = [ "datepicker" ]
+        h[:class].push(@attribute[:class]) if @attribute[:class]
+      end
+      Logger.debug("DatetimeType: res=#{h}")
+      return h
     end
 
     def db_type
