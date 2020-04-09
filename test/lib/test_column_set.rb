@@ -29,6 +29,19 @@ class ColumnTypeTest < GenericTest
     assert_equal([ "12", nil ], res[:v2])
   end
 
+  def test_force_arg
+    columns = [
+      { key: 'v1', type: 'text', label: 'label1' },
+      { key: 'v2', type: 'int', label: 'label2' },
+      { key: 'menu', type: 'select', label: 'menulabel', item: { opt1: 'value1', opt2: 'value2', opt3: 'value3' } }
+    ]
+    colset = ColumnSet.new(name: 'testcols', columns: columns)
+    tm = Time.mktime(2020,4,4)
+    colset[:created_at].value = tm
+    assert(!colset[:created_at].view)
+    assert_equal("2020/04/04 00:00:00", colset[:created_at].view(force: true))
+  end
+
   def test_birthday_type
     columns = [
       { key: 'v1', type: 'text', label: 'label' },
@@ -38,10 +51,10 @@ class ColumnTypeTest < GenericTest
 
     colset.set_values({ v1: "testvalue", v2_year: 1989, v2_mon: 9, v2_mday: 10 })
     assert_equal("1989-09-10", colset[:v2].value)
-    assert_equal("1989年9月10日", colset[:v2].view)
+    assert_equal("1989<small>年</small> 9<small>月</small>10<small>日</small>", colset[:v2].view)
     colset.set_values({ v1: "testvalue", v2: "1990-02-12"})
     assert_equal("1990-02-12", colset[:v2].value)
-    assert_equal("1990年2月12日", colset[:v2].view)
+    assert_equal("1990<small>年</small> 2<small>月</small>12<small>日</small>", colset[:v2].view)
   end
 
   def test_full_join_structure

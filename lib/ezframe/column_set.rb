@@ -234,6 +234,7 @@ module Ezframe
       Logger.debug("column_set.create: #{db_value_h}")
       db_value_h.delete(:id)
       db_value_h[:updated_at] = Time.now
+      db_value_h[:created_at] = Time.now
       return dataset.insert(db_value_h)
     end
 
