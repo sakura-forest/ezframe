@@ -4,6 +4,7 @@ module Ezframe
     class << self
       # メソッド名の名前のタグのhthashを生成
       def wrap_tag(ht_h = {})
+        return nil unless ht_h
         if ht_h.is_a?(String) || ht_h.is_a?(Array)
           h = { child: ht_h }
         elsif ht_h.is_a?(Hash)
