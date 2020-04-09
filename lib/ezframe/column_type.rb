@@ -294,7 +294,8 @@ module Ezframe
       return nil if no_view? && !opts[:force]
       item = @attribute[:item]
       # Logger.debug("select.view: @value=#{@value}, #{@value.class}, item=#{item}, result=#{item[@value]}")
-      return item[@value.to_sym]
+      return nil unless @value
+      return item[@value.to_s.to_sym]
     end
 
     def validate(val)
