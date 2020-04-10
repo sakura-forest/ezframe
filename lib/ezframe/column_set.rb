@@ -293,15 +293,25 @@ module Ezframe
       return self
     end
 
+    # 各カラムのバリデーション
+    # 戻り値は[ 正規化した値, エラーシンボル(Messageのキーと紐づく) ]を値として、
+    # カラムキーをキーとするハッシュ
     def validate(value_h)
       clear_error
-      result = {}
+      result_h = {}
       @columns.values.each do |col|
-        new_val = col.normalize(value_h[col.key])
-        err = col.validate(new_val)
-        result[col.key] = [ new_val, err ]
+        res = []
+        if col.respond_to?(:form_to_value) && !value_h.has_key?(col.key)
+          orig_val = col.form_to_value(value_h)
+        else
+          orig_val = value_h[col.key]
+        end
+        new_val = col.normalize(orig_val)
+        res[0] = new_val if orig_val != new_val
+        res[1] = col.validate(new_val)
+        result_h[col.key] = res if res[0] || res[1]
       end
-      return result
+      return result_h
     end
 
     def clear_error

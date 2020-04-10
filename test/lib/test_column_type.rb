@@ -41,7 +41,7 @@ class ColumnTypeTest < GenericTest
     new_val = obj.form_to_value(form)
     assert_equal("1988-11-22", new_val)
     obj.value = new_val
-    assert_equal("1988年11月22日", obj.view)
+    assert_equal("1988<small>年</small>11<small>月</small>22<small>日</small>", obj.view)
   end
 
   def test_view_format
