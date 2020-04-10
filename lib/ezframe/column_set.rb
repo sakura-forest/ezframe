@@ -172,7 +172,7 @@ module Ezframe
       end
       colset = @colset_h[colset_key.to_sym]
       return nil unless colset
-      Logger.debug("Collection.get: colset_key=#{colset_key}, col_key=#{col_key}, value=#{colset[col_key].value}")
+      # Logger.debug("Collection.get: colset_key=#{colset_key}, col_key=#{col_key}, value=#{colset[col_key].value}")
       return colset[col_key]
     end
 
