@@ -21,7 +21,7 @@ module Ezframe
           end
 
           def authenticate!
-            Logger.info "authenticate!: #{params}"
+            Logger.info "Auth.authenticate: #{params}"
             if Auth.authenticate(env, params["account"], params["password"])
               success!(Auth.get(params["account"]))
             else
@@ -36,6 +36,7 @@ module Ezframe
       end
 
       def authenticate(env, account, pass)
+        Logger.debug("authenticate: #{env}")
         auth_conf = Config[:auth]
         @user = DB.dataset(auth_conf[:table]).where(auth_conf[:user].to_sym => account ).first
         if @user
@@ -47,7 +48,7 @@ module Ezframe
         # Logger.info "env=#{env.inspect}"
         env['rack.session'][:user] = @user[:id]
         password = @user[auth_conf[:password].to_sym]
-        Logger.debug("@user=#{@user}, password=#{password}")
+        Logger.debug("@user=#{@user}")
         bcrypt = BCrypt::Password.new(password)
         @user.delete(:password)
 

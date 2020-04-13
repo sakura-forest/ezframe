@@ -6,9 +6,9 @@ require_relative "util"
 
 module Ezframe
   class PageBase
-    class << self
-      attr_accessor :auth
-    end
+#    class << self
+#      attr_accessor :auth
+#    end
     
     attr_accessor :request
 
@@ -35,7 +35,6 @@ module Ezframe
       @env = @request.env
       @session = @env["rack.session"]
 
-      # Logger.info "session = #{@session.inspect}"
       if %w[POST PUT].include?(request.request_method)
         body = @request.body.read
         if request.content_type.index("json")

@@ -12,29 +12,29 @@ module Ezframe
 
       def exec(request, response)
         @request = request
-        # Logger.debug("exec: path=#{request.path_info} params=#{request.params}")
         page_instance, method, url_params, class_opts = Route::choose(request)
 
-        Logger.debug("page: #{page_instance.class}, method=#{method}, url_params=#{url_params}, class_opts=#{class_opts}")
+        Logger.debug("Controller.exec: path=#{request.path_info}, params=#{request.params}, class=#{page_instance.class}, method=#{method}, url_params=#{url_params}, class_opts=#{class_opts}")
         if !page_instance || page_instance == 404
           file_not_found(response)
           return
         end
         @request.env["url_params"] = url_params
         opt_auth = class_opts[:auth]
-        if Config[:auth] && (!opt_auth || opt_auth != "disable")
+        @session = @request.env['rack.session']
+        if !@session[:user] && Config[:auth] && (!opt_auth || opt_auth != "disable")
+          Logger.debug("authenticate!")
           warden.authenticate! 
-          # Logger.info "Controller.exec: warden.options = #{@request.env['warden.options']}"
+          Logger.info "Controller.exec: warden.options = #{@request.env['warden.options']}"
         end
-        session = @request.env['rack.session']
         # session["in_controller"] = "set in controller"
-        Logger.debug "rack.session.keys=#{session.keys}" if session
+        Logger.debug "rack.session.keys=#{@session.keys}" if @session
         page_instance.set_request(@request)
         body = page_instance.send(method)
 
         # 戻り値によるレスポンス生成
         if body.is_a?(Hash) || body.is_a?(Array)
-          # puts  "Controller: body = #{body}"
+          # Logger.debug("Controller: body = #{body}")
           json = JSON.generate(body)
           response.body = [ json ]
           response['Content-Type'] = 'application/json; charset=utf-8'

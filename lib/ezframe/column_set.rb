@@ -297,6 +297,7 @@ module Ezframe
     # 戻り値は[ 正規化した値, エラーシンボル(Messageのキーと紐づく) ]を値として、
     # カラムキーをキーとするハッシュ
     def validate(value_h)
+      return {} unless value_h
       clear_error
       result_h = {}
       @columns.values.each do |col|
