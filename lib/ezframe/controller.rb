@@ -12,17 +12,17 @@ module Ezframe
 
       def exec(request, response)
         @request = request
-        Logger.debug("exec: path=#{request.path_info} params=#{request.params}")
-        page_instance, method, url_params = Route::choose(request)
-        Logger.debug("page: #{page_instance.class}, method=#{method}, url_params=#{url_params}")
+        # Logger.debug("exec: path=#{request.path_info} params=#{request.params}")
+        page_instance, method, url_params, class_opts = Route::choose(request)
+
+        Logger.debug("page: #{page_instance.class}, method=#{method}, url_params=#{url_params}, class_opts=#{class_opts}")
         if !page_instance || page_instance == 404
           file_not_found(response)
           return
         end
         @request.env["url_params"] = url_params
-        # auth_class = Route.scan_auth(page_instance.class)
-        # Logger.info "auth_class=#{auth_class}"
-        if Config[:auth]
+        opt_auth = class_opts[:auth]
+        if Config[:auth] && (!opt_auth || opt_auth != "disable")
           warden.authenticate! 
           # Logger.info "Controller.exec: warden.options = #{@request.env['warden.options']}"
         end

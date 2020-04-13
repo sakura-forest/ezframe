@@ -57,6 +57,18 @@ class RouteTest < GenericTest
     assert_equal({top: "123", second: "456", third: "789"}, res[2])
   end
 
+  def test_opts
+    route_h = { top: { second: { option_special: true, third: nil }}}
+
+    req = Request.new
+    req.request_method = "GET"
+    req.path_info = "/top/second"
+    res = Ezframe::Route.choose(req, route_h)
+    assert(res[3].is_a?(Hash))
+    assert(res[3])
+    assert(res[3][:special])
+  end
+
   def test_scan_path
     route_h = { top: { second: { third: nil }, v2: { fourth: nil }}}
     assert_equal([ :top, :second, :third ], Ezframe::Route.get_path(:third, route_h))

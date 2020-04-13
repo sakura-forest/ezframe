@@ -6,6 +6,7 @@ module Ezframe
         route_h ||= Config[:route].deep_dup
         # puts  "config=#{Config[:route]}, route_h=#{route_h}"
         args = {}
+        opts = {}
         class_a = []
         # p path_parts
         if path_parts.empty?
@@ -31,7 +32,13 @@ module Ezframe
             end
             route_h = route_h[part.to_sym]
             break if route_h.nil?
-            # Logger.info "route_h changed: #{route_h}"
+            opts = {}
+            route_h.keys.compact.each do |rkey|
+              if rkey =~ /option_(\w+)/
+                opt_key = $1
+                opts[opt_key.to_sym] = route_h[rkey]
+              end
+            end
           else
             # routeに無ければ、メソッドを探す
             # Logger.info "no_route: #{part}"
@@ -40,7 +47,7 @@ module Ezframe
             instance = klass.new
             method_name = make_method_name(part, request.request_method)
             if instance.respond_to?(method_name)
-              return [instance, method_name, args]
+              return [instance, method_name, args, opts]
             else
               Logger.info "undefined method: #{klass}.#{method_name}: full path=#{request.path_info}"
             end
@@ -59,7 +66,7 @@ module Ezframe
         #Logger.info "method_name=#{method_name}"
         instance = klass.new
         if instance.respond_to?(method_name)
-          return [instance, method_name, args]
+          return [instance, method_name, args, opts]
         end
         return [ 404 ]
       end

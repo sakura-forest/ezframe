@@ -27,7 +27,7 @@ module Ezframe
       @request = request
       @column_set = ColumnSets.get(@class_snake)
       @dataset = DB.dataset(@class_snake)
-      Logger.info "[WARN] column_set is not defined: #{@class_snake}" unless @column_set
+      Logger.debug "column_set is not defined: #{@class_snake}" unless @column_set
       @params = parse_query_string(request.env["QUERY_STRING"])
       @params.update(request.params)
       # Logger.info "set_request: params=#{@params.inspect}" if @params.length > 0
