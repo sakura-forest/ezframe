@@ -84,7 +84,7 @@ module Ezframe
       table = []
       matrix = @column_set.map do |column|
         form = column.form
-        table.push Ht.p([ Ht.small_text(column.label), form ]) if form
+        table.push Ht.p([ Ht.small(column.label), form ]) if form
       end
       send_button = Ht.button(child: Message[:edit_finish_button_label], class: %w[btn], event: "on=click:url=#{make_base_url(@id)}/#{command}:with=form") 
       table.push(send_button)
@@ -128,7 +128,7 @@ module Ezframe
           edit_btn = edit_button(column)
           edit_btn[:event] = "on=click:branch=edit_column:key=#{column.key}" if edit_btn
         end
-        table.push(Ht.p(class: %w[hover-button-box], child: [ Ht.small_text(column.label), column.view, edit_btn ].compact))
+        table.push(Ht.p(class: %w[hover-button-box], child: [ Ht.small(column.label), column.view, edit_btn ].compact))
       end
       unless @column_edit_mode
         edit_btn = Ht.button(class: %w[btn], child: [ Ht.icon("edit"), Message[:edit_button_label] ], event: "on=click:url=#{make_base_url(@id)}/edit")
@@ -159,13 +159,13 @@ module Ezframe
     # ラベル付きで1カラムのviewを表示
     def show_label_view(key)
       col = @column_set[key]
-      Ht.span([Ht.small_text(col.label), col.view(force: true)])
+      Ht.span([Ht.small(col.label), col.view(force: true)])
     end
 
     # ラベル付きで1カラムのformを表示
     def show_label_edit(key)
       col = @column_set[key]
-      Ht.span([Ht.small_text(col.label), col.form(force: true)])
+      Ht.span([Ht.small(col.label), col.form(force: true)])
     end
 
     # エラーページの表示

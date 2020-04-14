@@ -482,11 +482,11 @@ module Ezframe
       mday_list = (1..31).map { |d| [d, "#{d}"] }
       mday_list.unshift([0, "(日)"])
       return [Ht.div([Ht.select(name: "#{prefix}_year", class: %w[browser-default], item: year_list, value: year),
-              Ht.small_text("年")]),
+              Ht.small("年")]),
               Ht.select(name: "#{prefix}_mon", class: %w[browser-default], item: mon_list, value: mon),
-              Ht.small_text("月"),
+              Ht.small("月"),
               Ht.select(name: "#{prefix}_mday", class: %w[browser-default], item: mday_list, value: mday),
-              Ht.small_text("日")
+              Ht.small("日")
       ]
     end
 

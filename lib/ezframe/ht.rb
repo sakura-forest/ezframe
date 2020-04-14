@@ -99,10 +99,6 @@ module Ezframe
         return child
       end
 
-      def small_text(text)
-        return small(class: %w[teal-text], child: text)
-      end
-
       def search(ht_h, opts)
         @found ||= []
         if ht_h.is_a?(Hash)
