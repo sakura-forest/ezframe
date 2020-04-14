@@ -36,25 +36,22 @@ module Ezframe
       end
 
       def authenticate(env, account, pass)
-        Logger.debug("authenticate: #{env}")
+        # Logger.debug("authenticate: #{env}")
         auth_conf = Config[:auth]
         @user = DB.dataset(auth_conf[:table]).where(auth_conf[:user].to_sym => account ).first
         if @user
-          Logger.info "Auth: authenticate"
+          Logger.info "Auth: authenticate: has user: #{@user}"
         else
           Logger.info "authenticate: this user does not exist: #{account}"
           return nil
         end
-        # Logger.info "env=#{env.inspect}"
+        # Logger.debug "env=#{env.inspect}"
         env['rack.session'][:user] = @user[:id]
         password = @user[auth_conf[:password].to_sym]
-        Logger.debug("@user=#{@user}")
         bcrypt = BCrypt::Password.new(password)
         @user.delete(:password)
-
         return nil if !pass || pass.strip.empty? || !password || password.strip.empty?
-        # 生パスワード比較
-        # !!(password == pass)
+        Logger.debug("Auth.authenticate: #{bcrypt == pass}")
         return bcrypt == pass
       end
     end
@@ -76,6 +73,10 @@ module Ezframe
       end
       self.password = @user[auth_conf[:password].to_sym]
       @user.delete(:password)
+    end
+
+    def inspect
+      "account=#{@account}, user=#{@user}, id=#{@id}"
     end
   end
 end
