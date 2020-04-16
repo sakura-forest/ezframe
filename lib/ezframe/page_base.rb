@@ -82,12 +82,12 @@ module Ezframe
     def parse_json_body(body)
       return {} if !body || body.length==0
       begin
-        json = JSON.parse(body)
+        json = JSON.parse(body, symbolize_names: true)
       rescue => e
         Logger.info "ERROR: #{e.class}:#{e.message}\n#{e.backtrace}"
         return nil
       end
-      json = json.recursively_symbolize_keys if json.is_a?(Hash) || json.is_a?(Array)
+      # json = json.recursively_symbolize_keys if json.is_a?(Hash) || json.is_a?(Array)
       return json
     end
 
