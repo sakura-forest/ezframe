@@ -23,8 +23,10 @@ module Ezframe
           def authenticate!
             Logger.info "mystrategy.authenticate!: user=#{user}, params=#{params}"
             if Auth.authenticate(env, params["account"], params["password"])
+              Logger.info "mystrategy.authenticate!: success: user=#{user}"
               success!(Auth.get(params["account"]))
             else
+              Logger.info "mystrategy.authenticate!: failed: user=#{user}"
               fail!(Message[:login_failure])
             end
           end
@@ -54,6 +56,7 @@ module Ezframe
           env['rack.session'][:user] = user_data[:id]
           @user = user_data
           Logger.debug("Auth.self.authenticate: success: password match!")
+          return true
         else
           Logger.debug("Auth.self.authenticate: failure: password mismatch")
         end
