@@ -438,7 +438,7 @@ module Ezframe
     end
 
     def form(opts = {})
-      Logger.debug("DatetimeType: key=#{self.key}, opts=#{opts}")
+      # Logger.debug("DatetimeType: key=#{self.key}, opts=#{opts}")
       return nil if no_edit? && !opts[:force]
       h = super
       if h
@@ -448,7 +448,7 @@ module Ezframe
         h[:class] = [ "datepicker" ]
         h[:class].push(@attribute[:class]) if @attribute[:class]
       end
-      Logger.debug("DatetimeType: res=#{h}")
+      # Logger.debug("DatetimeType: res=#{h}")
       return h
     end
 
