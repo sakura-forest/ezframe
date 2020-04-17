@@ -247,7 +247,6 @@ module Ezframe
     def initialize(attr = nil)
       super(attr)
       @attribute[:no_view] = true
-      @encrypt_on_set = true
     end
 
     def form_to_value(val)
@@ -260,8 +259,8 @@ module Ezframe
     end
 
     def value_equal?(value_from_db, new_value)
-      @crypt = Bcrypt::Password.new(value_from_db)
-      return @crypt == new_value
+      crypt = BCrypt::Password.new(value_from_db)
+      return crypt == new_value
     end
 
     def form(opts = {})

@@ -52,4 +52,11 @@ class ColumnTypeTest < GenericTest
     obj.value = "2020-04-05"
     assert_equal("2020<tag>04</tag>05", obj.view)
   end
+
+  def test_password_type
+    obj = PasswordType.new({ key: "k1", type: "password", label: "label1" })
+    obj.value = raw_pass = "abcdef"
+    assert(obj.db_value.index("$"))
+    assert(obj.value_equal?(obj.db_value, raw_pass))
+  end
 end

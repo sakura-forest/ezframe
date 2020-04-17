@@ -5,6 +5,7 @@ require "sequel"
 require "json"
 require "nkf"
 require "date"
+require "bcrypt"
 
 require_relative 'ezframe/version'
 require_relative 'ezframe/util'

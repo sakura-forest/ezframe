@@ -21,7 +21,7 @@ module Ezframe
           end
 
           def authenticate!
-            Logger.info "Auth.authenticate: #{params}"
+            Logger.info "mystrategy.authenticate!: user=#{user}, params=#{params}"
             if Auth.authenticate(env, params["account"], params["password"])
               success!(Auth.get(params["account"]))
             else
@@ -36,23 +36,28 @@ module Ezframe
       end
 
       def authenticate(env, account, pass)
-        # Logger.debug("authenticate: #{env}")
+        return nil if !pass || pass.strip.empty?
+        Logger.debug("Auth.self.authenticate: account=#{account}, pass=#{pass}")
         auth_conf = Config[:auth]
-        @user = DB.dataset(auth_conf[:table]).where(auth_conf[:user].to_sym => account ).first
-        if @user
-          Logger.info "Auth: authenticate: has user: #{@user}"
+        user_data = DB.dataset(auth_conf[:table]).where(auth_conf[:user].to_sym => account ).first
+        if user_data
+          Logger.info "Auth: self.authenticate: has user: #{@user}"
         else
-          Logger.info "authenticate: this user does not exist: #{account}"
+          Logger.info "Auth.self.authenticate: this user does not exist: #{account}"
           return nil
         end
-        # Logger.debug "env=#{env.inspect}"
-        env['rack.session'][:user] = @user[:id]
-        password = @user[auth_conf[:password].to_sym]
-        bcrypt = BCrypt::Password.new(password)
-        @user.delete(:password)
-        return nil if !pass || pass.strip.empty? || !password || password.strip.empty?
-        Logger.debug("Auth.authenticate: #{bcrypt == pass}")
-        return bcrypt == pass
+        db_pass = user_data[auth_conf[:password].to_sym]
+        user_data.delete(:password)
+        return nil if !db_pass || db_pass.strip.length < 8
+        bcrypt = BCrypt::Password.new(db_pass)
+        if bcrypt == pass
+          env['rack.session'][:user] = user_data[:id]
+          @user = user_data
+          Logger.debug("Auth.self.authenticate: success: password match!")
+        else
+          Logger.debug("Auth.self.authenticate: failure: password mismatch")
+        end
+        return nil
       end
     end
 
