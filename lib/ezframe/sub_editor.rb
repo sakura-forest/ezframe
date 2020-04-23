@@ -1,5 +1,3 @@
-require_relative "editor_common"
-
 module Ezframe
   # 各顧客に関連づいた情報の編集を一般化したクラス
   class SubEditor < PageBase
@@ -8,7 +6,7 @@ module Ezframe
     def init_vars
       super
       @sort_key = :id
-      @parent_key = :customer
+      # @parent_key = :customer
       @event = @parsed_body[:event] if @parsed_body
       # @use_show_box = true
     end
@@ -16,7 +14,7 @@ module Ezframe
     def get_parent_id
       params = @request.env["url_params"]
       unless params
-        Logger.info "[WARN] no url_params"
+        EzLog.info "[WARN] no url_params"
         return nil
       end
       return params[@parent_key.to_sym]
@@ -29,7 +27,7 @@ module Ezframe
     # 新規データ登録
     def public_create_post
       @form = @event[:form]
-      # Logger.debug("public_create_post: form=#{@form}")
+      # EzLog.debug("public_create_post: form=#{@form}")
       unless @form
         { inject: "##{@class_snake}-create-area", body: Html.convert(make_edit_form(:create)) }
       else
@@ -206,7 +204,7 @@ module Ezframe
       list = target_keys.map do |colkey|
         column = @column_set[colkey.to_sym]
         unless column
-          Logger.error("undefined column entry: #{colkey}")
+          EzLog.error("undefined column entry: #{colkey}")
           next
         end
         form = column.form

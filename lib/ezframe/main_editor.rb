@@ -1,12 +1,7 @@
 # frozen_string_literal: true
-require_relative "editor_common"
-require_relative "search"
-
 module Ezframe
   class MainEditor < PageBase
-    include PageLayout
     include EditorCommon
-    include SearchFunc
 
     # 一覧ページ生成
     def public_default_get
@@ -38,7 +33,7 @@ module Ezframe
     def public_create_post
       validation = @column_set.validate(@form)
       if @event[:branch] == "single_validate"
-        Logger.debug("public_create_post: single validate: event=#{@event}, form=#{@form}")
+        EzLog.debug("public_create_post: single validate: event=#{@event}, form=#{@form}")
         return single_validation(validation, @event[:target_key]) 
       end
       unless @form
@@ -46,7 +41,7 @@ module Ezframe
       else
         if count_errors(validation) > 0
           cmd_a = full_validation(validation)
-          Logger.debug("public_create_post: cmd_a=#{cmd_a}")
+          EzLog.debug("public_create_post: cmd_a=#{cmd_a}")
           return cmd_a if cmd_a.length > 0
         end
         # 値の保存
@@ -58,11 +53,11 @@ module Ezframe
 
     # データ編集受信
     def public_edit_post
-      Logger.debug("public_edit_post: #{@form}")
+      EzLog.debug("public_edit_post: #{@form}")
       @id = get_id
       validation = @column_set.validate(@form)
       if @event[:branch] == "single_validate"
-        Logger.debug("public_edit_post: single validate:event=#{@event}, form=#{@form}")
+        EzLog.debug("public_edit_post: single validate:event=#{@event}, form=#{@form}")
         return single_validation(validation, @event[:target_key]) 
       end
       unless @form
@@ -138,7 +133,7 @@ module Ezframe
 
     # 詳細表示
     def make_detail_page
-      # Logger.info "make_detail_page: #{@request.params.inspect}"
+      # EzLog.info "make_detail_page: #{@request.params.inspect}"
       id = get_id(@class_snake)
       unless @column_set.set_from_db(id)
         return show_message_page("no data", "data is not defined: #{id}")
@@ -166,8 +161,8 @@ module Ezframe
       end
       comp_a = exec_completion(@form)
       cmd_a += comp_a if comp_a
-      Logger.debug("reset_error: #error-box-#{target_key}")
-      Logger.debug("single_validation: target_key=#{target_key}, result=#{result}, count=#{count_errors(result)}, cmd_a=#{cmd_a}")
+      EzLog.debug("reset_error: #error-box-#{target_key}")
+      EzLog.debug("single_validation: target_key=#{target_key}, result=#{result}, count=#{count_errors(result)}, cmd_a=#{cmd_a}")
       return cmd_a
     end
 
@@ -175,7 +170,7 @@ module Ezframe
     def full_validation(result)
       cmd_a = show_validate_result(result)
       cmd_a.unshift({ reset_error: ".error-box" })
-      Logger.debug("full_validation: full, cmd_a=#{cmd_a}")
+      EzLog.debug("full_validation: full, cmd_a=#{cmd_a}")
       return cmd_a
     end
 
@@ -184,7 +179,7 @@ module Ezframe
       cmd_a = []
       validate_result.each do |key, status|
         norm, err = status
-        Logger.debug("norm=#{norm}, err=#{err}")
+        EzLog.debug("norm=#{norm}, err=#{err}")
         if norm
           cmd_a.push({ set_value: "input[name=#{key}]", value: norm })
         end
