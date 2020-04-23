@@ -217,6 +217,7 @@ module Ezframe
       end
       @columns[:created_at] = DatetimeType.new(type: "datetime", key: "created_at", label: "生成日時", hidden: true)
       @columns[:updated_at] = DatetimeType.new(type: "datetime", key: "updated_at", label: "更新日時", hidden: true)
+      @columns[:deleted_at] = DatetimeType.new(type: "datetime", key: "deleted_at", label: "削除日時", hidden: true)
       @columns.values.each { |col| col.parent = self }
       return @columns
     end

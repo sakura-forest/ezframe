@@ -100,7 +100,7 @@ module Ezframe
           return
         end
         column_set.each do |column|
-          next if %w[id updated_at created_at].include?(column.key.to_s)
+          next if %w[id updated_at created_at deleted_at].include?(column.key.to_s)
           dbtype = dbcols[column.key]
           new_type = column.db_type
           unless dbtype
@@ -114,6 +114,7 @@ module Ezframe
             set_default(column)
           end
         end
+        # exec_sql("ALTER TABLE #{table_name} add COLUMN deleted_at timestamp;")
       end
     end
   end

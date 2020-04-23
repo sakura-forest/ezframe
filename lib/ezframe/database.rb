@@ -117,7 +117,7 @@ module Ezframe
 
       # テーブル生成
       def create_table(table_name, dbtype_h)
-        %w[id created_at updated_at].each do |key|
+        %w[id created_at updated_at deleted_at].each do |key|
           dbtype_h.delete(key.to_sym)
         end
         # puts "create_table: #{table_name}"
@@ -128,7 +128,8 @@ module Ezframe
               column(key, dbtype)
             end
             column(:created_at, :timestamp, default: Sequel::CURRENT_TIMESTAMP)
-            column(:updated_at, :timestamp, default: Sequel::CURRENT_TIMESTAMP)
+            column(:updated_at, :timestamp)
+            column(:deleted_at, :timestamp)
           end
         else
           @sequel.create_table(table_name) do
@@ -137,7 +138,8 @@ module Ezframe
               column(key, dbtype)
             end
             column(:created_at, :timestamp, default: Sequel::CURRENT_TIMESTAMP)
-            column(:updated_at, :timestamp, default: Sequel::CURRENT_TIMESTAMP)
+            column(:updated_at, :timestamp)
+            column(:deleted_at, :timestamp)
           end
         end
       end
@@ -146,9 +148,13 @@ module Ezframe
         dataset(table_name).insert(val_h)
       end
 
-      def update(dataset, val_h)
-        val_h.update({ updated_at: Time.now() })
-        dataset.update(val_h)
+      def update(dataset, id, val_h)
+        val_h.update({ updated_at: Time.now })
+        dataset.where(id: id).update(val_h)
+      end
+
+      def delete(dataset, id)
+        dataset.where(id: id).update({ deleted_at: Time.now })
       end
     end
 
