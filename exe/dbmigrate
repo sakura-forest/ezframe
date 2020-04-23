@@ -28,7 +28,7 @@ module Ezframe
         begin
           data_a = DB.sequel[sql].all
         rescue
-          Logger.error("get_info_from_postgres: #{$@}")
+          EzLog.error("get_info_from_postgres: #{$@}")
           return nil
         end
         data_a.each do |row|
@@ -71,7 +71,7 @@ module Ezframe
         begin
           DB.sequel.run(sql)
         rescue => e
-          Logger.error("dbmigrate: exec_sql: #{e}")
+          EzLog.error("dbmigrate: exec_sql: #{e}")
         end
       end
 

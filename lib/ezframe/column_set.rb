@@ -21,7 +21,7 @@ module Ezframe
         colset_name = $1 if filename =~ /(\w+).ya?ml$/
         yaml = YAML.load_file(filename)
         if yaml.length == 0
-          Logger.error("[ERROR] columns file is empty: #{filename}")
+          EzLog.error("[ERROR] columns file is empty: #{filename}")
           return
         end
         column_info = yaml.recursively_symbolize_keys
@@ -73,14 +73,14 @@ module Ezframe
           begin
             create_one_table(table_name, column_set)
           rescue => e
-            Logger.error("create_tables: #{e.inspect}\n#{$@.inspect}")
+            EzLog.error("create_tables: #{e.inspect}\n#{$@.inspect}")
           end
         end
       end
 
       def create_one_table(table_name, column_set)
         col_h = column_set.get_hash(:db_type)
-        Logger.info "create_one_table: col_h=#{col_h.inspect}"
+        EzLog.info "create_one_table: col_h=#{col_h.inspect}"
         DB.create_table(table_name, col_h)
       end
 
@@ -102,7 +102,7 @@ module Ezframe
               if @colset_h[key]
                 foreign_table = key
               else
-                Logger.error "There is no related table: #{key}"
+                EzLog.error "There is no related table: #{key}"
                 next
               end
             end
@@ -166,13 +166,13 @@ module Ezframe
         elsif @default_table
           colset_key, col_key =  @default_table, colset_key
         else
-          Logger.error "ColumnSetCollection.get: illegal arguments: #{colset_key}, #{col_key}"
+          EzLog.error "ColumnSetCollection.get: illegal arguments: #{colset_key}, #{col_key}"
           return nil
         end
       end
       colset = @colset_h[colset_key.to_sym]
       return nil unless colset
-      # Logger.debug("Collection.get: colset_key=#{colset_key}, col_key=#{col_key}, value=#{colset[col_key].value}")
+      # EzLog.debug("Collection.get: colset_key=#{colset_key}, col_key=#{col_key}, value=#{colset[col_key].value}")
       return colset[col_key]
     end
 
@@ -237,7 +237,7 @@ module Ezframe
     def create(value_h)
       self.set_values(value_h)
       db_value_h = self.get_hash(:db_value)
-      Logger.debug("column_set.create: #{db_value_h}")
+      EzLog.debug("column_set.create: #{db_value_h}")
       db_value_h.delete(:id)
       db_value_h[:updated_at] = Time.now
       db_value_h[:created_at] = Time.now
@@ -355,7 +355,7 @@ module Ezframe
         return @edit_keys.map do |key|
                  col = @columns[key.to_sym]
                  unless col
-                   Logger.info "[ERROR] @edit_keys has unknown column:name=#{@name}:key=#{key}"
+                   EzLog.info "[ERROR] @edit_keys has unknown column:name=#{@name}:key=#{key}"
                    next
                  end
                  col.form
@@ -370,7 +370,7 @@ module Ezframe
         return @view_keys.map do |key|
                  col = @columns[key.to_sym]
                  unless col
-                   Logger.info "[ERROR] @view_keys has unknown column:name=#{@name}:key=#{key}"
+                   EzLog.info "[ERROR] @view_keys has unknown column:name=#{@name}:key=#{key}"
                    next
                  end
                  col.view

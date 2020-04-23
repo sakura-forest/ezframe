@@ -292,7 +292,7 @@ module Ezframe
     def view(opts = {})
       return nil if no_view? && !opts[:force]
       item = @attribute[:item]
-      # Logger.debug("select.view: @value=#{@value}, #{@value.class}, item=#{item}, result=#{item[@value]}")
+      # EzLog.debug("select.view: @value=#{@value}, #{@value.class}, item=#{item}, result=#{item[@value]}")
       return nil unless @value
       return item[@value.to_s.to_sym]
     end
@@ -363,7 +363,7 @@ module Ezframe
       if v.is_a?(Date) || v.is_a?(Time)
         @value = v
       else
-        Logger.info "[WARN] illegal value for date type: #{v.inspect}"
+        EzLog.info "[WARN] illegal value for date type: #{v.inspect}"
       end
     end
 
@@ -412,7 +412,7 @@ module Ezframe
         begin
           @value = DateTime.parse(v)
         rescue
-          Logger.warn("date format error: #{self.key}=#{v}")
+          EzLog.warn("date format error: #{self.key}=#{v}")
           @value = nil
         end
         return
@@ -420,7 +420,7 @@ module Ezframe
       if v.is_a?(Date) || v.is_a?(Time) || v.is_a?(DateTime)
         @value = v
       else
-        Logger.info "[WARN] illegal value for date type: #{v.inspect}"
+        EzLog.info "[WARN] illegal value for date type: #{v.inspect}"
       end
     end
 
@@ -438,7 +438,7 @@ module Ezframe
     end
 
     def form(opts = {})
-      # Logger.debug("DatetimeType: key=#{self.key}, opts=#{opts}")
+      # EzLog.debug("DatetimeType: key=#{self.key}, opts=#{opts}")
       return nil if no_edit? && !opts[:force]
       h = super
       if h
@@ -448,7 +448,7 @@ module Ezframe
         h[:class] = [ "datepicker" ]
         h[:class].push(@attribute[:class]) if @attribute[:class]
       end
-      # Logger.debug("DatetimeType: res=#{h}")
+      # EzLog.debug("DatetimeType: res=#{h}")
       return h
     end
 

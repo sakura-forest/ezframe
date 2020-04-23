@@ -18,7 +18,7 @@ module Ezframe
         begin
           yaml = YAML.load_file(file)
         rescue
-          Logger.info("YAML load error: #{file}")
+          EzLog.info("YAML load error: #{file}")
           return 
         end
         if /([a-z]{2})\.yml$/ =~ file

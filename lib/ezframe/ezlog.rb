@@ -1,5 +1,5 @@
 module Ezframe
-  class Logger
+  class EzLog
     class << self
       @instance = nil
 

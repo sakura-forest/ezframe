@@ -14,7 +14,7 @@ module Ezframe
         @request = request
         page_instance, method, url_params, class_opts = Route::choose(request)
 
-        Logger.debug("Controller.exec: path=#{request.path_info}, params=#{request.params}, class=#{page_instance.class}, method=#{method}, url_params=#{url_params}, class_opts=#{class_opts}")
+        EzLog.debug("Controller.exec: path=#{request.path_info}, params=#{request.params}, class=#{page_instance.class}, method=#{method}, url_params=#{url_params}, class_opts=#{class_opts}")
         if !page_instance || page_instance == 404
           file_not_found(response)
           return
@@ -23,18 +23,18 @@ module Ezframe
         opt_auth = class_opts[:auth]
         @session = @request.env['rack.session']
         if !@session[:user] && Config[:auth] && (!opt_auth || opt_auth != "disable")
-          Logger.debug("authenticate!")
+          EzLog.debug("authenticate!")
           warden.authenticate! 
-          Logger.info "Controller.exec: warden.options = #{@request.env['warden.options']}"
+          EzLog.info "Controller.exec: warden.options = #{@request.env['warden.options']}"
         end
         # session["in_controller"] = "set in controller"
-        Logger.debug "rack.session.keys=#{@session.keys}" if @session
+        EzLog.debug "rack.session.keys=#{@session.keys}" if @session
         page_instance.set_request(@request)
         body = page_instance.send(method)
 
         # 戻り値によるレスポンス生成
         if body.is_a?(Hash) || body.is_a?(Array)
-          # Logger.debug("Controller: body = #{body}")
+          # EzLog.debug("Controller: body = #{body}")
           json = JSON.generate(body)
           response.body = [ json ]
           response['Content-Type'] = 'application/json; charset=utf-8'
@@ -43,7 +43,7 @@ module Ezframe
           response['Content-Type'] = 'text/html; charset=utf-8'
         end
         response.status = 200
-        # Logger.debug("Controller.exec: response.body=#{response.body}")
+        # EzLog.debug("Controller.exec: response.body=#{response.body}")
       end
 
       def file_not_found(response)

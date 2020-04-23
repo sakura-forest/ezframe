@@ -1,6 +1,4 @@
 # frozen_string_literal: true
-require "logger"
-
 module Ezframe
   class DB
     class << self
@@ -10,7 +8,7 @@ module Ezframe
         @dbfile = dbfile || ENV["EZFRAME_DB"] || Config[:database]
         if Config[:use_connection_pool] || opts[:use_connection_pool]
           @pool = Sequel::ConnectionPool(max_connections: 10) do
-            Sequel.connect(@dbfile, loggers: [Logger])
+            Sequel.connect(@dbfile, EzLogs: [EzLog])
           end
         else
           connect(@dbfile)
@@ -19,7 +17,7 @@ module Ezframe
 
       def connect(dbfile = nil)
         dbfile ||= @dbfile
-        @sequel = Sequel.connect(dbfile, loggers: [Logger])
+        @sequel = Sequel.connect(dbfile, EzLogs: [EzLog])
         return @sequel
       end
 
@@ -164,14 +162,14 @@ module Ezframe
         def [](table)
           @store ||= {}
           dataset = DB.dataset(table.to_sym)
-          # Logger.debug("DB::Cache: #{table}")
+          # EzLog.debug("DB::Cache: #{table}")
           unless @store[table.to_sym]
             data_a = dataset.all
             h = {}
             data_a.each {|data| h[data[:id]] = data }
             @store[table.to_sym] = h
           end
-          # Logger.debug(@store[table.to_sym])
+          # EzLog.debug(@store[table.to_sym])
           return @store[table.to_sym]
         end
       end

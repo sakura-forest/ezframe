@@ -14,7 +14,7 @@ module Ezframe
             h = ht_h.dup
           end
         else
-          Logger.info("[WARN] wrap_tag: unknown type: #{ht_h.inspect}")
+          EzLog.info("[WARN] wrap_tag: unknown type: #{ht_h.inspect}")
           return nil
         end
         h[:tag] ||= __callee__.to_s

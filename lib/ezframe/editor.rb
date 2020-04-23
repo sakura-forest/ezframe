@@ -94,7 +94,7 @@ module Ezframe
     #--------------------------------------------------------------------------------------------------------
     # 検索
     def public_search_post
-      Logger.info "public_search_post: #{@parsed_body.inspect}"
+      EzLog.info "public_search_post: #{@parsed_body.inspect}"
       sch_keys = @search_keys || @column_set.keys
       word = @params["word"]
       pattern = "%#{word}%"
@@ -107,7 +107,7 @@ module Ezframe
 
     # 詳細表示
     def show_detail_page
-      Logger.info "show_detail_page: #{@request.params.inspect}"
+      EzLog.info "show_detail_page: #{@request.params.inspect}"
       id = get_id(@class_snake)
       unless @column_set.set_from_db(id)
         return show_message_page("no data", "data is not defined: #{id}")
@@ -146,7 +146,7 @@ module Ezframe
       class_name ||= @class_snake
       params = @request.env['url_params']
       return nil unless params
-      # Logger.info "get_id: #{params.inspect}, #{class_name}"
+      # EzLog.info "get_id: #{params.inspect}, #{class_name}"
       return params[class_name.to_sym]
     end
 

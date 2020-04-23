@@ -32,7 +32,7 @@ module Ezframe
           new_h = ht_h.map { |v| convert(v) }
         elsif ht_h.is_a?(Hash)
           unless ht_h[:tag]
-            Logger.info("convert: no tag: #{ht_h.inspect}")
+            EzLog.info("convert: no tag: #{ht_h.inspect}")
             return nil
           end
           case ht_h[:tag].to_sym
@@ -54,7 +54,7 @@ module Ezframe
 
       def icon(ht_h)
         new_h = ht_h.clone
-        Logger.info "[warn] no name attribute for icon ht_h: #{ht_h.inspect}" unless new_h[:name]
+        EzLog.info "[warn] no name attribute for icon ht_h: #{ht_h.inspect}" unless new_h[:name]
         new_h.add_class(%w[material-icons align-icon])
         new_h.update({ tag: "i", child: ht_h[:name] })
         new_h.delete(:name)

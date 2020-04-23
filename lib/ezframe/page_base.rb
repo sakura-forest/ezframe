@@ -27,10 +27,10 @@ module Ezframe
       @request = request
       @column_set = ColumnSets.get(@class_snake)
       @dataset = DB.dataset(@class_snake)
-      Logger.debug "column_set is not defined: #{@class_snake}" unless @column_set
+      EzLog.debug "column_set is not defined: #{@class_snake}" unless @column_set
       @params = parse_query_string(request.env["QUERY_STRING"])
       @params.update(request.params)
-      # Logger.info "set_request: params=#{@params.inspect}" if @params.length > 0
+      # EzLog.info "set_request: params=#{@params.inspect}" if @params.length > 0
       # @id, @key = @params[:id], @params[:key]
       @env = @request.env
       @session = @env["rack.session"]
@@ -42,11 +42,11 @@ module Ezframe
         else
           @parsed_body = parse_query_string(body)
         end
-        # Logger.info "parsed_body=#{@parsed_body.inspect}"
+        # EzLog.info "parsed_body=#{@parsed_body.inspect}"
         @event = @parsed_body[:event] || {}
         @form = @event[:form]
 
-        # Logger.info "event=#{@event}"
+        # EzLog.info "event=#{@event}"
       end
     end
 
@@ -54,7 +54,7 @@ module Ezframe
     def make_base_url(id = nil)
       path = Route::get_path(@class_snake)
       params = @request.env["url_params"] || {}
-      # Logger.info "make_base_url: params=#{params}"
+      # EzLog.info "make_base_url: params=#{params}"
       # params[@class_snake.to_sym] = id
       path_s = path.map do |pa|
         if pa == @class_snake.to_sym && id
@@ -65,7 +65,7 @@ module Ezframe
           pa
         end
       end.join("/")
-      # Logger.info "path_s=#{path_s}"
+      # EzLog.info "path_s=#{path_s}"
       return "/#{path_s}"
     end
 
@@ -84,7 +84,7 @@ module Ezframe
       begin
         json = JSON.parse(body, symbolize_names: true)
       rescue => e
-        Logger.info "ERROR: #{e.class}:#{e.message}\n#{e.backtrace}"
+        EzLog.info "ERROR: #{e.class}:#{e.message}\n#{e.backtrace}"
         return nil
       end
       # json = json.recursively_symbolize_keys if json.is_a?(Hash) || json.is_a?(Array)

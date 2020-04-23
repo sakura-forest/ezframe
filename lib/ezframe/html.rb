@@ -79,7 +79,7 @@ module Ezframe
               h[:selected] = "selected" if selected
             end
             h[:child] = v
-            # Logger.info "select: hash: k=#{k}, v=#{v}, value=#{ht_h[:value]}"
+            # EzLog.info "select: hash: k=#{k}, v=#{v}, value=#{ht_h[:value]}"
             if ht_h[:value] && ht_h[:value].to_s == k.to_s
               h[:selected] = "selected"
             end
@@ -91,7 +91,7 @@ module Ezframe
             if %w[selected default].include?(v[2])
               h[:selected] = "selected"
             end
-            # Logger.info "select: array: v=#{v}, value=#{ht_h[:value]}"
+            # EzLog.info "select: array: v=#{v}, value=#{ht_h[:value]}"
             if ht_h[:value] && ht_h[:value].to_s == v[0].to_s
               h[:selected] = "selected"
             end
