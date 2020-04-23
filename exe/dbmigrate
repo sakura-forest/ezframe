@@ -103,6 +103,10 @@ module Ezframe
           next if %w[id updated_at created_at deleted_at].include?(column.key.to_s)
           dbtype = dbcols[column.key]
           new_type = column.db_type
+          if !new_type || new_type.empty?
+            EzLog.error("check_diff: no db_type: table=#{table_name}:key=#{column.key}")
+            next
+          end
           unless dbtype
             exec_sql("ALTER TABLE #{table_name} ADD #{column.key} #{new_type};")
             set_default(column)
