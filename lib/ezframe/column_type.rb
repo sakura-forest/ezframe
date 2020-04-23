@@ -92,7 +92,7 @@ module Ezframe
       nil
     end
 
-    # 日時をフォーマットに従って表示する
+    # フォーマットに従って表示する
     def use_view_format(format_a, tm)
       fmt_a = format_a.clone
       pattern = fmt_a.shift
@@ -249,9 +249,11 @@ module Ezframe
       @attribute[:no_view] = true
     end
 
-    def form_to_value(val)
-      return encrypt_value(val)
-    end
+#    def form_to_value(form)
+#      EzLog::debug("PasswordType.form_to_value: is it used?: #{form}")
+#      val = form[self.key.to_sym]
+#      return encrypt_value(val)
+#    end
 
     def encrypt_value(val)
       crypt = BCrypt::Password.create(val)
