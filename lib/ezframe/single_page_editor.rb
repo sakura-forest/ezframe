@@ -138,7 +138,7 @@ module Ezframe
       end
       tbody = Ht.tbody(tr_a)
       return [
-               Ht.table(id: "enable_datatable_#{@class_snake}", child: [thead, tbody], event: "on=load:command=enable_datatable:target=#enable_datatable_#{@class_snake}"),
+               Ht.table(id: "enable_datatable_#{@class_snake}", child: [thead, tbody], ezload: "command=enable_datatable:target=#enable_datatable_#{@class_snake}"),
                Ht.div(id: @dom_id[:detail], child: ""),
              ]
     end

@@ -113,7 +113,7 @@ module Ezframe
       thead = Ht.thead(Ht.tr(th_a))
       tbody = Ht.tbody(tr_a)
       table_id = "enable_datatable_#{@class_snake}"
-      return Ht.table(id: table_id, class: %w[enable_datatable], child: [ thead, tbody ], event: "on=load:command=enable_datatable:target=##{table_id}:size=10")
+      return Ht.table(id: table_id, class: %w[enable_datatable], child: [ thead, tbody ], ezload: "command=enable_datatable:target=##{table_id}:size=10")
     end
 
     # 編集フォームの生成
