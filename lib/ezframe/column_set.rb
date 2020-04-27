@@ -250,24 +250,26 @@ module Ezframe
       updated_values = {}
       @columns.each do |colkey, column|
         next if column.no_edit?
-        if column.multi_inputs?
+        if column.respond_to?(:form_to_value)
           new_value = column.form_to_value(value_h)
         else
           new_value = value_h[colkey]
         end
-        prev_value = column.value
+        prev_value = column.db_value
         column.value = new_value
+        EzLog.debug("key=#{colkey}, pre_value=#{prev_value}, new_value=#{column.db_value}")
         if column.respond_to?("value_equal?")
-          unless column.value_equal?(prev_value, column.value)
-            updated_values[colkey] = column.set_for_db(value)
+          unless column.value_equal?(prev_value, column.db_value)
+            updated_values[colkey] = column.db_value
           end
-        elsif prev_value != column.value
-          updated_values[colkey] = column.value
+        elsif prev_value != column.db_value
+          updated_values[colkey] = column.db_value
         end
       end
       if updated_values.length > 0
         updated_values[:updated_at] = Time.now
-        # puts dataset.where(id: id).update_sql(updated_values)
+        sql = dataset.where(id: id).update_sql(updated_values)
+        EzLog.debug("update: sql=#{sql}")
         dataset.where(id: id).update(updated_values)
       end
     end
@@ -284,7 +286,7 @@ module Ezframe
         next if key.nil? || key.to_s.empty?
         column = @columns[key.to_sym]
         next unless column
-        if column.respond_to?(:form_to_value) && !value_h.has_key?(key)
+        if column.respond_to?(:form_to_value) # && !value_h.has_key?(key)
           val = column.form_to_value(value_h)
         else
           val = value_h[key]
