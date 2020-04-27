@@ -8,7 +8,7 @@ module Ezframe
         @dbfile = dbfile || ENV["EZFRAME_DB"] || Config[:database]
         if Config[:use_connection_pool] || opts[:use_connection_pool]
           @pool = Sequel::ConnectionPool(max_connections: 10) do
-            Sequel.connect(@dbfile, EzLogs: [EzLog])
+            Sequel.connect(@dbfile, loggers: [EzLog])
           end
         else
           connect(@dbfile)
@@ -164,7 +164,7 @@ module Ezframe
           dataset = DB.dataset(table.to_sym)
           # EzLog.debug("DB::Cache: #{table}")
           unless @store[table.to_sym]
-            data_a = dataset.all
+            data_a = dataset.where(deleted_at: nil).all
             h = {}
             data_a.each {|data| h[data[:id]] = data }
             @store[table.to_sym] = h
