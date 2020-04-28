@@ -15,7 +15,7 @@ module Ezframe
     def public_default_get
       @id = get_id
       if @id
-        return make_detail_page
+        return public_detail_post
       else
         div = [ Ht.div(id: @dom_id[:create], child: make_index_top), Ht.div(id: @dom_id[:index], child: make_index_table) ]
         layout = index_layout(center: Ht.form(child: div))
@@ -61,7 +61,7 @@ module Ezframe
         form = make_edit_form
         found_a = Ht.search(form, tag: "input")
         found_a.each { |h| h.add_class("#{@class_snake}-edit-box") if h[:size] }
-        return { inject: @dom_id[:detail], body: Html.convert(form) }
+        return { inject: "##{@dom_id[:detail]}", body: Html.convert(form) }
       else
         if @event[:cancel]
           data = @column_set.set_from_db(@id)
@@ -76,7 +76,7 @@ module Ezframe
 
     # データ詳細表示
     def public_detail_post
-      @id = get_id
+      @id ||= get_id
       data = @column_set.set_from_db(@id)
       target_keys = @detail_keys || @column_set.keys.select { |key| !@column_set[key].attribute[:no_view] }
       line_a = []
@@ -88,7 +88,7 @@ module Ezframe
       table = Ht.div(line_a)
       collection = Materialize::Collection.new
       # 詳細表示用のblockを追加
-      collection.push(Ht.div(class: "detail-box", child: [button_for_detail_box(data), table]))
+      collection.push(Ht.div(id: @dom_id[:detail], child: [button_for_detail_box(data), table]))
       return { inject: "##{@dom_id[:detail]}", body: Html.convert(collection.to_h) }
     end
 
