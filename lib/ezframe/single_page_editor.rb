@@ -10,17 +10,18 @@ module Ezframe
       @sort_key = :id
       @event = @parsed_body[:event] if @parsed_body
       @dom_id = { create: "create-area", edit: "edit-area", index: "index-area", detail: "detail-area"}
+      @show_delete_button = true
     end
 
     def public_default_get
       @id = get_id
-      if @id
-        return public_detail_post
-      else
+#      if @id
+#        return public_detail_post
+#      else
         div = [ Ht.div(id: @dom_id[:create], child: make_index_top), Ht.div(id: @dom_id[:index], child: make_index_table) ]
         layout = index_layout(center: Ht.form(child: div))
         return show_base_template(title: Message[:index_page_title], body: Html.convert(layout))
-      end
+#      end
     end
 
     def make_index_top
@@ -46,8 +47,8 @@ module Ezframe
         form_values.update(@env["url_params"])
         # @column_set.values = form_values
         @column_set[:id].value = @id = @column_set.create(form_values)
-        # return { redirect: "#{make_base_url}/#{@id}" }
-        return public_default_post
+        return { redirect: make_base_url(@id) }
+        # return public_default_post
       end
     end
 
