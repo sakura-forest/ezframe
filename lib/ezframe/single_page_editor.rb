@@ -10,7 +10,7 @@ module Ezframe
       @sort_key = :id
       @event = @parsed_body[:event] if @parsed_body
       @dom_id = { create: "create-area", edit: "edit-area", index: "index-area", detail: "detail-area"}
-      @show_delete_button = true
+      # @show_delete_button = nil
     end
 
     def public_default_get
@@ -57,8 +57,8 @@ module Ezframe
       @id = get_id
       unless @event[:form]
         data = @column_set.set_from_db(@id)
-        # フォームの表示
         return show_message_page("no data", "data is not defined: #{@id}") unless data
+        # フォームの表示
         form = make_edit_form
         found_a = Ht.search(form, tag: "input")
         found_a.each { |h| h.add_class("#{@class_snake}-edit-box") if h[:size] }
@@ -183,7 +183,7 @@ module Ezframe
 
     # 編集フォームの生成
     def make_edit_form(command = :edit)
-      @id = get_id
+      @id ||= get_id
       target_keys = @edit_keys || @column_set.keys
       list = target_keys.map do |colkey|
         column = @column_set[colkey.to_sym]
