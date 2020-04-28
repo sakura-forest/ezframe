@@ -241,6 +241,7 @@ module Ezframe
       db_value_h.delete(:id)
       db_value_h[:updated_at] = Time.now
       db_value_h[:created_at] = Time.now
+      EzLog.debug("create: sql=#{dataset.insert_sql(db_value_h)}")
       return dataset.insert(db_value_h)
     end
 
@@ -257,7 +258,7 @@ module Ezframe
         end
         prev_value = column.db_value
         column.value = new_value
-        EzLog.debug("key=#{colkey}, pre_value=#{prev_value}, new_value=#{column.db_value}")
+        # EzLog.debug("key=#{colkey}, pre_value=#{prev_value}, new_value=#{column.db_value}")
         if column.respond_to?("value_equal?")
           unless column.value_equal?(prev_value, column.db_value)
             updated_values[colkey] = column.db_value
