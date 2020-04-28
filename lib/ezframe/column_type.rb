@@ -62,7 +62,11 @@ module Ezframe
 
     def view(opts = {})
       return nil if no_view?
-      @value
+      if @attribute[:view_format]
+        return use_view_format(@attribute[:view_format], @value)
+      else
+        @value
+      end
     end
 
     def normalize(val)
@@ -93,11 +97,15 @@ module Ezframe
     end
 
     # フォーマットに従って表示する
-    def use_view_format(format_a, tm)
-      fmt_a = format_a.clone
-      pattern = fmt_a.shift
-      value_a = fmt_a.map {|key| tm.send(key) }
-      return pattern % value_a
+    def use_view_format(format_a, val)
+      if format_a.is_a?(String)
+        return format_a % val
+      else
+        fmt_a = format_a.clone
+        pattern = fmt_a.shift
+        value_a = fmt_a.map {|key| val.send(key) }
+        return pattern % value_a
+      end
     end
   end
 
