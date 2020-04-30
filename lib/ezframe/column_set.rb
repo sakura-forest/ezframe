@@ -182,7 +182,7 @@ module Ezframe
   end
 
   class ColumnSet
-    attr_accessor :name, :parent, :edit_keys, :view_keys
+    attr_accessor :name, :parent # , :edit_keys, :view_keys
 
     def initialize(parent: nil, name: nil, columns: nil)
       @parent = parent
@@ -199,6 +199,14 @@ module Ezframe
 
     def keys
       @columns.keys
+    end
+
+    def edit_keys
+      @columns.keys.select {|k| !@columns[k].no_edit? }
+    end
+
+    def view_keys
+      @columns.keys.select {|k| !@columns[k].no_view? }
     end
 
     # 配列を初期化する
