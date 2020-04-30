@@ -98,6 +98,7 @@ module Ezframe
 
     # フォーマットに従って表示する
     def use_view_format(format_a, val)
+      return nil unless val
       if format_a.is_a?(String)
         return format_a % val
       else
@@ -153,7 +154,16 @@ module Ezframe
   class IntType < TextType
     def view(opts = {})
       return nil if no_view? && !opts[:force]
-      return @value.to_i.add_comma
+      return nil unless @value
+      if @attribute[:view_format]
+        return use_view_format(@attribute[:view_format], @value)
+      else
+        if @attribute[:add_comma]
+          return @value.to_i.add_comma
+        else
+          return @value.to_s
+        end
+      end
     end
 
     def normalize(val)

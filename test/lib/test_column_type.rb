@@ -45,12 +45,19 @@ class ColumnTypeTest < GenericTest
   end
 
   def test_view_format
+    obj = TextType.new({ key: "k1", type: "text", label: "label1", view_format: "12%s56" })    
+    obj.value = "34"
+    assert_equal("123456", obj.view)
+    obj.value = nil
+    assert_nil(obj.view)
     obj = DateType.new({ key: "k1", type: "date", label: "label1", view_format: ["%d/%02d/%02d", :year, :mon, :mday] })    
     obj.value = "2020-04-05"
     assert_equal("2020/04/05", obj.view)
     obj = DateType.new({ key: "k1", type: "date", label: "label1", view_format: ["%d<tag>%02d</tag>%02d", :year, :mon, :mday] })    
     obj.value = "2020-04-05"
     assert_equal("2020<tag>04</tag>05", obj.view)
+    obj.value = nil
+    assert_nil(obj.view)
   end
 
   def test_password_type
@@ -58,5 +65,15 @@ class ColumnTypeTest < GenericTest
     obj.value = raw_pass = "abcdef"
     assert(obj.db_value.index("$"))
     assert(obj.value_equal?(obj.db_value, raw_pass))
+  end
+
+  def test_int_type
+    obj = IntType.new({ key: "k1", type: "int", label: "numeric" })
+    obj.value = 123
+    assert_equal("123", obj.view)
+
+    obj = IntType.new({ key: "k1", type: "int", label: "numeric", view_format: "abc%sdef" })
+    obj.value = 123
+    assert_equal("abc123def", obj.view)
   end
 end
