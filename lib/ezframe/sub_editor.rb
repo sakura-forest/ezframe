@@ -146,7 +146,7 @@ module Ezframe
       tr_a = list.map do |data|
         view_a = make_index_line(target_keys, data)
         td_a = view_a.map {|view| Ht.td(view)}
-        Ht.tr(id: "tr-#{@class_snake}-#{data[:id]}", child: td_a, event: "on=click:url=#{make_base_url(data[:id])}/show")
+        Ht.tr(id: "tr-#{@class_snake}-#{data[:id]}", child: td_a, event: "on=click:url=#{make_base_url(data[:id])}/detail")
       end
       tbody = Ht.tbody(tr_a)
       return [
@@ -159,7 +159,7 @@ module Ezframe
     # 一覧表示の１行を生成
     def make_index_line(target_keys, data)
       @column_set.clear
-      @column_set.values = data
+      @column_set.set_values(data, from_db: true)
       return target_keys.map { |key| make_index_column(key) }
     end
 
@@ -237,7 +237,7 @@ module Ezframe
     end
 
     def make_cancel_button
-      return Ht.button(class: %w[btn red], child: [Ht.icon("cancel"), Message[:cancel_button_label]], event: "on=click:url=#{make_base_url(@id)}/show:cancel=true:with=form")
+      return Ht.button(class: %w[btn red], child: [Ht.icon("cancel"), Message[:cancel_button_label]], event: "on=click:url=#{make_base_url(@id)}/detail:cancel=true:with=form")
     end
   end
 end

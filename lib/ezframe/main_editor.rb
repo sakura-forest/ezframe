@@ -102,7 +102,7 @@ module Ezframe
       end
       tr_a = data_a.map do |data|
         @column_set.clear
-        @column_set.values = data
+        @column_set.set_values(data, from_db: true)
         line = target_keys.map do |key| 
           view = @column_set[key].view
           Ht.td(Ht.a(href: "#{make_base_url(data[:id])}", child: view))

@@ -228,14 +228,25 @@ module Ezframe
 
     def set_from_db(id)
       data = dataset.where(id: id).first
+      self.clear
       return nil unless data
-      self.values = data
+      self.set_values(data, from_db: true)
       return data
     end
 
+    def set_from_form(form)
+      self.clear
+      self.set_values(form)
+    end
+
     # データベースに新規に値を登録する
-    def create(value_h)
-      self.set_values(value_h)
+    def create(value_h, from_db: nil)
+      self.clear
+      if from_db
+        self.set_values(value_h, from_db: true)
+      else
+        self.set_from_form(value_h)
+      end
       db_value_h = self.get_hash(:db_value)
       EzLog.debug("column_set.create: #{db_value_h}")
       db_value_h.delete(:id)
@@ -281,13 +292,14 @@ module Ezframe
     end
 
     # 各カラムに値を格納する
-    def set_values(value_h)
-      return unless value_h
+    def set_values(value_h, from_db: nil)
+      clear
+      return self unless value_h
       @columns.keys.each do |key|
         next if key.nil? || key.to_s.empty?
         column = @columns[key.to_sym]
         next unless column
-        if column.respond_to?(:form_to_value) # && !value_h.has_key?(key)
+        if !from_db && column.respond_to?(:form_to_value) # && !value_h.has_key?(key)
           val = column.form_to_value(value_h)
         else
           val = value_h[key]
