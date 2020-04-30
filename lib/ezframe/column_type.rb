@@ -260,11 +260,13 @@ module Ezframe
   end
 
   class IdType < IntType
+=begin
     def label(opts = {})
       return nil if no_view? && !opts[:force]
       return @attribute[:label] if @attribute[:label]
       return "ID"
     end
+=end
 
     def form(opts = {})
       return nil
@@ -276,12 +278,6 @@ module Ezframe
       super(attr)
       @attribute[:no_view] = true
     end
-
-#    def form_to_value(form)
-#      EzLog::debug("PasswordType.form_to_value: is it used?: #{form}")
-#      val = form[self.key.to_sym]
-#      return encrypt_value(val)
-#    end
 
     def encrypt_value(val)
       crypt = BCrypt::Password.create(val)
@@ -546,8 +542,9 @@ module Ezframe
       true
     end
 
-    def form_to_value(form)
-      y, m, d = form["#{self.key}_year".to_sym], form["#{self.key}_mon".to_sym], form["#{self.key}_mday".to_sym]
+    def form_to_value(form, target_key: nil)
+      key = target_key || self.key
+      y, m, d = form["#{key}_year".to_sym], form["#{key}_mon".to_sym], form["#{key}_mday".to_sym]
       return "%d-%02d-%02d"%[y.to_i, m.to_i, d.to_i]
     end
   end

@@ -242,18 +242,18 @@ module Ezframe
       return data
     end
 
-    def set_from_form(form)
+    def set_from_form(form, key_suffix: nil)
       self.clear
       self.set_values(form)
     end
 
     # データベースに新規に値を登録する
-    def create(value_h, from_db: nil)
+    def create(value_h, from_db: nil, key_suffix: nil)
       self.clear
       if from_db
-        self.set_values(value_h, from_db: true)
+        self.set_values(value_h, from_db: true, key_suffix: key_suffix)
       else
-        self.set_from_form(value_h)
+        self.set_values(value_h, key_suffix: key_suffix)
       end
       db_value_h = self.get_hash(:db_value)
       EzLog.debug("column_set.create: #{db_value_h}")
@@ -294,27 +294,29 @@ module Ezframe
       end
     end
 
-    def values=(value_h)
-      clear
-      set_values(value_h)
-    end
-
     # 各カラムに値を格納する
-    def set_values(value_h, from_db: nil)
-      clear
+    def set_values(value_h, from_db: nil, key_suffix: nil)
+      self.clear
       return self unless value_h
+      # EzLog.debug("set_values: name=#{self.name}, keys=#{@columns.keys}, value_h=#{value_h}")
       @columns.keys.each do |key|
-        next if key.nil? || key.to_s.empty?
+        next if key.to_s.empty?
+        target_key = key
+        target_key = "#{key}#{key_suffix}" if key_suffix
         column = @columns[key.to_sym]
-        next unless column
         if !from_db && column.respond_to?(:form_to_value) # && !value_h.has_key?(key)
-          val = column.form_to_value(value_h)
+          val = column.form_to_value(value_h, target_key: target_key)
         else
-          val = value_h[key]
+          val = value_h[target_key.to_sym] || value_h[key]
         end
+        # EzLog.debug("key=#{column.key}, target_key=#{target_key}, value = #{val}")
         column.value = val
       end
       return self
+    end
+
+    def values=(value_h)
+      set_values(value_h)
     end
 
     # 各カラムのバリデーション
