@@ -130,7 +130,7 @@ module Ezframe
       if @table_labels
         thead = Ht.thead(Ht.tr(@table_labels.map {|label| Ht.th(label)}))
       else
-        thead = Ht.thead(Ht.tr(@view_keys.map {|key| 
+        thead = Ht.thead(Ht.tr(@index_keys.map {|key| 
           if @column_set[key].respond_to?(:label) 
             Ht.th(@column_set[key].label)
           else
@@ -156,18 +156,18 @@ module Ezframe
     def make_index_line(data)
       @column_set.clear
       @column_set.values = data
-      return @view_keys.map { |key| make_index_column(key) }
+      return @index_keys.map { |key| make_index_column(key) }
     end
 
     # 一覧表示の１カラムを生成
     def make_index_column(key)
       column = @column_set[key.to_sym]
-      if @with_label
-        child = [Ht.small(column.label), column.view]
-        return Ht.p(id: "edit-#{@class_snake}-#{@column_set[:id].value}-column-#{column.key}", child: child)
-      else
+#      if @with_label
+#        child = [Ht.small(column.label), column.view]
+#        return Ht.p(id: "edit-#{@class_snake}-#{@column_set[:id].value}-column-#{column.key}", child: child)
+#      else
         return column.view(force: true)
-      end
+#      end
     end
 
     # 一覧ページ用のデータリスト生成

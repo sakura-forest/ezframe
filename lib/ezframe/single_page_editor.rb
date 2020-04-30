@@ -121,13 +121,13 @@ module Ezframe
     # 一覧表の生成
     def make_index_table
       list = list_for_index
-      target_keys = @view_keys
+      target_keys = @index_keys
       unless target_keys
         target_keys = @column_set.keys.select {|k| !@column_set[k].no_view?}
       end
       labels = @table_labels
       unless labels
-        labels = target_keys.map {|k| @column_set[k].label || "　"}
+        labels = target_keys.map {|k| @column_set[k].label(force: true) || "　"}
       end
       # 項目名欄の生成
       thead = Ht.thead(Ht.tr(labels.map {|label| Ht.th(label||"　")}))
@@ -154,12 +154,12 @@ module Ezframe
     # 一覧表示の１カラムを生成
     def make_index_column(key)
       column = @column_set[key.to_sym]
-      if @with_label
-        child = [Ht.small(column.label), column.view]
-        return Ht.p(id: "edit-#{@class_snake}-#{@column_set[:id].value}-column-#{column.key}", child: child)
-      else
+#      if @with_label
+#        child = [Ht.small(column.label), column.view(force: true)]
+#        return Ht.p(id: "edit-#{@class_snake}-#{@column_set[:id].value}-column-#{column.key}", child: child)
+#      else
         return column.view(force: true)
-      end
+#      end
     end
 
     # 一覧ページ用のデータリスト生成

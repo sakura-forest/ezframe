@@ -31,8 +31,8 @@ module Ezframe
       @attribute[:key].to_sym
     end
 
-    def label
-      return nil if @attribute[:hidden]
+    def label(opts = {})
+      return nil if @attribute[:hidden] && !opts[:force]
       @attribute[:label]
     end
 
@@ -251,8 +251,9 @@ module Ezframe
   end
 
   class IdType < IntType
-    def label
-      return nil if no_view?
+    def label(opts = {})
+      return nil if no_view? && !opts[:force]
+        return @attribute[:label] if @attribute[:label]
       return "ID"
     end
 
