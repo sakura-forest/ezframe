@@ -8,7 +8,7 @@ module Ezframe
       @sort_key = :id
       # @parent_key = :customer
       @event = @parsed_body[:event] if @parsed_body
-      # @use_show_box = true
+      # @use_detail_box = true
     end
 
     def get_parent_id
@@ -66,20 +66,20 @@ module Ezframe
     end
 
     # データ詳細表示
-    def public_show_post
+    def public_detail_post
       @id = get_id
       data = @column_set.set_from_db(@id)
       target_keys = @show_keys || @column_set.keys.select { |key| !@column_set[key].attribute[:no_view] }
       line_a = []
       target_keys.each do |key|
         column = @column_set[key]
-        v = make_show_line(column)
+        v = make_detail_line(column)
         line_a.push(v) if v
       end
       table = Ht.div(line_a)
       collection = Materialize::Collection.new
       # 詳細表示用のblockを追加
-      collection.push(Ht.div(class: "detail-box", child: [button_for_show_box(data), table]))
+      collection.push(Ht.div(class: "detail-box", child: [button_for_detail_box(data), table]))
       return { inject: "##{@class_snake}_show", body: Html.convert(collection.to_h) }
     end
 
@@ -91,7 +91,7 @@ module Ezframe
     end
 
     # 詳細表示欄の一行を生成
-    def make_show_line(column)
+    def make_detail_line(column)
       view = column.view
       if view
         view = Ht.pre(view) if view.index("\n")
@@ -107,7 +107,7 @@ module Ezframe
     def edit_inject_element
         return "##{@class_snake}_show"
 #        return "##{@class_snake}-#{@id}"
-#      if @use_show_box
+#      if @use_detail_box
         # 詳細欄に表示
 #      else
         # 一覧の情報表示位置に編集欄を表示
@@ -115,12 +115,12 @@ module Ezframe
     end
     
     def act_after_edit
-      return [public_default_post, public_show_post]
+      return [public_default_post, public_detail_post]
       # return { inject: edit_inject_element, body: Html.convert(make_index_line(@column_set.get_hash(:value))) }
     end
 
     def act_after_cancel
-      return public_show_post
+      return public_detail_post
     end
 
     # 一覧表の生成
@@ -185,7 +185,7 @@ module Ezframe
     end
 
     # 詳細ページ用ボタン
-    def button_for_show_box(data)
+    def button_for_detail_box(data)
       buttons = [Ht.button(class: %w[btn right], event: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]]) ]
       if @show_delete_button
         buttons.push(make_delete_button)
