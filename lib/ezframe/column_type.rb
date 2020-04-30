@@ -126,7 +126,9 @@ module Ezframe
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      h = Ht.input(type: "text", name: self.key, label: @attribute[:label], value: @value || "")
+      key = self.key
+      key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
+      h = Ht.input(type: "text", name: key, label: @attribute[:label], value: @value || "")
       h[:class] = @attribute[:class] if @attribute[:class]
       return h
     end
@@ -145,7 +147,9 @@ module Ezframe
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
       val = @value
-      h = Ht.textarea(name: self.key, label: @attribute[:label], child: val)
+      key = self.key
+      key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
+      h = Ht.textarea(name: key, label: @attribute[:label], child: val)
       h[:class] = @attribute[:class] if @attribute[:class]
       return h
     end
@@ -195,7 +199,9 @@ module Ezframe
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      h = Ht.input(type: "number", name: self.key, label: @attribute[:label], value: @value || "")
+      key = self.key
+      key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
+      h = Ht.input(type: "number", name: key, label: @attribute[:label], value: @value || "")
       h[:class] = @attribute[:class] if @attribute[:class]
       return h
     end
@@ -243,7 +249,9 @@ module Ezframe
       menu_a = data_h.map do |id, data|
         [ data[:id], data[view_key&.to_sym] ]
       end
-      return Ht.select(name: self.key, class: %w[browser-default], item: menu_a, value: @value)
+      key = self.key
+      key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
+      return Ht.select(name: key, class: %w[browser-default], item: menu_a, value: @value)
     end
 
     def db_type
@@ -287,7 +295,9 @@ module Ezframe
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      h = { tag: "input", type: "password", name: self.key, label: @attribute[:label], value: "" }
+      key = self.key
+      key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
+      h = { tag: "input", type: "password", name: key, label: @attribute[:label], value: "" }
       h[:class] = @attribute[:class] if @attribute[:class]
       return h
     end
@@ -327,7 +337,9 @@ module Ezframe
   class CheckboxType < TypeBase
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      h = Ht.checkbox(name: self.key, value: parent[:id].value, label: @attribute[:label])
+      key = self.key
+      key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
+      h = Ht.checkbox(name: key, value: parent[:id].value, label: @attribute[:label])
       h[:class] = @attribute[:class] if @attribute[:class]
       return h
     end
@@ -488,7 +500,6 @@ module Ezframe
   class BirthdayType < TextType
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      prefix = self.key
       now = Time.now
       year_list = []
       110.times do |y|
@@ -497,16 +508,19 @@ module Ezframe
       end
       year_list.unshift([ 0, "(年)" ])
 
+      key = self.key
+      key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
+
       year, mon, mday = parse_date(@value)
       mon_list = (1..12).map { |m| [m, "#{m}"] }
       mon_list.unshift([0, "(月)"])
       mday_list = (1..31).map { |d| [d, "#{d}"] }
       mday_list.unshift([0, "(日)"])
-      return [Ht.div([Ht.select(name: "#{prefix}_year", class: %w[browser-default], item: year_list, value: year),
+      return [Ht.div([Ht.select(name: "#{key}_year", class: %w[browser-default], item: year_list, value: year),
               Ht.small("年")]),
-              Ht.select(name: "#{prefix}_mon", class: %w[browser-default], item: mon_list, value: mon),
+              Ht.select(name: "#{key}_mon", class: %w[browser-default], item: mon_list, value: mon),
               Ht.small("月"),
-              Ht.select(name: "#{prefix}_mday", class: %w[browser-default], item: mday_list, value: mday),
+              Ht.select(name: "#{key}_mday", class: %w[browser-default], item: mday_list, value: mday),
               Ht.small("日")
       ]
     end
@@ -652,7 +666,7 @@ module Ezframe
       return h
     end
 
-    def view
+    def view(opts = {})
       return nil if no_view? && !opts[:force]
       return @pref_h[@value.to_i]
     end
