@@ -52,7 +52,7 @@ module Ezframe
         form = make_edit_form
         found_a = Ht.search(form, tag: "input")
         found_a.each { |h| h.add_class("#{@class_snake}-edit-box") if h[:size] }
-        return { inject: edit_inject_element, body: Html.convert(form) }
+        return { inject: "##{edit_inject_element}", body: Html.convert(form) }
       else
         if @event[:cancel]
           data = @column_set.set_from_db(@id)
@@ -80,9 +80,10 @@ module Ezframe
       collection = Materialize::Collection.new
       # 詳細表示用のblockを追加
       collection.push(Ht.div(class: "detail-box", child: [button_for_detail_box(data), table]))
-      return { inject: "##{@class_snake}_show", body: Html.convert(collection.to_h) }
+      return { inject: "##{edit_inject_element}", body: Html.convert(collection.to_h) }
     end
 
+    # 削除ボタン押下時の処理
     def public_delete_post
       @id = get_id
       dataset = DB.dataset(@column_set.name)
@@ -96,22 +97,12 @@ module Ezframe
       if view
         view = Ht.pre(view) if view.index("\n")
         return Ht.p([Ht.small(column.label), view])
-        #        return Ht.tr([
-        #          Ht.td(id: "show-detail-#{@class_snake}-#{column.key}-label", child: Ht.small(column.label)),
-        #          Ht.td(id: "show-detail-#{@class_snake}-#{column.key}-value", child: view)
-        #        ])
       end
       return nil
     end
 
     def edit_inject_element
-        return "##{@class_snake}_show"
-#        return "##{@class_snake}-#{@id}"
-#      if @use_detail_box
-        # 詳細欄に表示
-#      else
-        # 一覧の情報表示位置に編集欄を表示
-#      end
+      return "#{@class_snake}_show"
     end
     
     def act_after_edit
@@ -150,10 +141,10 @@ module Ezframe
       end
       tbody = Ht.tbody(tr_a)
       return [
-               area_for_create,
-               Ht.table(id: "enable_datatable_#{@class_snake}", child: [thead, tbody], ezload: "command=enable_datatable:target=#enable_datatable_#{@class_snake}"),
-               Ht.div(id: "#{@class_snake}_show"),
-             ]
+        area_for_create,
+        Ht.table(id: "enable_datatable_#{@class_snake}", child: [thead, tbody], ezload: "command=enable_datatable:target=#enable_datatable_#{@class_snake}"),
+        Ht.div(id: edit_inject_element),
+      ]
     end
 
     # 一覧表示の１行を生成
@@ -166,12 +157,7 @@ module Ezframe
     # 一覧表示の１カラムを生成
     def make_index_column(key)
       column = @column_set[key.to_sym]
-#      if @with_label
-#        child = [Ht.small(column.label), column.view]
-#        return Ht.p(id: "edit-#{@class_snake}-#{@column_set[:id].value}-column-#{column.key}", child: child)
-#      else
-        return column.view(force: true)
-#      end
+      return column.view(force: true)
     end
 
     # 一覧ページ用のデータリスト生成
@@ -195,10 +181,10 @@ module Ezframe
 
     #--------------------------------------------------------------------------------------------------------
     # 新規データ追加欄
-    def area_for_create
+    def area_for_create(extra_buttons = nil)
       create_button = make_create_button
       create_button[:event] = "on=click:url=#{make_base_url}/create"
-      return Ht.div(id: "#{@class_snake}-create-area", child: create_button)
+      return Ht.div(id: "#{@class_snake}-create-area", child: [ create_button, extra_buttons ].compact)
     end
 
     # 編集フォームの生成
@@ -221,6 +207,7 @@ module Ezframe
       return Ht.form(list)
     end
 
+=begin    
     #  新規登録ボタンの生成
     def make_create_button
       return Ht.button(id: "#{@class_snake}-create-button", class: %[btn], child: [Ht.icon("add"), Message[:create_button_label]])
@@ -236,8 +223,10 @@ module Ezframe
       return Ht.button(class: %w[btn right red], event: "on=click:url=#{make_base_url(@id)}/delete", child: [Ht.icon("delete"), Message[:delete_button_label]])
     end
 
-    def make_cancel_button
-      return Ht.button(class: %w[btn red], child: [Ht.icon("cancel"), Message[:cancel_button_label]], event: "on=click:url=#{make_base_url(@id)}/detail:cancel=true:with=form")
+    def make_cancel_button(event)
+      event = "on=click:url=#{make_base_url(@id)}/detail:cancel=true:with=form"
+      return Ht.button(class: %w[btn red], child: [Ht.icon("cancel"), Message[:cancel_button_label]], event: event)
     end
+=end    
   end
 end
