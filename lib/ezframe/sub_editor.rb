@@ -126,13 +126,17 @@ module Ezframe
     # 一覧表の生成
     def make_index_page
       list = list_for_index
+      target_keys = @index_keys
+      unless target_keys
+        target_keys = @column_set.keys.select {|k| !@column_set[k].no_view?}
+      end
       # 項目名欄の生成
       if @table_labels
         thead = Ht.thead(Ht.tr(@table_labels.map {|label| Ht.th(label)}))
       else
-        thead = Ht.thead(Ht.tr(@index_keys.map {|key| 
+        thead = Ht.thead(Ht.tr(target_keys.map {|key| 
           if @column_set[key].respond_to?(:label) 
-            Ht.th(@column_set[key].label)
+            Ht.th(@column_set[key].label(force: true))
           else
             nil
           end
@@ -140,7 +144,7 @@ module Ezframe
       end
 
       tr_a = list.map do |data|
-        view_a = make_index_line(data)
+        view_a = make_index_line(target_keys, data)
         td_a = view_a.map {|view| Ht.td(view)}
         Ht.tr(id: "tr-#{@class_snake}-#{data[:id]}", child: td_a, event: "on=click:url=#{make_base_url(data[:id])}/show")
       end
@@ -153,10 +157,10 @@ module Ezframe
     end
 
     # 一覧表示の１行を生成
-    def make_index_line(data)
+    def make_index_line(target_keys, data)
       @column_set.clear
       @column_set.values = data
-      return @index_keys.map { |key| make_index_column(key) }
+      return target_keys.map { |key| make_index_column(key) }
     end
 
     # 一覧表示の１カラムを生成

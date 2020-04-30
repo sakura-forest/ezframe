@@ -155,6 +155,7 @@ module Ezframe
     def view(opts = {})
       return nil if no_view? && !opts[:force]
       return nil unless @value
+      return nil if @attribute[:no_view_if_zero] && @value.to_i == 0
       if @attribute[:view_format]
         return use_view_format(@attribute[:view_format], @value)
       else
@@ -253,7 +254,7 @@ module Ezframe
   class IdType < IntType
     def label(opts = {})
       return nil if no_view? && !opts[:force]
-        return @attribute[:label] if @attribute[:label]
+      return @attribute[:label] if @attribute[:label]
       return "ID"
     end
 
