@@ -441,8 +441,8 @@ module Ezframe
         end
         begin
           @value = DateTime.parse(v)
-        rescue
-          EzLog.warn("date format error: #{self.key}=#{v}")
+        rescue => e
+          EzLog.warn("date format error: #{self.key}=#{v}:#{e}")
           @value = nil
         end
         return

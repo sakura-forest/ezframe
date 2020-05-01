@@ -31,8 +31,8 @@ module Ezframe
         end
         begin
           yaml = YAML.load(instr)
-        rescue
-          EzLog.info("YAML load error: #{filename}")
+        rescue => e
+          EzLog.info("YAML load error: #{filename}:#{e}")
           return 
         end
         @value_h ||={}

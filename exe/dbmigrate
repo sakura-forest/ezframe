@@ -27,8 +27,8 @@ module Ezframe
         sql = "SELECT * FROM information_schema.columns"
         begin
           data_a = DB.sequel[sql].all
-        rescue
-          EzLog.error("get_info_from_postgres: #{$@}")
+        rescue => e
+          EzLog.error("get_info_from_postgres: #{e}")
           return nil
         end
         data_a.each do |row|
