@@ -197,36 +197,21 @@ module Ezframe
           EzLog.error("undefined column entry: #{colkey}")
           next
         end
-        form = column.form
-        Ht.p(class: %w[form-line], child: [Ht.small(column.label), form]) if form
-      end
+        make_edit_line(column)    
+      end.compact
       send_button = Ht.button(id: "#{@class_snake}-#{command}-finish-button", class: %w[btn], child: [Ht.icon("check"), Message[:edit_finish_button_label]], event: "on=click:url=#{make_base_url(@id)}/#{command}:with=form")
-      cancel_button = make_cancel_button
-      cancel_button[:event] = "on=click:url=#{make_base_url(@id)}/#{command}:cancel=true:with=form"
+      cancel_button = make_cancel_button("on=click:url=#{make_base_url(@id)}/#{command}:cancel=true:with=form")
       list.push(Ht.p(class: %w[edit-finish-buttons], child: [send_button, cancel_button]))
       return Ht.form(list)
     end
 
-=begin    
-    #  新規登録ボタンの生成
-    def make_create_button
-      return Ht.button(id: "#{@class_snake}-create-button", class: %[btn], child: [Ht.icon("add"), Message[:create_button_label]])
+    def make_edit_line(column)
+      form = column.form
+      if form
+        return Ht.p(class: %w[form-line], child: [ Ht.small(column.label), form ]) 
+      else
+        return nil
+      end
     end
-
-    # 編集ボタンの生成
-    def make_edit_button
-      return Ht.button(class: %w[btn], event: "on=click:url=#{make_base_url(@id)}/edit", child: [ Ht.icon("edit"), Message[:edit_button_label]])    
-    end
-
-    # 削除ボタンの生成
-    def make_delete_button
-      return Ht.button(class: %w[btn right red], event: "on=click:url=#{make_base_url(@id)}/delete", child: [Ht.icon("delete"), Message[:delete_button_label]])
-    end
-
-    def make_cancel_button(event)
-      event = "on=click:url=#{make_base_url(@id)}/detail:cancel=true:with=form"
-      return Ht.button(class: %w[btn red], child: [Ht.icon("cancel"), Message[:cancel_button_label]], event: event)
-    end
-=end    
   end
 end
