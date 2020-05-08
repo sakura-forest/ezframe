@@ -44,11 +44,12 @@ module Ezframe
 
     # データ編集受信
     def public_edit_post
-      @id = get_id
+      @id ||= get_id
       unless @event[:form]
         data = @column_set.set_from_db(@id)
+        # データが空ならエラーページ
+        return { inject: "##{edit_inject_element}", body: "データがありません: #{@id}"} unless data
         # フォームの表示
-        return show_message_page("no data", "data is not defined: #{@id}") unless data
         form = make_edit_form
         found_a = Ht.search(form, tag: "input")
         found_a.each { |h| h.add_class("#{@class_snake}-edit-box") if h[:size] }
@@ -189,7 +190,10 @@ module Ezframe
 
     # 編集フォームの生成
     def make_edit_form(command = :edit)
-      @id = get_id
+      # @id ||= get_id
+      if command == :edit && !@id
+        EzLog.error "make_edit_form: @id is not defined"
+      end
       target_keys = @edit_keys || @column_set.keys
       list = target_keys.map do |colkey|
         column = @column_set[colkey.to_sym]
@@ -199,7 +203,8 @@ module Ezframe
         end
         make_edit_line(column)    
       end.compact
-      send_button = Ht.button(id: "#{@class_snake}-#{command}-finish-button", class: %w[btn], child: [Ht.icon("check"), Message[:edit_finish_button_label]], event: "on=click:url=#{make_base_url(@id)}/#{command}:with=form")
+      event = "on=click:url=#{make_base_url(@id)}/#{command}:with=form"
+      send_button = Ht.button(id: "#{@class_snake}-#{command}-finish-button", class: %w[btn], child: [Ht.icon("check"), Message[:edit_finish_button_label]], event: event)
       cancel_button = make_cancel_button("on=click:url=#{make_base_url(@id)}/#{command}:cancel=true:with=form")
       list.push(Ht.p(class: %w[edit-finish-buttons], child: [send_button, cancel_button]))
       return Ht.form(list)
