@@ -220,6 +220,8 @@ module Ezframe
   end
 
   class ForeignType < IntType
+    attr_accessor :db_data 
+
     def initialize(attr = nil)
       super
     end
@@ -257,17 +259,16 @@ module Ezframe
     def db_type
       return "int"
     end
+
+    def set_db_data
+      @db_data = {}
+      if @value
+        @db_data = DB::Cache[target_table.to_sym][@value]
+      end
+    end
   end
 
   class IdType < IntType
-=begin
-    def label(opts = {})
-      return nil if no_view? && !opts[:force]
-      return @attribute[:label] if @attribute[:label]
-      return "ID"
-    end
-=end
-
     def form(opts = {})
       return nil
     end
@@ -307,8 +308,8 @@ module Ezframe
   class SelectType < TypeBase
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      # puts "selectType: #{@attribute[:item].inspect}"
-      h = { tag: "select", class: %w[browser-default], name: self.key, label: @attribute[:label], item: @attribute[:item], value: @value }
+      @items ||= @attribute[:item]
+      h = { tag: "select", class: %w[browser-default], name: self.key, label: @attribute[:label], item: @items, value: @value }
       h[:class] = @attribute[:class] if @attribute[:class]
       return h
     end
@@ -360,7 +361,7 @@ module Ezframe
     end
 
     def db_type
-      "date"
+      return "date"
     end
 
     def value

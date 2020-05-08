@@ -236,20 +236,17 @@ module Ezframe
 
     def set_from_db(id)
       data = dataset.where(id: id).first
-      self.clear
       return nil unless data
       self.set_values(data, from_db: true)
       return data
     end
 
     def set_from_form(form, key_suffix: nil)
-      self.clear
       self.set_values(form)
     end
 
     # データベースに新規に値を登録する
     def create(value_h, from_db: nil, key_suffix: nil)
-      self.clear
       if from_db
         self.set_values(value_h, from_db: true, key_suffix: key_suffix)
       else
@@ -297,8 +294,11 @@ module Ezframe
     # 各カラムに値を格納する
     def set_values(value_h, from_db: nil, key_suffix: nil)
       self.clear
+      merge_values(value_h, from_db: from_db, key_suffix: key_suffix)
+    end
+
+    def merge_values(value_h, from_db: nil, key_suffix: nil)
       return self unless value_h
-      # EzLog.debug("set_values: name=#{self.name}, keys=#{@columns.keys}, value_h=#{value_h}")
       @columns.keys.each do |key|
         next if key.to_s.empty?
         target_key = key
@@ -309,7 +309,6 @@ module Ezframe
         else
           val = value_h[target_key.to_sym] || value_h[key]
         end
-        # EzLog.debug("key=#{column.key}, target_key=#{target_key}, value = #{val}")
         column.value = val
       end
       return self
