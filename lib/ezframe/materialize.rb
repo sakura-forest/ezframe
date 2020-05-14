@@ -4,8 +4,8 @@ module Ezframe
   class Materialize
     class << self
       def into_html_header
-        css_a = Config[:extra_css_list].map {|file| "<link href=\"#{file}\" rel=\"stylesheet\">\n" }
-        js_a = Config[:extra_js_list].map {|file| "<script src=\"#{file}\"></script>\n" }
+        css_a = Config[:extra_css_list]&.map {|file| "<link href=\"#{file}\" rel=\"stylesheet\">\n" }
+        js_a = Config[:extra_js_list]&.map {|file| "<script src=\"#{file}\"></script>\n" }
 
         css_files = Dir["./asset/css/*.css"]||[]
         css_a += css_files.sort.map do |file|

@@ -4,6 +4,9 @@ module Ezframe
       def choose(request, route_h = nil)
         path_parts = request.path_info.split("/").drop(1)
         route_h ||= Config[:route].deep_dup
+        unless route_h
+          raise "Config[:route] is not defined. It should be defined in config/route.yml"
+        end
         # puts  "config=#{Config[:route]}, route_h=#{route_h}"
         args = {}
         opts = {}
