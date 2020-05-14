@@ -604,9 +604,6 @@ module Ezframe
   class UrlType < TextType
   end
 
-  class TagType < TextType
-  end
-
   class JpnameType < TextType
   end
 
