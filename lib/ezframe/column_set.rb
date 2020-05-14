@@ -19,12 +19,12 @@ module Ezframe
 
       def load_one_file(filename)
         colset_name = $1 if filename =~ /(\w+).ya?ml$/
-        yaml = YAML.load_file(filename)
+        yaml = YAML.load(File.open(filename), symbolize_names: true)
         if yaml.length == 0
           EzLog.error("[ERROR] columns file is empty: #{filename}")
           return
         end
-        column_info = yaml.recursively_symbolize_keys
+        column_info = yaml # .recursively_symbolize_keys
         # puts "load_one_file: filename=#{filename} column_info=#{column_info.inspect}"
         add(colset_name, column_info)
       end

@@ -30,13 +30,13 @@ module Ezframe
           instr = Template.fill_in_text(instr)
         end
         begin
-          yaml = YAML.load(instr)
+          yaml = YAML.load(instr, symbolize_names: true)
         rescue => e
           EzLog.info("YAML load error: #{filename}:#{e}")
           return 
         end
         @value_h ||={}
-        @value_h.update(yaml.recursively_symbolize_keys) if yaml.length>0
+        @value_h.update(yaml) if yaml.length>0 # .recursively_symbolize_keys
       end
 
       def [](k)

@@ -16,14 +16,14 @@ module Ezframe
 
       def load_one_file(file)
         begin
-          yaml = YAML.load_file(file)
+          yaml = YAML.load(File.open(file), symbolize_names: true)
         rescue
           EzLog.info("YAML load error: #{file}")
           return 
         end
         if /([a-z]{2})\.yml$/ =~ file
           lang = $1
-          @catalog[lang.to_sym] = yaml.recursively_symbolize_keys
+          @catalog[lang.to_sym] = yaml # .recursively_symbolize_keys
         end
       end
 

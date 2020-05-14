@@ -47,7 +47,7 @@ Dir["column/*.yml"].each do |file|
   if dup && dup.length > 0
     puts "#{file}\n#{dup}"
   end
-  yaml = YAML.load_file(file)
+  yaml = YAML.load(File.open(file), symbolize_names: true)
   upper = Object.const_get("Ezframe")
   yaml.each do |column|
     type = column["type"]

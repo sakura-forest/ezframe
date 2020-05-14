@@ -6,6 +6,9 @@ module Ezframe
 
       def init(dbfile = nil, opts = {})
         @dbfile = dbfile || ENV["EZFRAME_DB"] || Config[:database]
+        unless @dbfile
+          raise "database settings error: dbfile=#{Config[:database]}"
+        end
         if Config[:use_connection_pool] || opts[:use_connection_pool]
           @pool = Sequel::ConnectionPool(max_connections: 10) do
             Sequel.connect(@dbfile, loggers: [EzLog])

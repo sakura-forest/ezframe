@@ -20,10 +20,14 @@ end
 
 # https://github.com/cliftonsluss/recursively_symbolize_keys/blob/master/recursively_symbolize_keys.rb
 class Hash
-  def recursively_symbolize_keys
-    h = Hash.new
+#  def [](key)
+#    return (fetch key, nil) || (fetch key.to_s, nil) || (fetch key.to_s.to_sym, nil)
+#  end.recursively_symbolize_keys
+
+  def symbolize_keys
+    h = {}
     self.each do |k, v|
-      if v.class == Hash
+      if v.is_a?(Hash)
 	      h[k.to_s.to_sym] = v.recursively_symbolize_keys
       else
 	      h[k.to_s.to_sym] = v
@@ -62,10 +66,10 @@ class Hash
 end
 
 class Array
-  def recursively_symbolize_keys
+  def symbolize_keys
     self.collect do |v|
       if v.kind_of?(Hash) || v.kind_of?(Array) 
-        v.recursively_symbolize_keys
+        v.symbolize_keys
       else
         v  
       end  
