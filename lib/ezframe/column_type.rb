@@ -193,6 +193,10 @@ module Ezframe
         @value = nil
         return
       end
+      unless v.is_a?(Integer)  || v.is_a?(String)
+        EzLog.debug("value must integer or string: key=#{self.key}, #{v}: class=#{v.class}")
+        return
+      end
       v = normalize(v)
       @value = v.to_i
     end
