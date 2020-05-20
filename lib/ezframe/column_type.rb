@@ -226,10 +226,6 @@ module Ezframe
   class ForeignType < IntType
     attr_accessor :db_data 
 
-    def initialize(attr = nil)
-      super
-    end
-
     def target_table
       table = @attribute[:table]
       return table if table
@@ -651,7 +647,7 @@ module Ezframe
   class PrefectureType < SelectType
     attr_accessor :pref_h
 
-    def initialize(attr)
+    def initialize(attr = nil)
       super(attr)
       @pref_a = %w[() 北海道 青森県 岩手県 宮城県 秋田県 山形県 福島県
                    茨城県 栃木県 群馬県 埼玉県 千葉県 東京都 神奈川県

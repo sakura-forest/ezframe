@@ -114,7 +114,13 @@ module Ezframe
           end
           if dbtype != new_type
             exec_sql("ALTER TABLE #{table_name} ALTER COLUMN #{column.key} DROP DEFAULT;")
-            exec_sql("ALTER TABLE #{table_name} ALTER #{column.key} TYPE #{new_type};")
+            begin
+              exec_sql("ALTER TABLE #{table_name} ALTER #{column.key} TYPE #{new_type};")
+            rescue => e
+              EzLog.error("alter column type error: #{e.class}:#{e}:#{e.backtrace}")
+              back_key = "#{column.key}_bak"
+              exec_sql("ALTER TABLE #{table_name} RENAME #{column.key} TO #{back_key};")
+            end
             set_default(column)
           end
         end

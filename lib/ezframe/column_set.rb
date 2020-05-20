@@ -59,13 +59,14 @@ module Ezframe
       end
 
       def each
-        @colset_h.each { |k, v| yield(k, v) }
+        @colset_h.each {|k, v| yield(k, v) }
       end
 
       def inspect
-        @colset_h.each do |name, colset|
-          "[#{name}]:#{colset.inspect}"
-        end
+        return @colset_h.map do |name, colset|
+          # "[#{name}]:#{colset.inspect}"
+          "[#{name}]:\n"
+        end.join
       end
 
       def create_tables
