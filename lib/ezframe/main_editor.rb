@@ -96,17 +96,20 @@ module Ezframe
 
     # 一覧テーブルの生成
     def make_index_table(data_a)
+      EzLog.debug("make_index_table: #{data_a.length}")
       target_keys = @index_keys
       unless target_keys
         target_keys = @column_set.keys.select {|k| !@column_set[k].no_view? }
       end
       tr_a = data_a.map do |data|
+        # EzLog.debug("data=#{data}")
         @column_set.clear
         @column_set.set_values(data, from_db: true)
         line = target_keys.map do |key| 
           view = @column_set[key].view
           Ht.td(Ht.a(href: "#{make_base_url(data[:id])}", child: view))
         end
+        EzLog.debug("line=#{line}")
         Ht.tr(line)
       end
       th_a = target_keys.map {|key| Ht.th(@column_set[key.to_sym].label) }
@@ -218,6 +221,8 @@ module Ezframe
     def list_for_index(where: nil)
       where ||= {}
       where[:deleted_at] = nil
+      sql = @column_set.dataset.where(where).order(@sort_key).sql
+      EzLog.debug("list_for_index: #{sql}")
       return @column_set.dataset.where(where).order(@sort_key).all
     end
 
