@@ -50,7 +50,6 @@ module Ezframe
       end
     end
 
-
     # データ編集受信
     def public_edit_post
       EzLog.debug("public_edit_post: #{@form}")
@@ -127,7 +126,7 @@ module Ezframe
         form = column.form
         table.push Ht.p([ Ht.small(column.label), form ]) if form
       end
-      send_button = Ht.button(id: "edit-finish-button", child: Message[:edit_finish_button_label], class: %w[btn], event: "on=click:url=#{make_base_url}/#{command}:with=form") 
+      send_button = Ht.button(id: "edit-finish-button", child: Message[:edit_finish_button_label], class: %w[btn], ezevent: "on=click:url=#{make_base_url}/#{command}:with=form") 
       cancel_button = edit_cancel_button
       cancel_button[:event] = "on=click:command=redirect:url=#{make_base_url}"
       table.push(Ht.p([send_button, cancel_button]))
@@ -212,7 +211,7 @@ module Ezframe
         end          
         table.push Ht.p(class: %w[hover-button-box], child: [ Ht.small(column.label), view, edit_btn ].compact)  
       end
-      edit_btn = Ht.button(id: "#{@class_snake}-detail-edit-button", class: %w[btn], child: [ Ht.icon("edit"), Message[:edit_button_label] ], event: "on=click:url=#{make_base_url}/edit")
+      edit_btn = Ht.button(id: "#{@class_snake}-detail-edit-button", class: %w[btn], child: [ Ht.icon("edit"), Message[:edit_button_label] ], ezevent: "on=click:url=#{make_base_url}/edit")
       table.push edit_btn
       return table
     end
@@ -232,7 +231,7 @@ module Ezframe
 
     def make_create_button(event = nil)
       event ||= "on=click:command=redirect:url=#{make_base_url}/create"
-      return Ht.button(class: %w[btn], child: [ Ht.icon("add"), Message[:create_button_label] ], event: event )
+      return Ht.button(class: %w[btn], child: [ Ht.icon("add"), Message[:create_button_label] ], ezevent: event )
     end
   end
 end

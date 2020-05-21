@@ -15,13 +15,9 @@ module Ezframe
 
     def public_default_get
       @id = get_id
-#      if @id
-#        return public_detail_post
-#      else
-        div = [ Ht.div(id: @dom_id[:create], child: make_index_top), Ht.div(id: @dom_id[:index], child: make_index_table) ]
-        layout = index_layout(center: Ht.form(child: div))
-        return show_base_template(title: Message[:index_page_title], body: Html.convert(layout))
-#      end
+      div = [ Ht.div(id: @dom_id[:create], child: make_index_top), Ht.div(id: @dom_id[:index], child: make_index_table) ]
+      layout = index_layout(center: Ht.form(child: div))
+      return show_base_template(title: Message[:index_page_title], body: Html.convert(layout))
     end
 
     def make_index_top
@@ -135,7 +131,7 @@ module Ezframe
       tr_a = list.map do |data|
         view_a = make_index_line(target_keys, data)
         td_a = view_a.map {|view| Ht.td(view)}
-        Ht.tr(id: "tr-#{@class_snake}-#{data[:id]}", child: td_a, event: "on=click:url=#{make_base_url(data[:id])}/detail")
+        Ht.tr(id: "tr-#{@class_snake}-#{data[:id]}", child: td_a, ezevent: "on=click:url=#{make_base_url(data[:id])}/detail")
       end
       tbody = Ht.tbody(tr_a)
       return [
@@ -169,12 +165,12 @@ module Ezframe
 
     # 一覧ページ用ボタン
     def button_for_index_line(data)
-      Ht.button(class: %w[btn right], event: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]])
+      Ht.button(class: %w[btn right], ezevent: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]])
     end
 
     # 詳細ページ用ボタン
     def button_for_detail_box(data)
-      buttons = [Ht.button(class: %w[btn right], event: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]]) ]
+      buttons = [Ht.button(class: %w[btn right], ezevent: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]]) ]
       if @show_delete_button
         buttons.push(make_delete_button)
       end
@@ -194,7 +190,7 @@ module Ezframe
         form = column.form
         Ht.p(class: %w[form-line], child: [Ht.small(column.label), form]) if form
       end
-      send_button = Ht.button(id: "#{@class_snake}-#{command}-finish-button", class: %w[btn], child: [Ht.icon("check"), Message[:edit_finish_button_label]], event: "on=click:url=#{make_base_url(@id)}/#{command}:with=form")
+      send_button = Ht.button(id: "#{@class_snake}-#{command}-finish-button", class: %w[btn], child: [Ht.icon("check"), Message[:edit_finish_button_label]], ezevent: "on=click:url=#{make_base_url(@id)}/#{command}:with=form")
       cancel_button = make_cancel_button("on=click:url=#{make_base_url(@id)}/#{command}:cancel=true:with=form")
       list.push(Ht.p(class: %w[edit-finish-buttons], child: [send_button, cancel_button]))
       return Ht.form(list)

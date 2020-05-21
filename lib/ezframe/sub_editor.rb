@@ -56,6 +56,7 @@ module Ezframe
         return { inject: "##{edit_inject_element}", body: Html.convert(form) }
       else
         if @event[:cancel]
+          # キャンセルの場合
           data = @column_set.set_from_db(@id)
           return act_after_cancel
         else
@@ -138,7 +139,7 @@ module Ezframe
       tr_a = list.map do |data|
         view_a = make_index_line(target_keys, data)
         td_a = view_a.map {|view| Ht.td(view)}
-        Ht.tr(id: "tr-#{@class_snake}-#{data[:id]}", child: td_a, event: "on=click:url=#{make_base_url(data[:id])}/detail")
+        Ht.tr(id: "tr-#{@class_snake}-#{data[:id]}", child: td_a, ezevent: "on=click:url=#{make_base_url(data[:id])}/detail")
       end
       tbody = Ht.tbody(tr_a)
       return [
@@ -168,12 +169,12 @@ module Ezframe
 
     # 一覧ページ用ボタン
     def button_for_index_line(data)
-      Ht.button(class: %w[btn right], event: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]])
+      Ht.button(class: %w[btn right], ezevent: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]])
     end
 
     # 詳細ページ用ボタン
     def button_for_detail_box(data)
-      buttons = [Ht.button(class: %w[btn right], event: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]]) ]
+      buttons = [Ht.button(class: %w[btn right], ezevent: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]]) ]
       if @show_delete_button
         buttons.push(make_delete_button)
       end
@@ -204,7 +205,7 @@ module Ezframe
         make_edit_line(column)    
       end.compact
       event = "on=click:url=#{make_base_url(@id)}/#{command}:with=form"
-      send_button = Ht.button(id: "#{@class_snake}-#{command}-finish-button", class: %w[btn], child: [Ht.icon("check"), Message[:edit_finish_button_label]], event: event)
+      send_button = Ht.button(id: "#{@class_snake}-#{command}-finish-button", class: %w[btn], child: [Ht.icon("check"), Message[:edit_finish_button_label]], ezevent: event)
       cancel_button = make_cancel_button("on=click:url=#{make_base_url(@id)}/#{command}:cancel=true:with=form")
       list.push(Ht.p(class: %w[edit-finish-buttons], child: [send_button, cancel_button]))
       return Ht.form(list)
