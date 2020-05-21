@@ -114,17 +114,47 @@ module Ezframe
           end
           if dbtype != new_type
             exec_sql("ALTER TABLE #{table_name} ALTER COLUMN #{column.key} DROP DEFAULT;")
-            begin
-              exec_sql("ALTER TABLE #{table_name} ALTER #{column.key} TYPE #{new_type};")
-            rescue => e
-              EzLog.error("alter column type error: #{e.class}:#{e}:#{e.backtrace}")
-              back_key = "#{column.key}_bak"
-              exec_sql("ALTER TABLE #{table_name} RENAME #{column.key} TO #{back_key};")
+            unless change_type(table, column.key, new_type)
+              # 失敗したときは名前を変更してカラム追加
+              rename_column(table_name, column.key, "#{column.key}_bak")
+              add_column(table, column.key, new_type)
             end
             set_default(column)
           end
         end
-        # exec_sql("ALTER TABLE #{table_name} add COLUMN deleted_at timestamp;")
+      end
+
+      # カラム追加
+      def add_column(table_name, key, typ)
+        begin
+          exec_sql("ALTER TABLE #{table_name} ADD #{key} #{typ};")
+        rescue => e
+          EzLog.error("change_type: error: #{e.class}:#{e}:#{e.backtrace}")
+          return nil
+        end
+        return true
+      end
+
+      # カラムの型変更
+      def change_type(table_name, key, typ)
+        begin
+          exec_sql("ALTER TABLE #{table_name} ALTER #{key} TYPE #{typ};")
+        rescue => e
+          EzLog.error("change_type: error: #{e.class}:#{e}:#{e.backtrace}")
+          return nil
+        end
+        return true
+      end
+
+      # カラムの名前変更
+      def rename_column(table_name, old_key, new_key)
+        begin
+          exec_sql("ALTER TABLE #{table_name} RENAME #{old_key} TO #{new_key};")
+        rescue => e
+          EzLog.error("rename_column: error: #{e.class}:#{e}:#{e.backtrace}")
+          return nil
+        end
+        return true
       end
     end
   end
