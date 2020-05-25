@@ -16,7 +16,7 @@ module Ezframe
     def public_default_get
       @id = get_id
       div = [ Ht.div(id: @dom_id[:create], child: make_index_top), Ht.div(id: @dom_id[:index], child: make_index_table) ]
-      layout = index_layout(center: Ht.form(child: div))
+      layout = index_layout(center: make_form(make_base_url, div))
       return show_base_template(title: Message[:index_page_title], body: Html.convert(layout))
     end
 
@@ -165,7 +165,7 @@ module Ezframe
 
     # 一覧ページ用ボタン
     def button_for_index_line(data)
-      Ht.button(class: %w[btn right], ezevent: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]])
+      return Ht.button(class: %w[btn right], ezevent: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]])
     end
 
     # 詳細ページ用ボタン
@@ -193,7 +193,7 @@ module Ezframe
       send_button = Ht.button(id: "#{@class_snake}-#{command}-finish-button", class: %w[btn], child: [Ht.icon("check"), Message[:edit_finish_button_label]], ezevent: "on=click:url=#{make_base_url(@id)}/#{command}:with=form")
       cancel_button = make_cancel_button("on=click:url=#{make_base_url(@id)}/#{command}:cancel=true:with=form")
       list.push(Ht.p(class: %w[edit-finish-buttons], child: [send_button, cancel_button]))
-      return Ht.form(list)
+      return make_form("#{make_base_url}/edit", list)
     end
 
 

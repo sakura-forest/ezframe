@@ -191,7 +191,7 @@ module Ezframe
 
     # 編集フォームの生成
     def make_edit_form(command = :edit)
-      # @id ||= get_id
+      @id ||= get_id
       if command == :edit && !@id
         EzLog.error "make_edit_form: @id is not defined"
       end
@@ -208,7 +208,7 @@ module Ezframe
       send_button = Ht.button(id: "#{@class_snake}-#{command}-finish-button", class: %w[btn], child: [Ht.icon("check"), Message[:edit_finish_button_label]], ezevent: event)
       cancel_button = make_cancel_button("on=click:url=#{make_base_url(@id)}/#{command}:cancel=true:with=form")
       list.push(Ht.p(class: %w[edit-finish-buttons], child: [send_button, cancel_button]))
-      return Ht.form(list)
+      return make_form("#{make_base_url}/edit", list)
     end
 
     def make_edit_line(column)

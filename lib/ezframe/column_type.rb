@@ -315,7 +315,7 @@ module Ezframe
       @items ||= @attribute[:item]
       h = Ht.select(class: %w[browser-default], name: self.key, label: @attribute[:label], item: @items, value: @value)
       h[:class] = @attribute[:class] if @attribute[:class]
-      return [ h, make_error_box(self.key )
+      return [ h, make_error_box(self.key ) ]
     end
 
     def db_type
@@ -562,10 +562,12 @@ module Ezframe
   class EmailType < TextType
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      h = super
-      h[:type] = "email" if h
+      fm = super
+      return nil unless fm
+      h = fm[0]
+      h[:type] = "email"
       h[:class] = @attribute[:class] if @attribute[:class]
-      return h
+      return fm
     end
 
     def normalize(val)

@@ -7,6 +7,10 @@ module Ezframe
       return params[class_name.to_sym]
     end
 
+    def make_form(url, child)
+      return Ht.form(ezload: "command=set_validation:validate_url=#{url}", child: child)
+    end
+
     #  新規登録ボタンの生成
     def make_create_button(event = nil)
       event ||= "on=click:url=#{make_base_url(@id)}/create"
@@ -49,6 +53,7 @@ module Ezframe
       Ht.span([Ht.small(col.label), col.form(force: true)])
     end
 
+    # エラーメッセージだけを表示するページを生成
     def show_message_page(title, body)
       return show_base_template(title: title, body: Html.convert(body))
     end

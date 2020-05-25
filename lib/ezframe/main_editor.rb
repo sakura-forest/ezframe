@@ -11,7 +11,7 @@ module Ezframe
       else
         data_a = list_for_index
         div = [ Ht.div(id: "detail-top-area", child: make_index_top), Ht.div(id: "index-area", child: make_index_table(data_a)) ]
-        layout = index_layout(center: Ht.form(child: div))
+        layout = index_layout(center: make_form(make_base_url, div))
         return show_base_template(title: Message[:index_page_title], body: Html.convert(layout))
       end
     end
@@ -25,7 +25,7 @@ module Ezframe
     def public_create_get
       @column_set.clear
       table = make_edit_form(:create)
-      layout = main_layout(center: Ht.form(child: table), type: 2)
+      layout = main_layout(center: make_form("#{make_base_url}/create", table), type: 2)
       show_base_template(title: Message[:parent_create_page_title], body: Html.convert(layout))
     end
 
@@ -34,10 +34,10 @@ module Ezframe
       validation = @column_set.validate(@form)
       if @event[:branch] == "single_validate"
         EzLog.debug("public_create_post: single validate: event=#{@event}, form=#{@form}")
-        return single_validation(validation, @event[:target_key]) 
+        return single_validation(validation, @event[:target_key] || @form.keys[0]) 
       end
       unless @form
-        return { inject: "#center-panel", body: Ht.form(child: make_edit_form(:create)) }
+        return { inject: "#center-panel", body: Html.convert(make_form("#{make_base_url}/create", make_edit_form(:create))) }
       else
         if count_errors(validation) > 0
           cmd_a = full_validation(validation)
@@ -57,12 +57,12 @@ module Ezframe
       validation = @column_set.validate(@form)
       if @event[:branch] == "single_validate"
         EzLog.debug("public_edit_post: single validate:event=#{@event}, form=#{@form}")
-        return single_validation(validation, @event[:target_key]) 
+        return single_validation(validation, @event[:target_key] || @form.keys[0]) 
       end
       unless @form
         data = @column_set.set_from_db(@id)
         return show_message_page("no data", "data is not defined: #{@id}") unless data
-        return { inject: "#center-panel", body: Html.convert(Ht.form(make_edit_form)) }
+        return { inject: "#center-panel", body: Html.convert(make_form("#{make_base_url}/edit", make_edit_form)) }
       else
         if count_errors(validation) > 0
           cmd_a = full_validation(validation)
@@ -101,14 +101,12 @@ module Ezframe
         target_keys = @column_set.keys.select {|k| !@column_set[k].no_view? }
       end
       tr_a = data_a.map do |data|
-        # EzLog.debug("data=#{data}")
         @column_set.clear
         @column_set.set_values(data, from_db: true)
         line = target_keys.map do |key| 
           view = @column_set[key].view
           Ht.td(Ht.a(href: "#{make_base_url(data[:id])}", child: view))
         end
-        EzLog.debug("line=#{line}")
         Ht.tr(line)
       end
       th_a = target_keys.map {|key| Ht.th(@column_set[key.to_sym].label) }

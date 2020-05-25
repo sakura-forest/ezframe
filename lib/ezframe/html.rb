@@ -21,9 +21,9 @@ module Ezframe
         end
         tag = ht_h[:tag]
         error_box = ""
-        if %w[input select textarea].include?(tag)
-          error_box = "<div id=\"error-box-#{ht_h[:name]}\" class=\"error-box hide\"></div>"
-        end
+        #if %w[input select textarea].include?(tag)
+        #  error_box = "<div id=\"error-box-#{ht_h[:name]}\" class=\"error-box hide\"></div>"
+        #end
         opt_s, child_s = join_attribute(ht_h)
         if !child_s.strip.empty? || !%w[img input hr br meta].include?(tag)
           start_tag = [ht_h[:tag], opt_s].compact.join(" ").strip
