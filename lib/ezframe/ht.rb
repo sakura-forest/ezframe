@@ -18,6 +18,7 @@ module Ezframe
           return nil
         end
         h[:tag] ||= __callee__.to_s
+        h[:wrap] = true
         raise "no tag" if h[:tag] == "wrap_tag"
         return h
       end
@@ -58,6 +59,7 @@ module Ezframe
       alias_method :form, :wrap_tag
       alias_method :input, :single_tag
       alias_method :select, :wrap_tag
+      alias_method :option, :wrap_tag
       alias_method :textarea, :wrap_tag
       alias_method :label, :wrap_tag
       alias_method :fieldset, :wrap_tag
@@ -79,7 +81,7 @@ module Ezframe
           h[:tag] = "icon"
           return wrap_tag(h)
         elsif arg.is_a?(String)
-          return { tag: "icon", name: arg }
+          return { tag: "icon", wrap: true, name: arg }
         end
       end
 
@@ -120,10 +122,8 @@ module Ezframe
       attr_accessor :tag
       def to_h(opts = {})
         return nil if self.empty?
-        child = self.map do |elem|
-          { tag: "li", child: elem }
-        end
-        h = { tag: @tag, child: child }
+        child = self.map { |elem| Ht.li(elem) }
+        h = { tag: @tag, wrap: true, child: child }
         h.update(opts)
         return h
       end

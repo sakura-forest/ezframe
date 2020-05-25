@@ -7,7 +7,7 @@ module Ezframe
       super
       @sort_key = :id
       # @parent_key = :customer
-      @event = @parsed_body[:event] if @parsed_body
+      @event = @parsed_body[:ezevent] if @parsed_body
       # @use_detail_box = true
     end
 
@@ -185,7 +185,7 @@ module Ezframe
     # 新規データ追加欄
     def area_for_create(extra_buttons = nil)
       create_button = make_create_button
-      create_button[:event] = "on=click:url=#{make_base_url}/create"
+      create_button[:ezevent] = "on=click:url=#{make_base_url}/create"
       return Ht.div(id: "#{@class_snake}-create-area", child: [ create_button, extra_buttons ].compact)
     end
 

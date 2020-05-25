@@ -20,24 +20,30 @@ module Ezframe
           tag = "i"
         end
         tag = ht_h[:tag]
-        error_box = ""
-        #if %w[input select textarea].include?(tag)
-        #  error_box = "<div id=\"error-box-#{ht_h[:name]}\" class=\"error-box hide\"></div>"
-        #end
-        opt_s, child_s = join_attribute(ht_h)
-        if !child_s.strip.empty? || !%w[img input hr br meta].include?(tag)
-          start_tag = [ht_h[:tag], opt_s].compact.join(" ").strip
-          return "<#{start_tag}>#{child_s}</#{ht_h[:tag]}>"+error_box
+        join_info = join_attribute(ht_h)
+        start_tag = [ht_h[:tag], join_info[:attr]].compact.join(" ").strip
+        if ht_h[:wrap]   # !child_s.strip.empty? || 
+          return "#{join_info[:before]}<#{start_tag}>#{join_info[:child]}</#{ht_h[:tag]}>#{join_info[:after]}"
         end
-        tag_content = [ ht_h[:tag], opt_s ].compact.join(" ")
-        return "<#{tag_content}/>"+error_box
+        # tag_content = [ ht_h[:tag], join_info[:attr] ].compact.join(" ")
+        return "#{join_info[:before]}<#{start_tag}/>#{join_info[:after]}"
       end
 
       # attributeの連結文字列化
       def join_attribute(attrs)
         child_s = ""
+        before = ""
+        after = ""
         opt_a = attrs.map do |k, v|
           case k
+          when :before
+            before = convert(v)
+            next
+          when :after
+            after = convert(v)
+            next
+          when :wrap
+            nil
           when :child
             child_s = convert(v)
             next
@@ -56,7 +62,7 @@ module Ezframe
             end
           end
         end
-        [opt_a.compact.join(" "), child_s]
+        { attr: opt_a.compact.join(" "), before: before, after: after, child: child_s }
       end
 
       def textarea(ht_h)
@@ -73,7 +79,7 @@ module Ezframe
         # puts "Html.select: #{item}"
         if item.is_a?(Hash)
           option_a = ht_h[:item].map do |k, v|
-            h = { tag: "option", value: k }
+            h = Ht.option(value: k)
             if v.is_a?(Array)
               v, selected = v
               h[:selected] = "selected" if selected
@@ -87,7 +93,7 @@ module Ezframe
           end
         elsif item.is_a?(Array)
           option_a = item.map do |v|
-            h = { tag: "option", value: v[0], child: v[1] }
+            h = Ht.option(value: v[0], child: v[1])
             if %w[selected default].include?(v[2])
               h[:selected] = "selected"
             end
@@ -105,6 +111,7 @@ module Ezframe
         attr[:child] = option_a
         attr[:name] ||= attr[:key]
         attr[:final] = true
+        attr[:wrap] = true
         attr.delete(:item)
         Html.convert(attr)
       end

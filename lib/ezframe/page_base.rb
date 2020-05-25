@@ -43,7 +43,7 @@ module Ezframe
           @parsed_body = parse_query_string(body)
         end
         # EzLog.info "parsed_body=#{@parsed_body.inspect}"
-        @event = @parsed_body[:event] || {}
+        @event = @parsed_body[:ezevent] || {}
         @form = @event[:form]
 
         # EzLog.info "event=#{@event}"

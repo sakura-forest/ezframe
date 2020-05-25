@@ -3,14 +3,14 @@ require_relative "../test_helper.rb"
 
 class HthashTest < GenericTest
   def test_convert_tag
-    assert_equal({ tag: "div", child: "test"},  Ht.div(child: "test"))
+    assert_equal({ tag: "div", wrap: true, child: "test"},  Ht.div(child: "test"))
     assert_equal({ tag: "input", name: "test"},  Ht.input(name: "test"))
-    assert_equal({ tag: "span", child: "test"},  Ht.span(child: "test"))
+    assert_equal({ tag: "span", wrap: true, child: "test"},  Ht.span(child: "test"))
   end
 
   def test_div
     h = Ht.div(child: [Ht.div(child: "A"), Ht.div(child: "B")])
-    assert_equal({ tag: "div", child: [ {tag: "div", child: "A"}, {tag: "div", child: "B"}]}, h)
+    assert_equal({ tag: "div", wrap: true, child: [ {tag: "div", wrap: true, child: "A"}, {tag: "div", wrap: true, child: "B"}]}, h)
   end
 
   def test_multidiv
