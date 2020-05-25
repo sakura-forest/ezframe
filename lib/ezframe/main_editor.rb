@@ -148,28 +148,29 @@ module Ezframe
     private
 
     # １カラムに対してだけバリデーションを行う。
-    def single_validation(result, target_key)
+    def single_validation(validate_h, target_key)
+      EzLog.debug("single_validation: validate_h=#{validate_h}, target_key=#{target_key}")
       unless target_key
-        raise "target_key is empty: #{result}"
+        raise "target_key is empty: #{validate_h}"
         return [] 
       end
       cmd_a = []
-      if result[target_key.to_sym]
-        cmd_a = show_validate_result(result)
+      if validate_h[target_key.to_sym]
+        cmd_a = show_validate_result(validate_h)
       end
-      if count_errors(result) == 0
+      if count_errors(validate_h) == 0
         cmd_a.unshift({ reset_error: "#error-box-#{target_key}"})
       end
       comp_a = exec_completion(@form)
       cmd_a += comp_a if comp_a
       EzLog.debug("reset_error: #error-box-#{target_key}")
-      EzLog.debug("single_validation: target_key=#{target_key}, result=#{result}, count=#{count_errors(result)}, cmd_a=#{cmd_a}")
+      EzLog.debug("single_validation: target_key=#{target_key}, validate_h=#{validate_h}, count=#{count_errors(validate_h)}, cmd_a=#{cmd_a}")
       return cmd_a
     end
 
     # 全てのカラムに対してバリデーションを行う
-    def full_validation(result)
-      cmd_a = show_validate_result(result)
+    def full_validation(validate_h)
+      cmd_a = show_validate_result(validate_h)
       cmd_a.unshift({ reset_error: ".error-box" })
       EzLog.debug("full_validation: full, cmd_a=#{cmd_a}")
       return cmd_a

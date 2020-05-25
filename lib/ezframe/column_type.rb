@@ -523,12 +523,13 @@ module Ezframe
       mon_list.unshift([0, "(月)"])
       mday_list = (1..31).map { |d| [d, "#{d}"] }
       mday_list.unshift([0, "(日)"])
+      ezvalid = "target_key=#{key}:with=#multi-#{key}"
       return  Ht.div(id: "multi-#{key}",
-        child: [ Ht.div([Ht.select(name: "#{key}_year", class: %w[browser-default multi_input], item: year_list, value: year, ezvalid: "#multi-#{key}"),
+        child: [ Ht.div([Ht.select(name: "#{key}_year", class: %w[browser-default multi_input], item: year_list, value: year, ezvalid: ezvalid),
               Ht.small("年")]),
-              Ht.select(name: "#{key}_mon", class: %w[browser-default multi_input], item: mon_list, value: mon, ezvalid: "#multi-#{key}"),
+              Ht.select(name: "#{key}_mon", class: %w[browser-default multi_input], item: mon_list, value: mon, ezvalid: ezvalid),
               Ht.small("月"),
-              Ht.select(name: "#{key}_mday", class: %w[browser-default multi_input], item: mday_list, value: mday, ezvalid: "#multi-#{key}"),
+              Ht.select(name: "#{key}_mday", class: %w[browser-default multi_input], item: mday_list, value: mday, ezvalid: ezvalid),
               Ht.small("日"), 
               make_error_box(key)])
     end
@@ -558,6 +559,28 @@ module Ezframe
       key = target_key || self.key
       y, m, d = form["#{key}_year".to_sym], form["#{key}_mon".to_sym], form["#{key}_mday".to_sym]
       return "%d-%02d-%02d"%[y.to_i, m.to_i, d.to_i]
+    end
+
+    def validate(val)
+      return validate_date(val)
+    end
+
+    # 日付の検証
+    def validate_date(val)
+      if val.is_a?(String)
+        y,m,d = val.split("-")
+        if y.to_i == 0 || m.to_i == 0 || d.to_i == 0
+          return nil
+        end
+        tm = Time.mktime(y.to_i, m.to_i, d.to_i)
+      elsif val.is_a?(Time)
+        tm = val
+      end
+      if tm.mday != d.to_i
+        @error = :invalid_value
+        return @error
+      end
+      return nil
     end
   end
 
