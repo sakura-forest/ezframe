@@ -58,7 +58,7 @@ module Ezframe
       validation = @column_set.validate(@form)
       if @event[:branch] == "single_validate"
         EzLog.debug("public_edit_post: single validate:event=#{@event}, form=#{@form}")
-        return single_validation(validation, @event[:target_key] || @form.keys[0]) 
+        return single_validation(validation, @event[:target_key]) 
       end
       unless @form
         data = @column_set.set_from_db(@id)
@@ -192,6 +192,7 @@ module Ezframe
       end
       return cmd_a
     end
+
 
     # validate_resultの中のエラーの数を数える
     def count_errors(validate_result)
