@@ -523,11 +523,12 @@ module Ezframe
       mon_list.unshift([0, "(月)"])
       mday_list = (1..31).map { |d| [d, "#{d}"] }
       mday_list.unshift([0, "(日)"])
-      return  Ht.div(id: "multi_input_#{key}", child: [ Ht.div([Ht.select(name: "#{key}_year", class: %w[browser-default"], item: year_list, value: year),
+      return  Ht.div(id: "multi-#{key}",
+        child: [ Ht.div([Ht.select(name: "#{key}_year", class: %w[browser-default multi_input], item: year_list, value: year, ezvalid: "#multi-#{key}"),
               Ht.small("年")]),
-              Ht.select(name: "#{key}_mon", class: %w[browser-default], item: mon_list, value: mon),
+              Ht.select(name: "#{key}_mon", class: %w[browser-default multi_input], item: mon_list, value: mon, ezvalid: "#multi-#{key}"),
               Ht.small("月"),
-              Ht.select(name: "#{key}_mday", class: %w[browser-default], item: mday_list, value: mday),
+              Ht.select(name: "#{key}_mday", class: %w[browser-default multi_input], item: mday_list, value: mday, ezvalid: "#multi-#{key}"),
               Ht.small("日"), 
               make_error_box(key)])
     end
