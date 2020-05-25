@@ -32,8 +32,9 @@ module Ezframe
     # 新規登録受信
     def public_create_post
       validation = @column_set.validate(@form)
+      EzLog.debug("public_create_post: event=#{@event}, form=#{@form}")
       if @event[:branch] == "single_validate"
-        EzLog.debug("public_create_post: single validate: event=#{@event}, form=#{@form}")
+        EzLog.debug("public_create_post: single validate")
         return single_validation(validation, @event[:target_key] || @form.keys[0]) 
       end
       unless @form

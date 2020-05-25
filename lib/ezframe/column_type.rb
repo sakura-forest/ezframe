@@ -134,7 +134,8 @@ module Ezframe
       key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
       h = Ht.input(type: "text", name: key, label: @attribute[:label], value: @value || "")
       h[:class] = @attribute[:class] if @attribute[:class]
-      return [ h, make_error_box(key) ]
+      h[:after]  = make_error_box(key)
+      return h
     end
 
     def db_type
@@ -155,7 +156,8 @@ module Ezframe
       key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
       h = Ht.textarea(name: key, label: @attribute[:label], child: val)
       h[:class] = @attribute[:class] if @attribute[:class]
-      return [ h, make_error_box(key) ]
+      h[:after] = make_error_box(key)
+      return h
     end
   end
 
@@ -211,7 +213,8 @@ module Ezframe
       key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
       h = Ht.input(type: "number", name: key, label: @attribute[:label], value: @value || "")
       h[:class] = @attribute[:class] if @attribute[:class]
-      return [ h, make_error_box(key) ]
+      h[:after] = make_error_box(key)
+      return h
     end
 
     def validate(val)
@@ -257,7 +260,7 @@ module Ezframe
       end
       key = self.key
       key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
-      return [ Ht.select(name: key, class: %w[browser-default], item: menu_a, value: @value), make_error_box(key) ]
+      return Ht.select(name: key, class: %w[browser-default], item: menu_a, value: @value, after: make_error_box(key))
     end
 
     def db_type
@@ -300,7 +303,8 @@ module Ezframe
       key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
       h = Ht.input(type: "password", name: key, label: @attribute[:label], value: "")
       h[:class] = @attribute[:class] if @attribute[:class]
-      return  [ h, make_error_box ]
+      h[:after] = make_error_box(key)
+      return  h
     end
 
     def db_value
@@ -315,7 +319,8 @@ module Ezframe
       @items ||= @attribute[:item]
       h = Ht.select(class: %w[browser-default], name: self.key, label: @attribute[:label], item: @items, value: @value)
       h[:class] = @attribute[:class] if @attribute[:class]
-      return [ h, make_error_box(self.key ) ]
+      h[:after] = make_error_box(self.key)
+      return h
     end
 
     def db_type
@@ -342,7 +347,8 @@ module Ezframe
       key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
       h = Ht.checkbox(name: key, value: parent[:id].value, label: @attribute[:label])
       h[:class] = @attribute[:class] if @attribute[:class]
-      return [ h, make_error_box(key) ]
+      h[:after] = make_error_box(key)
+      return h
     end
 
     def db_type
@@ -353,9 +359,8 @@ module Ezframe
   class DateType < TextType
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      fm = super
-      return nil unless fm
-      h = fm[0]
+      h = super
+      return nil unless h
       if h
         # h[:type] = 'date'
         h[:type] = "text"
@@ -363,7 +368,7 @@ module Ezframe
         h[:class] = [ "datepicker" ]
         h[:class].push(@attribute[:class]) if @attribute[:class]
       end
-      return fm
+      return h
     end
 
     def db_type
@@ -477,18 +482,15 @@ module Ezframe
     def form(opts = {})
       # EzLog.debug("DatetimeType: key=#{self.key}, opts=#{opts}")
       return nil if no_edit? && !opts[:force]
-      fm = super
-      return ni unless fm
-      h = fm[0]
+      h = super
+      return nil unless h
       if h
-        # h[:type] = 'date'
         h[:type] = "text"
         h[:value] = @value || ""
         h[:class] = [ "datepicker" ]
         h[:class].push(@attribute[:class]) if @attribute[:class]
       end
-      # EzLog.debug("DatetimeType: res=#{h}")
-      return fm
+      return h
     end
 
     def db_type
@@ -521,14 +523,13 @@ module Ezframe
       mon_list.unshift([0, "(月)"])
       mday_list = (1..31).map { |d| [d, "#{d}"] }
       mday_list.unshift([0, "(日)"])
-       [ Ht.div([Ht.select(name: "#{key}_year", class: %w[browser-default], item: year_list, value: year),
+      return  Ht.div(id: "multi_input_#{key}", child: [ Ht.div([Ht.select(name: "#{key}_year", class: %w[browser-default"], item: year_list, value: year),
               Ht.small("年")]),
               Ht.select(name: "#{key}_mon", class: %w[browser-default], item: mon_list, value: mon),
               Ht.small("月"),
               Ht.select(name: "#{key}_mday", class: %w[browser-default], item: mday_list, value: mday),
               Ht.small("日"), 
-              make_error_box(key)
-      ]
+              make_error_box(key)])
     end
 
     def view(opts = {})
@@ -562,12 +563,11 @@ module Ezframe
   class EmailType < TextType
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      fm = super
-      return nil unless fm
-      h = fm[0]
+      h = super
+      return nil unless h
       h[:type] = "email"
       h[:class] = @attribute[:class] if @attribute[:class]
-      return fm
+      return h
     end
 
     def normalize(val)
@@ -673,11 +673,10 @@ module Ezframe
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      fm = super
-      return nil unless fm
-      h = fm[0]
+      h = super
+      return nil unless h
       h[:item] = @pref_h
-      return fm
+      return h
     end
 
     def view(opts = {})
