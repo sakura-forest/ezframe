@@ -51,6 +51,11 @@ module Ezframe
     # データ編集受信
     def public_edit_post
       @id = get_id
+      validation = @column_set.validate(@form)
+      if @event[:branch] == "single_validate"
+        EzLog.debug("public_edit_post: single validate:event=#{@event}, form=#{@form}")
+        return single_validation(validation, @event[:target_key]) 
+      end
       unless @event[:form]
         data = @column_set.set_from_db(@id)
         return show_message_page("no data", "data is not defined: #{@id}") unless data
@@ -135,9 +140,9 @@ module Ezframe
       end
       tbody = Ht.tbody(tr_a)
       return [
-               Ht.table(id: "enable_datatable_#{@class_snake}", child: [thead, tbody], ezload: "command=enable_datatable:target=#enable_datatable_#{@class_snake}"),
-               Ht.div(id: @dom_id[:detail], child: ""),
-             ]
+        Ht.table(id: "enable_datatable_#{@class_snake}", child: [thead, tbody], ezload: "command=enable_datatable:target=#enable_datatable_#{@class_snake}"),
+        Ht.div(id: @dom_id[:detail], child: "")
+      ]
     end
 
     # 一覧表示の１行を生成
@@ -150,12 +155,7 @@ module Ezframe
     # 一覧表示の１カラムを生成
     def make_index_column(key)
       column = @column_set[key.to_sym]
-#      if @with_label
-#        child = [Ht.small(column.label), column.view(force: true)]
-#        return Ht.p(id: "edit-#{@class_snake}-#{@column_set[:id].value}-column-#{column.key}", child: child)
-#      else
-        return column.view(force: true)
-#      end
+      return column.view(force: true)
     end
 
     # 一覧ページ用のデータリスト生成
@@ -195,7 +195,5 @@ module Ezframe
       list.push(Ht.p(class: %w[edit-finish-buttons], child: [send_button, cancel_button]))
       return make_form("#{make_base_url}/edit", list)
     end
-
-
   end
 end

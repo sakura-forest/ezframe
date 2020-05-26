@@ -7,6 +7,18 @@ module Ezframe
       return params[class_name.to_sym]
     end
 
+    # 新規データの生成
+    def create_data(form)
+      @column_set.clear
+      @column_set[:id].value = id = @column_set.create(form)
+      return id
+    end
+
+    # データの更新
+    def update_data(id, form)
+      @column_set.update(id, form)
+    end
+
     def make_form(url, child)
       return Ht.form(ezload: "command=set_validation:validate_url=#{url}", child: child)
     end
@@ -36,10 +48,10 @@ module Ezframe
     end
 
     # 値の更新
-    def update_value
-      form = @event[:form]
-      @column_set.update(get_id, form)
-    end
+#    def update_value
+#      form = @event[:form]
+#      @column_set.update(get_id, form)
+#    end
 
     # ラベル付きで1カラムのviewを表示
     def show_label_view(key)

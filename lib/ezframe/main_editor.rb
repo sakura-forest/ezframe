@@ -77,18 +77,6 @@ module Ezframe
 
     private
 
-    # 新規データの生成
-    def create_data(form)
-      @column_set.clear
-      @column_set[:id].value = id = @column_set.create(form)
-      return id
-    end
-
-    # データの更新
-    def update_data(id, form)
-      @column_set.update(id, form)
-    end
-
     # 自動入力を行う
     def exec_completion
       return nil
