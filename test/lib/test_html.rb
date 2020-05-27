@@ -58,7 +58,9 @@ class HtmlTest < GenericTest
     h = Ht.div(before: Ht.div("before_elem"), child: "main_elem", after: Ht.div("after_elem"))
     res = Html.convert(h)
     assert_equal("<div>before_elem</div><div>main_elem</div><div>after_elem</div>", res)
+  end
 
-
+  def test_ht_list
+    p Html.convert(Ht::Ul.new(%w[a b c d]).to_h)
   end
 end
