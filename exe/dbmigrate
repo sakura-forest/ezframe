@@ -51,8 +51,12 @@ module Ezframe
       end
 
       def parse_create_sql(sql)
-        sql.gsub(/CREATE TABLE \`(\w+)\` \(/i, "")
-        table_name = $1
+        # EzLog.debug("parse_create_sql: #{sql}")
+        if sql =~ /CREATE TABLE \`(\w+)\` \(/i
+          table_name = $1
+        else
+          return
+        end
         @db_columns[table_name.to_sym] ||= {}
         column_a = sql.split(", ")
         column_a.each do |line|
