@@ -9,13 +9,13 @@ module Ezframe
         unless @dbfile
           raise "database settings error: dbfile=#{Config[:database]}"
         end
-        if Config[:use_connection_pool] || opts[:use_connection_pool]
-          @pool = Sequel::ConnectionPool(max_connections: 10) do
-            Sequel.connect(@dbfile, loggers: [EzLog])
-          end
-        else
-          connect(@dbfile)
-        end
+        #if Config[:use_connection_pool] || opts[:use_connection_pool]
+          #@pool = Sequel::ConnectionPool.new(max_connections: 10) do
+          #  Sequel.connect(@dbfile, loggers: [EzLog])
+          #end
+        #else
+        connect(@dbfile)
+        #end
       end
 
       def connect(dbfile = nil)
