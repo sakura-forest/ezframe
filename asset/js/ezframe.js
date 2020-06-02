@@ -1,31 +1,216 @@
-function add_event(obj) {
-  var elems = obj.querySelectorAll('[event]')
-  if (elems) {
-    console.log("events=" + elems.length)
-    for (var i = 0; i < elems.length; i++) {
-      var elem = elems[i]
-      var event_s = elem.getAttribute("event")
-      // console.log(event_s)
-      var event = parse_event(event_s)
-      if (event.on == "load" && !elem.event_done) {
-        console.log("load: "+event_s)
-        execute_event(elem)
-        elem.event_done = 1
-      } else {
-        elem.addEventListener(event.on, function () {
-          execute_event(this)
-        })
+// 2020年05月25日(月) 6
+var extra_event_funcs = []
+var event_commands = {
+  /*
+  switch_hide: function(event) {
+    console.log("switch")
+    var a = event.between
+    for(var i = 0; i<a.length; i++) {
+      switch_hide(a[i])
+    }
+  },*/
+  set_validation: function(event, form_dom) {
+    console.log("set_validation")
+    var inputs = collect_all_input_elements(form_dom)
+    for(var i = 0; i < inputs.length; i++) {
+      var elem = inputs[i]
+      var send_with = "input";
+      var on = "change"
+      var target_key = elem.name
+      var ezvalid = elem.getAttribute("ezvalid")
+      if (ezvalid) {
+        ezvalid = parse_one_event(ezvalid)
+        if (ezvalid.with) { send_with = ezvalid.with }
+        if (ezvalid.on) { on = ezvalid.on }
+        if (ezvalid.target_key) { target_key = ezvalid.target_key }
+      }
+      var ev_s = "on=" + on + ":branch=single_validate:target_key=" + target_key + ":with=" + send_with + ":url=" + event.validate_url
+      console.log("set_validation: ev_s="+ev_s)
+      elem.setAttribute("ezevent", ev_s)
+      elem.addEventListener(on, function(ev) {
+        execute_event(ev.srcElement)
+      })
+    }
+  },
+  redirect: function(event) {
+    console.log("redirect:" + event.url)
+    location.href = event.url
+  },
+  /*
+  toggle_hide: function(event) {
+    console.log("toggle_hide: target=", event.target)
+    for(var i=0; i < event.target.length; i++) {
+      var elem = document.querySelector(event.target[i])
+      if (elem) {
+        var list = elem.classList
+        if (list.contains("hide")) {
+          elem.classList.remove("hide")
+        } else {
+          elem.classList.add("hide")
+        }
       }
     }
   }
-  register_switch_event(obj)
-  register_hover_button(obj)
-  initialize_materialize()
-  var elems = document.querySelectorAll('.dropdown-trigger')
-  var instances = M.Dropdown.init(elems, {})
+  */
 }
 
+// サーバからのレスポンスを処理する関数
+var response_funcs = {
+  inject: function(res, obj) {
+    var elem
+    console.log("inject: " + res.inject + ", body=" + res.body)
+    if (res.inject == "this") {
+      elem = obj
+    } else {
+      elem = document.querySelector(res.inject)
+    }
+    if (elem) {
+      elem.innerHTML = (res.body || "")
+      add_event(elem)
+      exec_ezload(elem)
+    } else {
+      console.log("inject: no such element: " + res.inject)
+    }
+  },
+  set_value: function(res, obj) {
+    var elem
+    console.log("set_value: " + res.set_value + ", value=", res.value)
+    if (res.set_value == "this") {
+      elem = obj
+    } else {
+      elem = document.querySelector(res.set_value)
+    }
+    if (elem) {
+      if (res.set_value.indexOf("select") > 0) {
+        elem.selectedIndex = res.value
+      } else {
+        elem.value = res.value
+      }
+    } else {
+      console.log("set_value: no such element: " + res.set_value)
+    }
+  },
+  reset_error: function(res, obj) {
+    console.log("reset_error: " + res.reset_error)
+    var elems = document.querySelectorAll(res.reset_error)
+    if (elems) {
+      for(var i=0; i < elems.length; i++) {
+        elem = elems[i]
+        elem.innerHTML = ""
+        elem.classList.add("hide")
+      }
+    }
+  },
+  set_error: function(res, obj) {
+    var elem;
+    console.log("set_error: " + res.set_error + ", value=", res.value)
+    elem = document.querySelector(res.set_error)
+    if (elem) {
+      elem.innerHTML = res.value
+      if (!res.value || res.value.length == 0) {
+        elem.classList.add("hide")
+      } else {
+        elem.classList.remove("hide")
+      }
+    } else {
+      console.log("set_error: no such element: " + res.set_error)
+    }
+  },
+  add_class: function(res, obj) {
+    var elem;
+    console.log("add_class: " + res.add_class + ", value=", res.value)
+    if (res.add_class == "this") {
+      elem = obj
+    } else {
+      elem = document.querySelector(res.add_class)
+    }
+    if (elem) {
+      elem.classList.add(res.value)
+    }
+  },
+  remove_class: function(res, obj) {
+    var elem;
+    console.log("remove_class: " + res.remove_class + ", value=", res.value)
+    if (res.remove_class == "this") {
+      elem = obj
+    } else {
+      elem = document.querySelector(res.remove_class)
+    }
+    if (elem) {
+      elem.classList.remove(res.value)
+    }
+  }
+}
+
+// register events included in a object
+function add_event(obj) {
+  var elems = obj.querySelectorAll('[ezevent]')
+  if (elems) {
+    console.log("add_event: events=" + elems.length)
+    for (var i = 0; i < elems.length; i++) {
+      var elem = elems[i]
+      var event_s = elem.getAttribute("ezevent")
+      var event_a = parse_event(event_s)
+      if (event_a.length > 1) {
+        console.log("inculde multi events: "+event_a.length)
+        console.dir(event_a)
+      }
+      for(var j = 0; j < event_a.length; j++) {
+        var event = event_a[j]
+        if (event.on == "load") {
+          if (!elem.event_done) {
+            console.log("load: "+event_s)
+            execute_event(elem, "ezevent")
+            elem.event_done = 1
+          }
+        } else {
+          elem.addEventListener(event.on, function (ev) {
+            execute_event(this, "ezevent", ev)
+          })
+        }
+      }
+    }
+  }
+  // execute extra event functions
+  for(var i=0; i < extra_event_funcs.length; i++) {
+    extra_event_funcs[i](obj)
+  }
+}
+
+function exec_ezload(obj) {
+  var elems = obj.querySelectorAll('[ezload]')
+  if (elems) {
+    console.log("ezload: events=" + elems.length)
+    for (var i = 0; i < elems.length; i++) {
+      var elem = elems[i]
+      if (!elem.event_done) {
+        execute_event(elem, "ezload")
+        elem.event_done = 1
+      }
+    }
+  }
+}
+
+// parse attrite named event
 function parse_event(event) {
+  var event_a;
+  if (!event) { return [] }
+  if (event.indexOf(";;") > -1) {
+    event_a = event.split(";;")
+  } else {
+    event_a = [ event ]
+  }
+  console.log("parse_event:"+event_a.length) // event_a="+JSON.stringify(event_a))
+  // console.dir(event_a)
+  var parsed_event_a = []
+  for(var i = 0; i < event_a.length; i++) {
+    var ev = event_a[i]
+    parsed_event_a.push(parse_one_event(ev))
+  }
+  return parsed_event_a
+}
+
+function parse_one_event(event) {
   var ev = {}
   var a = event.split(":")
   for (var i = 0; i < a.length; i++) {
@@ -48,86 +233,51 @@ function parse_event(event) {
       }
     }
   }
+  // console.log("parse_one_event: ") 
+  // console.dir(ev)
   return ev
 }
 
-function execute_event(obj) {
-  console.log("execute_event")
-  // console.dir(obj)
-  var event_s = obj.getAttribute("event")
-  var event = parse_event(event_s)
-  switch(event.command) {
-    case "switch":
-      var a = event.between
-      for(var i = 0; i < a.length; i++) {
-        switch_hide(a[i])
-      }
-      return
-    case "set_global":
-      for(key in event) {
-        if ([ "command", "on", "url" ].indexOf(key) >= 0) { continue }
-        window.ez_global[key] = event[key]
-      }
-      // console.log("set_global:" + JSON.stringify(window.ezframe))
-      return
-    case "redirect":
-      console.log("redirect:" + event.url)
-      location.href = event.url
-      return
-    case "enable_datatable":
-      enable_datatable(event)
-      return
-  }
-  with_attr(event, obj)
-  post_values(event, obj)
-}
-
-function enable_datatable(event) {
-  // $("#enable_datatable").DataTable();
-  console.log("enable_datatable: target="+event.target)
-  // console.log($(tevent.arget))
-  var list_size = event.size || 5
-  $(event.target).DataTable({
-    lengthChange: false,
-    displayLength: parseInt(list_size),
-    columnDefs: [{ targets: '_all', className: 'ellipsis' }],
-    language: {
-      "decimal": ".",
-      "thousands": ",",
-      "sProcessing": "処理中...",
-      "sLengthMenu": "_MENU_ 件表示",
-      "sZeroRecords": "データはありません。",
-      "sInfo": " _TOTAL_ 件中 _START_ から _END_ まで表示",
-      "sInfoEmpty": " 0 件中 0 から 0 まで表示",
-      "sInfoFiltered": "（全 _MAX_ 件より抽出）",
-      "sInfoPostFix": "",
-      "sSearch": "検索:",
-      "sUrl": "",
-      "oPaginate": {
-        "sFirst": "<< 先頭",
-        "sPrevious": "< 前",
-        "sNext": "次 > ",
-        "sLast": "最終 >>"
-      }
+function execute_event(obj, attr_key = "ezevent", ev = null) {
+  var event_s = obj.getAttribute(attr_key)
+  console.log("execute_event: "+attr_key+", event="+event_s+", ev="+JSON.stringify(ev))
+  var event_a = parse_event(event_s)
+  for(var i = 0; i < event_a.length; i++) {
+    var event = event_a[i]
+    func = event_commands[event.command]
+    if (func) {
+      func(event, obj)
     }
-  })
+    with_attr(event, obj)
+    if (event.url) {
+      post_values(event, obj)
+    }
+  }
 }
 
 function with_attr(event, obj) {
-  if (!event.with) {
-    return null
-  }
-  var with_s = event.with
-  if (event.with == "form") {
-    var node = obj
-    while (node && node.nodeName != 'FORM') {
-      node = node.parentNode
-    }
-    form = collect_form_values(node)
-    event.form = form
+  switch (event.with) {
+    case "form":
+      var node = obj
+      while (node && node.nodeName != 'FORM') {
+        node = node.parentNode
+      }
+      form = collect_form_values(node)
+      event.form = form
+      break
+    case "input":
+      event.form = {}
+      event.form[obj.name] = obj.value
+      break
+    default:
+      var node = document.querySelector(event.with)
+      form = collect_form_values(node)
+      event.form = form
+      break
   }
 }
 
+// サーバーにJSONをPOST
 function post_values(event, obj) {
   var xhr = new XMLHttpRequest()
   xhr.onreadystatechange = function () {
@@ -140,62 +290,55 @@ function post_values(event, obj) {
   xhr.open("POST", event.url, true)
   xhr.setRequestHeader("Content-Type", "application/json")
   xhr.responseType = 'json'
-  send_values = { event: event }
-  if (window.ezframe) {
-    send_values.global = window.ezframe
-  }
+  send_values = { ezevent: event }
   xhr.send(JSON.stringify(send_values))
 }
 
+// サーバーからの返信を処理
 function manage_response(res, event, obj) {
   var elem
-  console.log("manage_response: res="+JSON.stringify(res)+", event=" + JSON.stringify(event) +
-    ", obj=" + JSON.stringify(obj)) 
+  // console.log("manage_response: res="+JSON.stringify(res)+", event=" + JSON.stringify(event) +
+  //  ", obj=" + JSON.stringify(obj)) 
   if (!res) { return }
   if (Array.isArray(res)) {
     for(var i = 0; i < res.length; i++) {
-      exec_one_response(res[i])
+      manage_one_response(res[i], obj)
     }
   } else {
-    exec_one_response(res)
+    manage_one_response(res, obj)
   }
 }
 
-function exec_one_response(res) {
-  if (res.inject) {
-    console.log("inject: " + res.inject)
-    elem = document.querySelector(res.inject)
-    if (elem) {
-      elem.innerHTML = res.body.replace(/<br>/g, "\n")
-      add_event(elem)
-    } else {
-      console.log("no such element: "+res.inject)
-    }
-  }
+// サーバーからの返信を１件処理
+function manage_one_response(res, obj) {
   if (res.redirect) {
     console.log("redirect:" + res.redirect)
     location.href = res.redirect
-    return
+    return 
   }
-  if (res.reset) {
-    elem = document.querySelector(res.reset)
-    if (event.reset == "form") {
-      while (node && node.nodeName != 'FORM') {
-        node = node.parentNode
-      }
-      node.reset();
+  // サーバーからの戻り値のハッシュのキーにresponse_funcsのキーに一致するものがあったら、実行する。
+  for (var key in response_funcs) {
+    if (res[key]) {
+      response_funcs[key](res, obj)
     }
   }
 }
 
-function collect_form_values(obj) {
-  var res = {};
+// 全ての入力要素を集める
+function collect_all_input_elements(obj) {
   var inputs = Array.from(obj.querySelectorAll("input"));
   var selects = Array.from(obj.querySelectorAll("select"));
   var textareas = Array.from(obj.querySelectorAll("textarea"));
-  // console.dir(inputs)
   inputs = inputs.concat(selects)
   inputs = inputs.concat(textareas)
+  return inputs
+}
+
+// 入力フォームの値を集収
+function collect_form_values(obj) {
+  if (!obj) {return}
+  var res = {};
+  var inputs = collect_all_input_elements(obj)
   for (var i = 0; i < inputs.length; i++) {
     var elem = inputs[i]
     if (!elem.name) { continue }
@@ -205,7 +348,6 @@ function collect_form_values(obj) {
     }
     var cur_value = res[elem.name]
     var elem_value = elem.value
-    elem_value = elem_value.replace(/\n/g, '<br>')
     if (cur_value) {
       if (Array.isArray(cur_value)) {
         cur_value.push(elem_value)
@@ -239,49 +381,7 @@ function switch_hide(button) {
   }
 }
 
-function register_switch_event(elem) {
-  var boxes = elem.querySelectorAll(".switch-box")
-  for(var i = 0; i < boxes.length; i++) {
-    var box = boxes[i]
-    var buttons = box.querySelectorAll(".switch-button")
-    for(var j = 0; j < buttons.length; j++) {
-      var button = buttons[j]
-      button.addEventListener('click', function() { switch_hide(this) })
-    }
-  }
-}
-
-function register_hover_button(obj) {
-  var elems = obj.querySelectorAll(".hover-button")
-  for(var i = 0; i < elems.length; i++) {
-    var node = elems[i]
-    while(node && !node.classList.contains("hover-button-box") ) { node = node.parentNode  }
-    //var parent = elems[i].parentNode.parentNode
-    node.addEventListener('mouseenter', function() {
-      console.log("show button")
-      var btns = this.querySelectorAll(".hover-button")
-      for (var j = 0; j < btns.length; j++) {
-        btns[j].classList.remove("hide")
-      }
-    })
-    node.addEventListener('mouseleave', function() { 
-      console.log("hide button")
-      var btns = this.querySelectorAll(".hover-button")
-      for (var j = 0; j < btns.length; j++) {
-        btns[j].classList.add("hide") 
-      }
-    })
-  }
-}
-
-
 document.addEventListener('DOMContentLoaded', function () {
-  if (!window.ez_global) { window.ez_global = {} }
   add_event(document)
+  exec_ezload(document)
 })
-
-/*
-$(document).ready(function () {
-  add_event(document)
-})
-*/
