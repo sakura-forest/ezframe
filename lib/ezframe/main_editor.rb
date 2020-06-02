@@ -4,9 +4,12 @@ require_relative "main_page_kit"
 module Ezframe
   class MainEditor < PageBase
     include EditorCommon
-    include MainPageKit::Default
-    include MainPageKit::Index
-    include MainPageKit::Edit
-    include MainPageKit::Detail
+
+    def route
+      case path
+      MainPageKit::Default
+      MainPageKit::Index
+      MainPageKit::Edit
+      MainPageKit::Detail
   end
 end

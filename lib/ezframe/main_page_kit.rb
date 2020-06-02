@@ -1,6 +1,18 @@
 module Ezframe
   module MainPageKit
-    module Default
+    class Common
+      def show_base_page
+        @div_a = [ 
+          Ht.div(id: "head-box"), 
+          Ht.div(id: "main-box"),
+          Ht.div(id: "foot-box")
+        ]
+        layout = index_layout(center: div_a)
+        return show_base_template(title: Message[:index_page_title], body: Html.convert(layout))
+      end
+    end
+
+    class Default < Common
       # 一覧ページ生成
       def public_default_get
         # IDが指定されていれば詳細ページを、なければ一覧ページを表示
@@ -12,17 +24,13 @@ module Ezframe
         else
           event = "url=#{make_base_url}"
         end
-        # div = [Ht.div(id: "index-top-box", child: make_index_top), Ht.div(id: "index-main-box", child: "", ]
-        div = Ht.div(id: "index-main-box", child: "", ezload: event)
-        layout = index_layout(center: div)
-        return show_base_template(title: Message[:index_page_title], body: Html.convert(layout))
       end
     end
 
     # 一覧テーブルの生成
-    module Index
+    class Index < Common
       def public_default_post
-        return { inject: "#index-main-box", body: [ Ht.div(make_index_top), Ht.div(make_index_table), set_url: make_base_url ]
+        return { inject: "#index-main-box", body: [ Ht.div(make_index_top), Ht.div(make_index_table)], set_url: make_base_url }
       end
 
       def make_index_table
@@ -54,7 +62,7 @@ module Ezframe
       end
     end
 
-    module Edit
+    class Edit < Common
       # 新規登録フォーム表示
       def public_create_get
         @column_set.clear
@@ -191,7 +199,7 @@ module Ezframe
       end
     end
 
-    module Detail
+    class Detail < Common
       # 詳細表示
       def make_detail_page
         # EzLog.info "make_detail_page: #{@request.params.inspect}"
