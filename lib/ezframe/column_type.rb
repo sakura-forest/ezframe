@@ -433,7 +433,8 @@ module Ezframe
   class DatetimeType < TextType
     def initialize(attr = nil)
       super(attr)
-      @attribute[:class] = "datetimepicker"
+      # @attribute[:class] = "datettimepicker"  # for jquery datetimepicker
+      @attribute[:class] = "datetpicker"  
     end
 
     def value=(v)
