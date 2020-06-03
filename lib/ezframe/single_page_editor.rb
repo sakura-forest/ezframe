@@ -1,5 +1,5 @@
 require_relative "editor_common"
-require_relative "page_kit"
+require_relative "single_page_kit"
 
 module Ezframe
   # ページ遷移無しでデータを編集する仕組み

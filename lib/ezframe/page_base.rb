@@ -6,10 +6,6 @@ require_relative "util"
 
 module Ezframe
   class PageBase
-#    class << self
-#      attr_accessor :auth
-#    end
-    
     attr_accessor :request
 
     def initialize(request = nil)
@@ -45,8 +41,6 @@ module Ezframe
         # EzLog.info "parsed_body=#{@parsed_body.inspect}"
         @event = @parsed_body[:ezevent] || {}
         @form = @event[:form]
-
-        # EzLog.info "event=#{@event}"
       end
     end
 
@@ -87,7 +81,6 @@ module Ezframe
         EzLog.info "ERROR: #{e.class}:#{e.message}\n#{e.backtrace}"
         return nil
       end
-      # json = json.recursively_symbolize_keys if json.is_a?(Hash) || json.is_a?(Array)
       return json
     end
 
