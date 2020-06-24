@@ -1,0 +1,61 @@
+#!/usr/bin/env ruby
+#coding: utf-8
+=begin
+
+  HTMLから、hthash生成するrubyプログラムを生成する
+
+=end
+require "nokogiri"
+
+class Html2Ruby
+  def show_leaves(node, depth=0)
+    res = []
+    indent = "  "*depth
+    node.children.each do |child|
+      next if child.name == "comment"
+      if child.name == "text" 
+        if child.content.strip.empty?
+          next
+        else
+          res.push "#{indent}\"#{child.content}\""
+        end
+      else
+        attrs = child.attributes.map do |k, v| 
+          if k.index("-")
+            key_s = "\"#{k}\""
+          else
+            key_s = k
+            if k == "class"
+              if v =~/\s/
+                cls_a = v.split(/\s+/)
+                v = "%w[#{cls_a.join(' ')}]"
+              end
+            end
+          end
+          "#{key_s}: \"#{v}\"" 
+        end
+        descendant = show_leaves(child, depth+1)
+        if descendant && descendant.strip.length > 10
+          attrs.push("child: \n#{descendant}\n")
+          res.push "#{indent}Ht.#{child.name}(#{attrs.join(', ')}#{indent})"
+        else
+          res.push "#{indent}Ht.#{child.name}(#{attrs.join(', ')})"
+        end
+      end
+    end
+    if res.length > 1
+      res_s = res.join(",\n")
+      return "[ #{res_s} ]"
+    else
+      return res[0]
+    end
+  end
+
+  def show_all(file)
+    doc = Nokogiri::HTML(File.open(file))
+    puts show_leaves(doc.root)
+  end
+end
+
+node = Html2Ruby.new
+node.show_all(ARGV[0])
