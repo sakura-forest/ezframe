@@ -20,15 +20,15 @@ module Ezframe
           return
         end
         @request.env["url_params"] = url_params
-        opt_auth = class_opts[:auth]
         @session = @request.env['rack.session']
-        if !@session[:user] && Config[:auth] && (!opt_auth || opt_auth != "disable")
-          EzLog.debug("authenticate!")
-          warden.authenticate! 
-          EzLog.info "Controller.exec: warden.options = #{@request.env['warden.options']}"
+        if class_opts
+          opt_auth = class_opts[:auth]
+          if !@session[:user] && Config[:auth] && (!opt_auth || opt_auth != "disable")
+            EzLog.debug("authenticate!")
+            warden.authenticate! 
+            EzLog.info "Controller.exec: warden.options = #{@request.env['warden.options']}"
+          end
         end
-        # session["in_controller"] = "set in controller"
-        EzLog.debug "rack.session.keys=#{@session.keys}" if @session
         page_instance.set_request(@request)
         body = page_instance.send(method)
 
@@ -43,7 +43,6 @@ module Ezframe
           response['Content-Type'] = 'text/html; charset=utf-8'
         end
         response.status = 200
-        # EzLog.debug("Controller.exec: response.body=#{response.body}")
       end
 
       def file_not_found(response)
