@@ -375,33 +375,47 @@ module Ezframe
       return @columns[col_key.to_sym]
     end
 
-    def form
+    # 入力フォームを生成して配列で返す
+    def form(convert_html = nil)
       if @edit_keys
-        return @edit_keys.map do |key|
-                 col = @columns[key.to_sym]
-                 unless col
-                   EzLog.info "[ERROR] @edit_keys has unknown column:name=#{@name}:key=#{key}"
-                   next
-                 end
-                 col.form
-               end
+        target_a = @edit_keys.map {|key| @columns[key.to_sym] }
       else
-        return @columns.values.map { |coltype| coltype.form }
+        target_a = @columns.values
       end
+      return target_a.map do |col|
+        fm = col.form
+        convert_html ? Html.convert(fm) : fm 
+      end
+    end
+
+    # 入力フォームをカラムのキーをキーとしたハッシュで返す
+    def form_hash(convert_html = nil)
+      if @edit_keys
+        target_a = @edit_keys.map {|key| @columns[key.to_sym] }
+      else
+        target_a = @columns.values
+      end
+      
+      res_h = {}
+      target_a.map do |col|
+        fm = col.form
+        res_h[col.key] = convert_html ? Html.convert(fm) : fm
+      end
+      return res_h
     end
 
     def view
       if @view_keys
         return @view_keys.map do |key|
-                 col = @columns[key.to_sym]
-                 unless col
-                   EzLog.info "[ERROR] @view_keys has unknown column:name=#{@name}:key=#{key}"
-                   next
-                 end
-                 col.view
-               end
+          col = @columns[key.to_sym]
+          unless col
+            EzLog.info "[ERROR] @view_keys has unknown column:name=#{@name}:key=#{key}"
+            next
+          end
+          col.view
+        end
       else
-        return @columns.values.map { |coltype| coltype.view }
+        return @columns.values.map { |col| col.view }
       end
     end
 
