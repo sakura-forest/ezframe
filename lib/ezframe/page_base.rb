@@ -6,7 +6,7 @@ require_relative "util"
 
 module Ezframe
   class PageBase
-    attr_accessor :request
+    attr_accessor :controller
 
     def initialize(request = nil)
       @class_snake = class_to_snake(self.class)
@@ -20,34 +20,22 @@ module Ezframe
 
     # Rackのrequestを代入し、関連するインスタンス変数を定義
     def set_request(request)
-      @request = request
       @column_set = ColumnSets.get(@class_snake)
-      @dataset = DB.dataset(@class_snake)
-      EzLog.debug "column_set is not defined: #{@class_snake}" unless @column_set
-      @params = parse_query_string(request.env["QUERY_STRING"])
-      @params.update(request.params)
-      # EzLog.info "set_request: params=#{@params.inspect}" if @params.length > 0
-      # @id, @key = @params[:id], @params[:key]
-      @env = @request.env
-      @session = @env["rack.session"]
+      @dataset = DB.dataset(@class_snake) if @column_set
+    end
 
-      if %w[POST PUT].include?(request.request_method)
-        body = @request.body.read
-        if request.content_type.index("json")
-          @parsed_body = parse_json_body(body)
-        else
-          @parsed_body = parse_query_string(body)
-        end
-        # EzLog.info "parsed_body=#{@parsed_body.inspect}"
-        @event = @parsed_body[:ezevent] || {}
-        @form = @event[:form]
-      end
+    def event
+      return @controller.json_body_params[:ezevent] || @controller.url_params[:ezevent] || {}
+    end
+
+    def event_form
+      event[:form]
     end
 
     # routeから基本URLを生成
     def make_base_url(id = nil)
       path = Route::get_path(@class_snake)
-      params = @request.env["url_params"] || {}
+      params = @url_params || {}
       # EzLog.info "make_base_url: params=#{params}"
       # params[@class_snake.to_sym] = id
       path_s = path.map do |pa|
@@ -73,23 +61,12 @@ module Ezframe
       Template.fill_from_file("template/base.html", args)
     end
 
-    def parse_json_body(body)
-      return {} if !body || body.length==0
-      begin
-        json = JSON.parse(body, symbolize_names: true)
-      rescue => e
-        EzLog.info "ERROR: #{e.class}:#{e.message}\n#{e.backtrace}"
-        return nil
-      end
-      return json
-    end
-
     def session
-      return @request.env['rack.session']
+      return env['rack.session']
     end
 
     def warden
-      return @request.env["warden"]
+      return env["warden"]
     end
 
     def login?

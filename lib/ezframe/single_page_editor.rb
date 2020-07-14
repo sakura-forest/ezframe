@@ -14,7 +14,6 @@ module Ezframe
     def init_vars
       super
       @sort_key = :id
-      @event = @parsed_body[:ezevent] if @parsed_body
       @dom_id = { create: "create-area", edit: "edit-area", index: "index-area", detail: "detail-area"}
       # @show_delete_button = nil
     end

@@ -15,11 +15,6 @@ module Ezframe
           inst
         end
         Warden::Strategies.add(:mystrategy) do
-          def valid?
-            # EzLog.info "valid?"
-            params["account"] || params["password"]
-          end
-
           def authenticate!
             EzLog.info "mystrategy.authenticate!: user=#{user}, params=#{params}"
             if Auth.authenticate(env, params["account"], params["password"])
@@ -81,10 +76,6 @@ module Ezframe
       end
       self.password = @user[auth_conf[:password].to_sym]
       @user.delete(:password)
-    end
-
-    def inspect
-      "account=#{@account}, user=#{@user}, id=#{@id}"
     end
   end
 end

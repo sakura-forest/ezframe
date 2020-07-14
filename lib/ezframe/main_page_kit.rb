@@ -1,20 +1,6 @@
 module Ezframe
   module MainPageKit
-    module Default
-      def public_default_get
-        @id = get_id
-        div = [Ht.div(id: @dom_id[:create], child: make_index_top), Ht.div(id: @dom_id[:index], child: "", ezload: "url=#{make_base_url}")]
-        layout = index_layout(center: make_form(make_base_url, div))
-        return show_base_template(title: Message[:index_page_title], body: Html.convert(layout))
-      end
-    end
-
-    # 一覧テーブルの生成
-    module Index
-      def public_default_post
-        return { inject: "#main-box", body: [ Ht.div(make_index_top), Ht.div(make_index_table)], set_url: make_base_url }
-      end
-
+=begin    
       def make_index_table
         data_a = list_for_index
         EzLog.debug("make_index_table: #{data_a.length}")
@@ -37,12 +23,8 @@ module Ezframe
         table_id = "enable_datatable_#{@class_snake}"
         return Ht.table(id: table_id, class: %w[enable_datatable], child: [thead, tbody], ezload: "command=enable_datatable:target=##{table_id}:size=10")
       end
-
-      # 一覧ページの上部に表示するボタン等の生成
-      def make_index_top
-        make_create_button
-      end
     end
+=end
 
     module Edit
       # 新規登録フォーム表示

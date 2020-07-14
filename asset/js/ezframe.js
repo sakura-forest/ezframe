@@ -71,6 +71,10 @@ var response_funcs = {
     } else {
       console.log("inject: no such element: " + res.inject)
     }
+    // URL表示を指定されたURLに変更する
+    if (res.set_url) {
+      history.pushState(null, null, res.set_url)
+    }
   },
   set_value: function(res, obj) {
     var elem

@@ -9,7 +9,6 @@ module Ezframe
       super
       @sort_key = :id
       # @parent_key = :customer
-      @event = @parsed_body[:ezevent] if @parsed_body
       # @use_detail_box = true
     end
 
