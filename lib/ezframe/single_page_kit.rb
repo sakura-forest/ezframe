@@ -3,11 +3,13 @@ module Ezframe
     module Default
       def public_default_get
         @id = get_id
-        div = [
+        div_a = [
+          # 追加ボタン配置用のエリア
           Ht.div(id: @dom_id[:create], child: make_index_top), 
+          # 一覧表示用のエリア
           Ht.div(id: @dom_id[:index], child: "", ezload: "url=#{make_base_url}")
         ]
-        layout = index_layout(center: make_form(make_base_url, div))
+        layout = index_layout(center: make_form(make_base_url, div_a))
         return show_base_template(title: Message[:index_page_title], body: Html.convert(layout))
       end
 
@@ -47,6 +49,22 @@ module Ezframe
         ]
       end
 
+      class Table
+        def initialize
+          @thead = []
+          @tbody = []
+        end
+
+        def new_head_line
+          @cur_line = []
+          @thead.push(@cur_line)
+          return @cur_line
+        end
+
+        def new_body_line
+        end
+      end
+
       # 一覧表示の１行を生成(override用)
       def make_index_line(target_keys, data)
         make_index_line_event(target_keys, data)
@@ -55,8 +73,9 @@ module Ezframe
 
       # 一覧表示の１行を生成(イベント型)
       def make_index_line_event(target_keys, data)
-        td_a = target_keys.map { |k| Ht.td(make_index_column(k)) }
-        return Ht.tr(id: "tr-#{@class_snake}-#{data[:id]}", child: td_a, ezevent: "on=click:url=#{make_base_url(data[:id])}/detail")
+        # td_a = target_keys.map { |k| Ht.td(make_index_column(k)) }
+        # return Ht.tr(id: "tr-#{@class_snake}-#{data[:id]}", child: td_a, ezevent: "on=click:url=#{make_base_url(data[:id])}/detail")
+        make_index_column(k)
       end
 
       # 一覧の一行を生成（href型)
@@ -98,9 +117,10 @@ module Ezframe
         @form = @event[:form]
         EzLog.debug("public_create_post: event=#{@event}")
         # １項目のバリデーション
+        validator = Valiadtor.new(@column_set.validate(@form))
         if @event[:branch] == "single_validate"
           EzLog.debug("public_create_post: single validate")
-          return single_validation(validation, @event[:target_key] || @form.keys[0])
+          return validator.single_validation(@event[:target_key] || @form.keys[0])
         end
         # キャンセルの場合、編集欄を新規ボタンに戻す
         if @event[:cancel]
@@ -123,7 +143,7 @@ module Ezframe
       # データ編集受信
       def public_edit_post
         @id = get_id
-        validation = @column_set.validate(@form)
+        validation = Valiadtor.new(@column_set.validate(@form))
         if @event[:branch] == "single_validate"
           EzLog.debug("public_edit_post: single validate:event=#{@event}, form=#{@form}")
           return single_validation(validation, @event[:target_key])
@@ -179,64 +199,6 @@ module Ezframe
       # キャンセル時の表示
       def act_after_cancel
         return public_detail_post
-      end
-    end
-
-    module Validation
-      # 自動入力を行う
-      def exec_completion
-        return nil
-      end
-
-      # １カラムに対してだけバリデーションを行う。
-      def single_validation(validate_h, target_key)
-        EzLog.debug("single_validation: validate_h=#{validate_h}, target_key=#{target_key}")
-        unless target_key
-          raise "target_key is empty: #{validate_h}"
-          return []
-        end
-        cmd_a = []
-        if validate_h[target_key.to_sym]
-          cmd_a = show_validate_result(validate_h)
-        end
-        if count_errors(validate_h) == 0
-          cmd_a.unshift({ reset_error: "#error-box-#{target_key}" })
-        end
-        comp_a = exec_completion(@form)
-        cmd_a += comp_a if comp_a
-        EzLog.debug("reset_error: #error-box-#{target_key}")
-        EzLog.debug("single_validation: target_key=#{target_key}, validate_h=#{validate_h}, count=#{count_errors(validate_h)}, cmd_a=#{cmd_a}")
-        return cmd_a
-      end
-
-      # 全てのカラムに対してバリデーションを行う
-      def full_validation(validate_h)
-        cmd_a = show_validate_result(validate_h)
-        cmd_a.unshift({ reset_error: ".error-box" })
-        EzLog.debug("full_validation: full, cmd_a=#{cmd_a}")
-        return cmd_a
-      end
-
-      # フォームの値の有効性チェックし、ajax用返信ハッシュを生成
-      def show_validate_result(validate_result)
-        cmd_a = []
-        validate_result.each do |key, status|
-          norm, err = status
-          EzLog.debug("norm=#{norm}, err=#{err}")
-          if norm
-            cmd_a.push({ set_value: "input[name=#{key}]", value: norm })
-          end
-          if err
-            msg = Message[err.to_sym] || err
-            cmd_a.push({ set_error: "#error-box-#{key}", value: msg })
-          end
-        end
-        return cmd_a
-      end
-
-      # validate_resultの中のエラーの数を数える
-      def count_errors(validate_result)
-        return validate_result.count { |k, a| a[1] }
       end
     end
 
