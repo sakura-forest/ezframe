@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require_relative "../test_helper.rb"
 
-class HthashTest < GenericTest
+class HtTest < GenericTest
   def test_convert_tag
     assert_equal({ tag: "div", wrap: true, child: "test"},  Ht.div(child: "test"))
     assert_equal({ tag: "input", name: "test"},  Ht.input(name: "test"))

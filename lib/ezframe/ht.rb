@@ -4,20 +4,27 @@ module Ezframe
     class << self
       # メソッド名の名前のタグのhthashを生成
       def wrap_tag(ht_h = {})
+      force_tag = nil
         return nil unless ht_h
         if ht_h.is_a?(String) || ht_h.is_a?(Array)
           h = { child: ht_h }
         elsif ht_h.is_a?(Hash)
-          if ht_h[:tag] && !__callee__.to_s.index("wrap_tag")
+          if ht_h[:tag] # && !__callee__.to_s.index("wrap_tag")
             h = { child: ht_h }
           else
             h = ht_h.dup
           end
+          force_tag = ht_h[:force_tag]
+          ht_h.delete(:force_tag) if force_tag
         else
           EzLog.info("[WARN] wrap_tag: unknown type: #{ht_h.inspect}")
           return nil
         end
-        h[:tag] ||= __callee__.to_s
+        if force_tag
+          h[:tag] = force_tag
+        else
+          h[:tag] ||= __callee__.to_s.to_sym
+        end
         h[:wrap] = true
         raise "no tag" if h[:tag] == "wrap_tag"
         return h
@@ -120,7 +127,7 @@ module Ezframe
     # 配列を<UL><OL>要素に変換するためのクラス
     class List < Array
       attr_accessor :tag
-      def to_h(opts = {})
+      def to_ht(opts = {})
         return nil if self.empty?
         child = self.map { |elem| Ht.li(elem) }
         h = { tag: @tag, wrap: true, child: child }
@@ -131,7 +138,7 @@ module Ezframe
 
     # 配列を<UL>要素に変換するためのクラス
     class Ul < List
-      def to_h(opts = {})
+      def to_ht(opts = {})
         @tag = "ul"
         return super(opts)
       end
@@ -139,7 +146,7 @@ module Ezframe
 
     # 配列を<OL>要素に変換するためのクラス
     class Ol < List
-      def to_h(opts = {})
+      def to_ht(opts = {})
         @tag = "ol"
         return super(opts)
       end
@@ -165,7 +172,7 @@ module Ezframe
         @matrix.push(row)
       end
 
-      def to_h
+      def to_ht
         table_class, tr_class, td_class = @class_a
         max_col = 0
         @matrix.each { |row| max_col = row.length if max_col < row.length }

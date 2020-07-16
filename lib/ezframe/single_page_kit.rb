@@ -30,61 +30,53 @@ module Ezframe
         unless target_keys
           target_keys = @column_set.keys.select { |k| !@column_set[k].no_view? }
         end
+
+        table = PageStructure::Table.new
+
+        # 項目名欄の生成
         labels = @table_labels
         unless labels
           labels = target_keys.map { |k| @column_set[k].label(force: true) || "　" }
         end
-        # 項目名欄の生成
-        thead = Ht.thead(Ht.tr(labels.map { |label| Ht.th(label || "　") }))
+        # thead = Ht.thead(Ht.tr(labels.map { |label| Ht.th(label || "　") }))
+        table.set_head(labels)
 
-        tr_a = list.map do |data|
+        table.set_value(list)
+        list.each do |data|
           @column_set.clear
           @column_set.values = data
-          view_a = make_index_line(target_keys, data)
+          table.add_line(@column_set.view_array(target_keys))
         end
-        tbody = Ht.tbody(tr_a)
+        tb_ht = table.to_ht
+        tb_ht[:id] = table_id = "enable_datatable_#{@class_snake}"
+        tb_ht[:ezload] = "command=enable_datatable:target=##{table_id}"
         return [
-          Ht.table(id: "enable_datatable_#{@class_snake}", child: [thead, tbody], ezload: "command=enable_datatable:target=#enable_datatable_#{@class_snake}"),
+          # Ht.table(id: "enable_datatable_#{@class_snake}", child: [thead, tbody])
+          tb_ht,
           Ht.div(id: @dom_id[:detail], child: ""),
         ]
       end
 
-      class Table
-        def initialize
-          @thead = []
-          @tbody = []
-        end
-
-        def new_head_line
-          @cur_line = []
-          @thead.push(@cur_line)
-          return @cur_line
-        end
-
-        def new_body_line
-        end
-      end
-
       # 一覧表示の１行を生成(override用)
-      def make_index_line(target_keys, data)
-        make_index_line_event(target_keys, data)
+#      def make_index_line(target_keys, data)
+#        make_index_line_event(target_keys, data)
         # make_index_line_href(target_keys, data)
-      end
+#      end
 
       # 一覧表示の１行を生成(イベント型)
-      def make_index_line_event(target_keys, data)
+#      def make_index_line_event(target_keys, data)
         # td_a = target_keys.map { |k| Ht.td(make_index_column(k)) }
         # return Ht.tr(id: "tr-#{@class_snake}-#{data[:id]}", child: td_a, ezevent: "on=click:url=#{make_base_url(data[:id])}/detail")
-        make_index_column(k)
-      end
+#        make_index_column(k)
+#      end
 
       # 一覧の一行を生成（href型)
-      def make_index_line_href(target_keys, data)
-        td_a = target_keys.map do |k| 
-          Ht.td(Ht.a(href: "#{make_base_url(data[:id])}/detail", child: make_index_column(k))
-        end
-        return Ht.tr(td_a)
-      end
+#      def make_index_line_href(target_keys, data)
+#        td_a = target_keys.map do |k| 
+#          Ht.td(Ht.a(href: "#{make_base_url(data[:id])}/detail", child: make_index_column(k))
+#        end
+#        return Ht.tr(td_a)
+#      end
 
             # 一覧表示の１カラムを生成
       def make_index_column(key)
@@ -219,7 +211,7 @@ module Ezframe
         collection = Materialize::Collection.new
         # 詳細表示用のblockを追加
         collection.push(Ht.div(id: @dom_id[:detail], child: [button_for_detail_box(data), table]))
-        return { inject: "##{@dom_id[:detail]}", body: Html.convert(collection.to_h) }
+        return { inject: "##{@dom_id[:detail]}", body: Html.convert(collection.to_ht) }
       end
 
       # 詳細ページ用ボタン

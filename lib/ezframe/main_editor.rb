@@ -1,13 +1,12 @@
 # frozen_string_literal: true
-require_relative "main_page_kit"
+require_relative "single_page_kit"
 
 module Ezframe
   class MainEditor < PageBase
     include EditorCommon
-    include MainPageKit::Default
-    include MainPageKit::Index
-    include MainPageKit::Edit
-    include MainPageKit::Detail
+    include PageKit::Index
+    include PageKit::Edit
+    include PageKit::Detail
 
      def init_vars
       super

@@ -61,6 +61,6 @@ class HtmlTest < GenericTest
   end
 
   def test_ht_list
-    p Html.convert(Ht::Ul.new(%w[a b c d]).to_h)
+    p Html.convert(Ht::Ul.new(%w[a b c d]).to_ht)
   end
 end

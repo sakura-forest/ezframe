@@ -109,7 +109,7 @@ module Ezframe
     end
 
     class Collection < Array
-      def to_h
+      def to_ht
         list = self.map do |line|
           Ht.li(class: %w[collection-item], child: line)
         end

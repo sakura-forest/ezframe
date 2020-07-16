@@ -177,7 +177,7 @@ module Ezframe
         collection = Materialize::Collection.new
         # 詳細表示用のblockを追加
         collection.push(Ht.div(class: "detail-box", child: [button_for_detail_box(data), table]))
-        return { inject: "##{edit_inject_element}", body: Html.convert(collection.to_h) }
+        return { inject: "##{edit_inject_element}", body: Html.convert(collection.to_ht) }
       end
 
       # 詳細表示欄の一行を生成
