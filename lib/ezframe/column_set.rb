@@ -120,10 +120,6 @@ module Ezframe
         struct[:join_condition] = join_cond_h
         return struct
       end
-
-      def join_complex_column
-
-      end
     end
   end
 
@@ -182,37 +178,38 @@ module Ezframe
     end
   end
 
+  # カラム集合を扱う
   class ColumnSet
-    attr_accessor :name, :parent # , :edit_keys, :view_keys
+    attr_accessor :name, :parent
 
     def initialize(parent: nil, name: nil, columns: nil)
       @parent = parent
       @name = name
-      @columns ||= {}
+      @column_h ||= {}
       set(columns) if columns
     end
 
     def clear
-      @columns.each do |key, col|
+      @column_h.each do |key, col|
         col.value = nil
       end
     end
 
     def keys
-      @columns.keys
+      @column_h.keys
     end
 
     def edit_keys
-      @columns.keys.select {|k| !@columns[k].no_edit? }
+      @column_h.keys.select {|k| !@column_h[k].no_edit? }
     end
 
     def view_keys
-      @columns.keys.select {|k| !@columns[k].no_view? }
+      @column_h.keys.select {|k| !@column_h[k].no_view? }
     end
 
     # 配列を初期化する
     def set(attr_a)
-      @columns[:id] = IdType.new(key: "id", label: "ID", hidden: true)
+      @column_h[:id] = IdType.new(key: "id", label: "ID", hidden: true)
       attr_a.each do |attribute|
         attr = attribute.clone
         col_key = attr[:key]
@@ -221,14 +218,14 @@ module Ezframe
         unless klass
           raise "no such column type: #{attr[:type]}"
         else
-          @columns[col_key.to_sym] = klass.new(attr)
+          @column_h[col_key.to_sym] = klass.new(attr)
         end
       end
-      @columns[:created_at] = DatetimeType.new(type: "datetime", key: "created_at", label: "生成日時", hidden: true)
-      @columns[:updated_at] = DatetimeType.new(type: "datetime", key: "updated_at", label: "更新日時", hidden: true)
-      @columns[:deleted_at] = DatetimeType.new(type: "datetime", key: "deleted_at", label: "削除日時", hidden: true)
-      @columns.values.each { |col| col.parent = self }
-      return @columns
+      @column_h[:created_at] = DatetimeType.new(type: "datetime", key: "created_at", label: "生成日時", hidden: true)
+      @column_h[:updated_at] = DatetimeType.new(type: "datetime", key: "updated_at", label: "更新日時", hidden: true)
+      @column_h[:deleted_at] = DatetimeType.new(type: "datetime", key: "deleted_at", label: "削除日時", hidden: true)
+      @column_h.values.each { |col| col.parent = self }
+      return @column_h
     end
 
     def dataset
@@ -266,7 +263,7 @@ module Ezframe
     def update(id, value_h)
       self.set_from_db(id)
       updated_values = {}
-      @columns.each do |colkey, column|
+      @column_h.each do |colkey, column|
         next if column.no_edit?
         if column.respond_to?(:form_to_value)
           new_value = column.form_to_value(value_h)
@@ -300,11 +297,11 @@ module Ezframe
 
     def merge_values(value_h, from_db: nil, key_suffix: nil)
       return self unless value_h
-      @columns.keys.each do |key|
+      @column_h.keys.each do |key|
         next if key.to_s.empty?
         target_key = key
         target_key = "#{key}#{key_suffix}" if key_suffix
-        column = @columns[key.to_sym]
+        column = @column_h[key.to_sym]
         if !from_db && column.respond_to?(:form_to_value) # && !value_h.has_key?(key)
           val = column.form_to_value(value_h, target_key: target_key)
         else
@@ -326,7 +323,7 @@ module Ezframe
       return {} unless value_h
       clear_error
       result_h = {}
-      @columns.values.each do |col|
+      @column_h.values.each do |col|
         res = []
         if col.respond_to?(:form_to_value) && !value_h.has_key?(col.key)
           orig_val = col.form_to_value(value_h)
@@ -342,80 +339,65 @@ module Ezframe
     end
 
     def clear_error
-      @columns.values.each { |col| col.error = nil }
+      @column_h.values.each { |col| col.error = nil }
     end
 
-    def values
-      @columns.map { |key, col| col.value }
+    def values(target_keys = nil)
+      target_keys ||= @column_h.keys
+      return target_keys.map {|key| key = key.to_sym; @column_h[key].value }
     end
 
     def each
-      @columns.values.each { |column| yield(column) }
+      @column_h.values.each { |column| yield(column) }
     end
 
     def map
-      @columns.values.map { |column| yield(column) }
-    end
-
-    def get_matrix(method_a)
-      return @columns.map do |_key, col|
-               method_a.map { |method| col.send(method) }
-             end
+      @column_h.values.map { |column| yield(column) }
     end
 
     def get_hash(method)
       res_h = {}
-      @columns.map do |key, col|
+      @column_h.map do |key, col|
         res_h[key.to_sym] = col.send(method)
       end
       return res_h
     end
 
     def [](col_key)
-      return @columns[col_key.to_sym]
+      return @column_h[col_key.to_sym]
     end
 
     # 入力フォームを生成して配列で返す
-    def form(convert_html = nil)
-      if @edit_keys
-        target_a = @edit_keys.map {|key| @columns[key.to_sym] }
-      else
-        target_a = @columns.values
-      end
-      return target_a.map do |col|
-        fm = col.form
+    def form_array(target_keys = nil, convert_html = nil)
+      target_keys ||= edit_keys
+      return target_keys.map do |key|
+        fm = self[key].form
         convert_html ? Html.convert(fm) : fm 
       end
     end
 
     # 入力フォームをカラムのキーをキーとしたハッシュで返す
-    def form_hash(convert_html = nil)
-      if @edit_keys
-        target_a = @edit_keys.map {|key| @columns[key.to_sym] }
-      else
-        target_a = @columns.values
-      end
-      
+    def form_hash(target_keys = nil, convert_html = nil)
+      target_keys ||= edit_keys
       res_h = {}
-      target_a.map do |col|
-        fm = col.form
-        res_h[col.key] = convert_html ? Html.convert(fm) : fm
+      target_keys.map do |key|
+        key = key.to_sym
+        fm = @column_h[key].form
+        res_h[key] = convert_html ? Html.convert(fm) : fm
       end
       return res_h
     end
 
-    def view
-      if @view_keys
-        return @view_keys.map do |key|
-          col = @columns[key.to_sym]
-          unless col
-            EzLog.info "[ERROR] @view_keys has unknown column:name=#{@name}:key=#{key}"
-            next
-          end
-          col.view
+    # カラムの表示値を配列として返す
+    def view_array(target_keys = nil)
+      target_keys ||= view_keys
+      return @view_keys.map do |key|
+        col = @column_h[key.to_sym]
+        unless col
+          EzLog.info "[ERROR] @view_keys has unknown column:name=#{@name}:key=#{key}"
+          next
         end
-      else
-        return @columns.values.map { |col| col.view }
+        col.view
       end
     end
 
@@ -425,13 +407,13 @@ module Ezframe
     end
 
     def hidden_form
-      return @columns.map do |colkey, coltype|
+      return @column_h.map do |colkey, coltype|
                { tag: "input", id: colkey, name: colkey, type: "hidden", value: coltype.value }
              end
     end
 
     def inpsect
-      @columns.map do |colkey, coltype|
+      @column_h.map do |colkey, coltype|
         "#{colkey}=#{coltype.value}"
       end.join(" ")
     end

@@ -41,4 +41,8 @@ class Test < GenericTest
     assert_equal(:td, td[:tag])
     assert_equal(5, td[:child])
   end
+
+  def test_container
+    
+  end
 end

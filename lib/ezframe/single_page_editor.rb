@@ -1,15 +1,16 @@
+# frozen_string_literal: true
 require_relative "editor_common"
-require_relative "single_page_kit"
+require_relative "page_maker"
 
 module Ezframe
   # ページ遷移無しでデータを編集する仕組み
   class SinglePageEditor < PageBase
     include EditorCommon
-    include PageKit::Default
-    include PageKit::Index
-    include PageKit::Edit
-    include PageKit::Detail
-    include PageKit::Delete
+    include PageMaker::Default
+    include PageMaker::Index
+    include PageMaker::Edit
+    include PageMaker::Detail
+    include PageMaker::Delete
 
     def init_vars
       super

@@ -1,5 +1,5 @@
 module Ezframe
-  module MainPageKit
+  module MainPageMaker
 =begin    
       def make_index_table
         data_a = list_for_index
@@ -41,14 +41,14 @@ module Ezframe
         EzLog.debug("public_create_post: event=#{@event}, form=#{@form}")
         if @event[:branch] == "single_validate"
           EzLog.debug("public_create_post: single validate")
-          return single_validation(validation, @event[:target_key] || @form.keys[0])
+          return validate_one(validation, @event[:target_key] || @form.keys[0])
         end
         unless @form
           url = "#{make_base_url}/create"
           return { inject: "#center-panel", body: Html.convert(make_form(url, make_edit_form(:create))), set_url: url }
         else
           if count_errors(validation) > 0
-            cmd_a = full_validation(validation)
+            cmd_a = validate_all(validation)
             EzLog.debug("public_create_post: cmd_a=#{cmd_a}")
             return cmd_a if cmd_a.length > 0
           end
@@ -65,7 +65,7 @@ module Ezframe
         validation = @column_set.validate(@form)
         if @event[:branch] == "single_validate"
           EzLog.debug("public_edit_post: single validate:event=#{@event}, form=#{@form}")
-          return single_validation(validation, @event[:target_key])
+          return validate_one(validation, @event[:target_key])
         end
         unless @form
           data = @column_set.set_from_db(@id)
@@ -73,7 +73,7 @@ module Ezframe
           return { inject: "#center-panel", body: Html.convert(make_form("#{make_base_url}/edit", make_edit_form)) }
         else
           if count_errors(validation) > 0
-            cmd_a = full_validation(validation)
+            cmd_a = validate_all(validation)
             return cmd_a
           end
           # 値を保存
@@ -103,8 +103,8 @@ module Ezframe
       end
 
       # １カラムに対してだけバリデーションを行う。
-      def single_validation(validate_h, target_key)
-        EzLog.debug("single_validation: validate_h=#{validate_h}, target_key=#{target_key}")
+      def validate_one(validate_h, target_key)
+        EzLog.debug("validate_one: validate_h=#{validate_h}, target_key=#{target_key}")
         unless target_key
           raise "target_key is empty: #{validate_h}"
           return []
@@ -119,15 +119,15 @@ module Ezframe
         comp_a = exec_completion(@form)
         cmd_a += comp_a if comp_a
         EzLog.debug("reset_error: #error-box-#{target_key}")
-        EzLog.debug("single_validation: target_key=#{target_key}, validate_h=#{validate_h}, count=#{count_errors(validate_h)}, cmd_a=#{cmd_a}")
+        EzLog.debug("validate_one: target_key=#{target_key}, validate_h=#{validate_h}, count=#{count_errors(validate_h)}, cmd_a=#{cmd_a}")
         return cmd_a
       end
 
       # 全てのカラムに対してバリデーションを行う
-      def full_validation(validate_h)
+      def validate_all(validate_h)
         cmd_a = show_validate_result(validate_h)
         cmd_a.unshift({ reset_error: ".error-box" })
-        EzLog.debug("full_validation: full, cmd_a=#{cmd_a}")
+        EzLog.debug("validate_all: full, cmd_a=#{cmd_a}")
         return cmd_a
       end
 
