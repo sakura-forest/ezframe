@@ -12,7 +12,7 @@ module Ezframe
     def init_vars
       super
       @sort_key = :id
-      @dom_id = { create: "create-area", edit: "edit-area", index: "index-area", detail: "detail-area"}
+      @dom_id = { create: "create-area", edit: "edit-area", index: "index-area", detail: "detail-area" }
     end   
   end
 end

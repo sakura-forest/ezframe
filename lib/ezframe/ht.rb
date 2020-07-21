@@ -4,7 +4,7 @@ module Ezframe
     class << self
       # メソッド名の名前のタグのhthashを生成
       def wrap_tag(ht_h = {})
-      force_tag = nil
+        force_tag = nil
         return nil unless ht_h
         if ht_h.is_a?(String) || ht_h.is_a?(Array)
           h = { child: ht_h }
@@ -21,7 +21,7 @@ module Ezframe
           return nil
         end
         if force_tag
-          h[:tag] = force_tag
+          h[:tag] = force_tag.to_sym
         else
           h[:tag] ||= __callee__.to_s.to_sym
         end
@@ -31,7 +31,7 @@ module Ezframe
       end
 
       def single_tag(ht_h = {})
-        ht_h[:tag] ||= __callee__.to_s
+        ht_h[:tag] ||= __callee__.to_s.to_sym
         raise "no tag" if ht_h[:tag] == "wrap_tag"
         raise "has child: #{ht_h.inspect}" if ht_h[:child]
         return ht_h
@@ -101,6 +101,7 @@ module Ezframe
         wrap_tag(arg)
       end
 
+      # 複数のDIVをまとめて生成
       def multi_div(class_a, child)
         class_a.reverse.each do |klass|
           child = Ht.div(class: klass, child: child)
@@ -108,6 +109,14 @@ module Ezframe
         return child
       end
 
+      # ハッシュにclassを追加
+      def add_class(ht_h, class_a)
+        cls = ht_h[:class]
+        cls = [] unless cls
+        ht_h[:class] = Array.new(cls) + Array.new(class_a)
+      end
+
+      # ハッシュを再帰的に探査して、指定されたタグの要素の配列を返す
       def search(ht_h, opts)
         @found ||= []
         if ht_h.is_a?(Hash)
@@ -121,6 +130,82 @@ module Ezframe
           ht_h.map { |h| search(h, opts) }
         end
         return @found
+      end
+
+      def from_array(array)
+        return array.map.with_index do |v, i|
+          _array_to_ht(v, array[i+1])
+        end.compact
+      end
+
+      def _array_to_ht(val, next_val)
+        return nil if !val || val.is_a?(Array)
+        ht = {}
+        class_a = []
+        val.scan(/\A([a-z]+)/) { ht[:tag] = $1.to_sym }
+        val.scan(/\.([a-zA-Z][a-zA-Z0-9_\-]+)/) { class_a.push($1) }
+        val.scan(/\#([a-zA-Z][a-zA-Z0-9_\-]+)/) { ht[:id] = $1.to_sym }
+        prev_key = nil
+        val.scan(/\:([^:]+)/) do 
+          misc = $1
+          if /\A\/\// =~ misc
+            ht[prev_key] += ":#{misc}"
+            next
+          end
+          if misc =~ /([a-zA-Z\-\_]+)=(.*)/
+            key, value = $1.to_sym, $2
+            ht[key] = value
+            prev_key = key
+          else
+            ht[:child] = misc
+          end
+        end
+        ht[:class] = class_a unless class_a.empty?
+        ht[:tag] ||= :div
+        if next_val.is_a?(Array)
+          ht[:child] = next_val.map.with_index {|v, i| _array_to_ht(v, next_val[i+1]) }
+        end
+        return ht
+      end
+    end
+
+    class Node
+      attr_accessor :option
+
+      def initialize(opts = nil)
+        @option = opts || {}
+      end
+
+      def add_child(child)
+        return nil unless child
+        child_a = @option[:child]
+        if child_a
+          child_a = Array.new(ch) unless child_a.is_a?(Array)
+        else
+          child_a = []
+        end
+        child_a += Array.new(child)
+        @option[:child] = child_a
+        return self
+      end
+
+      def add_class(klass)
+        return nil unless klass
+        classs_a = @option[:class]
+        if class_a
+          class_a = Array.new(class_a) unless class_a.is_a?(Array)
+        else
+          classs_a = []
+        end
+        class_a += Array.new(klass)
+        @option[:class] = class_a
+        return self
+      end
+
+      def to_ht
+        tag = @option[:tag]
+        @option[:force_tag] = tag || :div
+        return Ht.wrap_tag(@option)
       end
     end
 
@@ -139,7 +224,7 @@ module Ezframe
     # 配列を<UL>要素に変換するためのクラス
     class Ul < List
       def to_ht(opts = {})
-        @tag = "ul"
+        @tag = :ul
         return super(opts)
       end
     end
@@ -147,7 +232,7 @@ module Ezframe
     # 配列を<OL>要素に変換するためのクラス
     class Ol < List
       def to_ht(opts = {})
-        @tag = "ol"
+        @tag = :ol
         return super(opts)
       end
     end

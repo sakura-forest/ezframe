@@ -56,7 +56,7 @@ module Ezframe
         container = PageStruct::Container.new
         vert = container.add_vertical
         vert.add(tb_ht)
-        vert.add(Ht.div(id: @dom_id[:detail], child: "")
+        vert.add(Ht.div(id: @dom_id[:detail], child: ""))
         return container.to_ht
       end
 
