@@ -4,27 +4,16 @@ module Ezframe
     class << self
       # メソッド名の名前のタグのhthashを生成
       def wrap_tag(ht_h = {})
-        force_tag = nil
         return nil unless ht_h
         if ht_h.is_a?(String) || ht_h.is_a?(Array)
           h = { child: ht_h }
         elsif ht_h.is_a?(Hash)
-          if ht_h[:tag] # && !__callee__.to_s.index("wrap_tag")
-            h = { child: ht_h }
-          else
-            h = ht_h.dup
-          end
-          force_tag = ht_h[:force_tag]
-          ht_h.delete(:force_tag) if force_tag
+          h = ht_h.dup
         else
           EzLog.info("[WARN] wrap_tag: unknown type: #{ht_h.inspect}")
           return nil
         end
-        if force_tag
-          h[:tag] = force_tag.to_sym
-        else
-          h[:tag] ||= __callee__.to_s.to_sym
-        end
+        h[:tag] ||= __callee__.to_s.to_sym
         h[:wrap] = true
         raise "no tag" if h[:tag] == "wrap_tag"
         return h
@@ -37,7 +26,16 @@ module Ezframe
         return ht_h
       end
 
-      alias_method :script, :wrap_tag
+      def script(ht_h)
+        if ht_h.is_a?(String)
+          return { tag: :script, src: ht_h }
+        else
+          h = ht_h.clone
+          h[:tag] = :script
+        end
+        return h
+      end
+
 
       alias_method :h1, :wrap_tag
       alias_method :h2, :wrap_tag
@@ -140,6 +138,7 @@ module Ezframe
 
       def _array_to_ht(val, next_val)
         return nil if !val || val.is_a?(Array)
+        return val if val.is_a?(Hash)
         ht = {}
         class_a = []
         val.scan(/\A([a-z]+)/) { ht[:tag] = $1.to_sym }
@@ -203,8 +202,7 @@ module Ezframe
       end
 
       def to_ht
-        tag = @option[:tag]
-        @option[:force_tag] = tag || :div
+        @option[:tag] ||= :div
         return Ht.wrap_tag(@option)
       end
     end

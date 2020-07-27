@@ -12,8 +12,7 @@ module Ezframe
       end
 
       def to_ht
-        h = Ht.wrap_tag(force_tag: @tag, child: @value)
-        h.delete(:force_tag)
+        h = Ht.wrap_tag(tag: @tag, child: @value)
         h.update(@option) if @option.is_a?(Hash)
         return h
       end
