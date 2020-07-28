@@ -26,16 +26,31 @@ module Ezframe
         return ht_h
       end
 
-      def script(ht_h)
-        if ht_h.is_a?(String)
-          return { tag: :script, src: ht_h }
+      def script(ht)
+        if ht.is_a?(String)
+          h = { src: ht }
         else
-          h = ht_h.clone
-          h[:tag] = :script
+          h = ht.clone
         end
+        h[:tag] = :script
+        h[:wrap] = true
         return h
       end
 
+      def css(ht)
+        if ht.is_a?(String)
+          h = { href: ht }
+        else
+          h = ht.clone
+        end
+        h[:wrap] = true
+
+        h[:tag] = :link
+        h[:rel] = "stylesheet"
+        return h
+      end
+
+      alias_method :title, :wrap_tag
 
       alias_method :h1, :wrap_tag
       alias_method :h2, :wrap_tag
@@ -59,6 +74,7 @@ module Ezframe
       alias_method :tr, :wrap_tag
       alias_method :th, :wrap_tag
       alias_method :td, :wrap_tag
+      alias_method :meta, :single_tag
       alias_method :img, :single_tag
       alias_method :a, :wrap_tag
       alias_method :form, :wrap_tag
@@ -131,21 +147,47 @@ module Ezframe
       end
 
       def from_array(array)
-        return array.map.with_index do |v, i|
-          _array_to_ht(v, array[i+1])
-        end.compact
+        ht, pointer = _array_to_ht(array, 0)
+        return ht
       end
 
-      def _array_to_ht(val, next_val)
-        return nil if !val || val.is_a?(Array)
-        return val if val.is_a?(Hash)
+      def _array_to_ht(array, pointer)
+        res_a = []
+        while pointer < array.length
+          val = array[pointer]
+          if val.is_a?(Hash)
+            res_a.push(val)
+            pointer += 1
+            next
+          end
+          if val.is_a?(String)
+            ht = parse_ht_string(val)
+            next_val = array[pointer + 1]
+            if next_val.is_a?(Array)
+              child_ht, p = _array_to_ht(next_val, 0)
+              ht[:child] = child_ht
+              pointer += 1
+            end
+            res_a.push(ht)
+          end
+          pointer += 1
+        end
+        return res_a, pointer
+      end
+
+      def parse_ht_string(str)
         ht = {}
         class_a = []
-        val.scan(/\A([a-z]+)/) { ht[:tag] = $1.to_sym }
-        val.scan(/\.([a-zA-Z][a-zA-Z0-9_\-]+)/) { class_a.push($1) }
-        val.scan(/\#([a-zA-Z][a-zA-Z0-9_\-]+)/) { ht[:id] = $1.to_sym }
+        if str.index(":")
+          tag_section = str.split(":")[0]
+        else
+          tag_section = str
+        end
+        tag_section.scan(/\A([a-z]+)/) { ht[:tag] = $1.to_sym }
+        tag_section.scan(/\.([a-zA-Z][a-zA-Z0-9_\-]+)/) { class_a.push($1) }
+        tag_section.scan(/\#([a-zA-Z][a-zA-Z0-9_\-]+)/) { ht[:id] = $1.to_sym }
         prev_key = nil
-        val.scan(/\:([^:]+)/) do 
+        str.scan(/\:([^:]+)/) do 
           misc = $1
           if /\A\/\// =~ misc
             ht[prev_key] += ":#{misc}"
@@ -161,9 +203,6 @@ module Ezframe
         end
         ht[:class] = class_a unless class_a.empty?
         ht[:tag] ||= :div
-        if next_val.is_a?(Array)
-          ht[:child] = next_val.map.with_index {|v, i| _array_to_ht(v, next_val[i+1]) }
-        end
         return ht
       end
     end
