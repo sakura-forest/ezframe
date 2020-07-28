@@ -21,7 +21,8 @@ class HtTest < GenericTest
   end
 
   def test_from_array
-    ht_a = Ht.from_array([ "body.cl1", [ "ul#myid", [ "li", [ "a:href=http://www.asahi.com" ]]], ".wrapper", [ "span.cl2:child1", Ht.div(child: "div") ]])
+    ht_a = Ht.from_array([ "body.cl1", [ "ul#myid", [ "li", [ "a:href=http://www.asahi.com:asahi" ]]], ".wrapper", [ "span.cl2:child1", Ht.div(child: "child_text") ]])
+    p ht_a
     node1 = ht_a[0]
     assert_equal(:body, node1[:tag])
     assert_equal(%w[cl1], node1[:class])
@@ -33,16 +34,20 @@ class HtTest < GenericTest
     child = child[:child][0]
     assert_equal(:a, child[:tag])
     assert_equal("http://www.asahi.com", child[:href])
+    assert_equal("asahi", child[:child])
 
     node2 = ht_a[1]
     assert_equal(:div, node2[:tag])
     assert_equal(%w[wrapper], node2[:class])
-    child = node2[:child][0]
+    child_a = node2[:child]
+    assert(child_a.is_a?(Array))
+    assert_equal(2, child_a.length)
+    child = child_a[0]
     assert_equal(:span, child[:tag])
     assert_equal(%w[cl2], child[:class])
     assert_equal("child1", child[:child])
-    child = node2[:child][1]
+    child = child_a[1]
     assert_equal(:div, child[:tag])
-    assert_equal("div", child[:child])
+    assert_equal("child_text", child[:child])
   end
 end
