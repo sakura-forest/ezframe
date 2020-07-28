@@ -1,4 +1,6 @@
 # HTMLを中間表現としてのハッシュであるhthashを生成するためのクラス
+require "strscan"
+
 module Ezframe
   module Ht
     class << self
@@ -43,8 +45,6 @@ module Ezframe
         else
           h = ht.clone
         end
-        h[:wrap] = true
-
         h[:tag] = :link
         h[:rel] = "stylesheet"
         return h
@@ -85,6 +85,7 @@ module Ezframe
       alias_method :label, :wrap_tag
       alias_method :fieldset, :wrap_tag
       alias_method :nav, :wrap_tag
+      alias_method :aside, :wrap_tag
       alias_method :footer, :wrap_tag
 
       alias_method :small, :wrap_tag
@@ -164,7 +165,8 @@ module Ezframe
             ht = parse_ht_string(val)
             next_val = array[pointer + 1]
             if next_val.is_a?(Array)
-              ht[:child] = _array_to_ht(next_val)
+              ht[:child] = tmp = _array_to_ht(next_val)
+              puts "tmp=#{tmp}"
               pointer += 1
             end
             res_a.push(ht)
@@ -177,6 +179,43 @@ module Ezframe
       end
 
       def parse_ht_string(str)
+        puts "parse_ht_string: #{str}"
+        ss = StringScanner.new(str)
+        ht = root = { tag: :div }
+        class_a = []
+        if ss.scan(/(\w+)/)
+          ht[:tag] = ss[1].to_sym
+          puts "tag=#{ht[:tag]}"
+        end
+        until ss.eos?
+          if ss.scan(/\.([a-zA-Z][a-zA-Z0-9_\-]*)/)
+            class_a.push(ss[1])
+            ht[:class] ||= class_a
+          elsif ss.scan(/\#([a-zA-Z][a-zA-Z0-9_\-]*)/)
+            ht[:id] = ss[1].to_sym
+          elsif ss.scan(/\s*>\s*([a-zA-Z][a-zA-Z0-9_\-]*)/)
+            parent = ht
+            class_a = []
+            parent[:child] = ht = { tag: ss[1].to_sym }
+          elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-]+)=\[([^\]]+)\]/)
+            ht[ss[1].to_sym] = ss[2]
+          elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-]+)=\{([^\}]+)\}/)
+            ht[ss[1].to_sym] = ss[2]
+          elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-]+)=\(([^\)]+)\)/)
+            ht[ss[1].to_sym] = ss[2]
+          elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-]+)=([^:]+)/)
+            ht[ss[1].to_sym] = ss[2]
+          else
+            ht[:child] = str[ss.pos+1..-1]
+            puts "get child: pos=#{ss.pos}, #{ht}"
+            return root
+          end
+        end
+        p root
+        return root
+      end
+
+      def parse_ht_string_old(str)
         ht = {}
         class_a = []
         if str.index(":")
