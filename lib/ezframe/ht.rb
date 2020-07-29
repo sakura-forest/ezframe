@@ -147,8 +147,12 @@ module Ezframe
         return @found
       end
 
-      def from_array(array)
-        return _array_to_ht(array)
+      def from_array(arg)
+        if arg.is_a?(String)
+          return parse_ht_string(arg)
+        else
+          return _array_to_ht(arg)
+        end
       end
 
       def _array_to_ht(array)
@@ -166,7 +170,7 @@ module Ezframe
             next_val = array[pointer + 1]
             if next_val.is_a?(Array)
               ht[:child] = tmp = _array_to_ht(next_val)
-              puts "tmp=#{tmp}"
+              # puts "tmp=#{tmp}"
               pointer += 1
             end
             res_a.push(ht)
@@ -179,13 +183,13 @@ module Ezframe
       end
 
       def parse_ht_string(str)
-        puts "parse_ht_string: #{str}"
+        # puts "parse_ht_string: #{str}"
         ss = StringScanner.new(str)
         ht = root = { tag: :div }
         class_a = []
         if ss.scan(/(\w+)/)
           ht[:tag] = ss[1].to_sym
-          puts "tag=#{ht[:tag]}"
+          # puts "tag=#{ht[:tag]}"
         end
         until ss.eos?
           if ss.scan(/\.([a-zA-Z][a-zA-Z0-9_\-]*)/)
@@ -197,53 +201,22 @@ module Ezframe
             parent = ht
             class_a = []
             parent[:child] = ht = { tag: ss[1].to_sym }
-          elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-]+)=\[([^\]]+)\]/)
+          elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-\.]+)=\[([^\]]+)\]/)
             ht[ss[1].to_sym] = ss[2]
-          elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-]+)=\{([^\}]+)\}/)
+          elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-\.]+)=\{([^\}]+)\}/)
             ht[ss[1].to_sym] = ss[2]
-          elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-]+)=\(([^\)]+)\)/)
+          elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-^.]+)=\(([^\)]+)\)/)
             ht[ss[1].to_sym] = ss[2]
-          elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-]+)=([^:]+)/)
+          elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-^.]+)=([^:]+)/)
             ht[ss[1].to_sym] = ss[2]
           else
             ht[:child] = str[ss.pos+1..-1]
-            puts "get child: pos=#{ss.pos}, #{ht}"
+            # puts "get child: pos=#{ss.pos}, #{ht}"
             return root
           end
         end
-        p root
+        # p root
         return root
-      end
-
-      def parse_ht_string_old(str)
-        ht = {}
-        class_a = []
-        if str.index(":")
-          tag_section = str.split(":")[0]
-        else
-          tag_section = str
-        end
-        tag_section.scan(/\A([a-z]+)/) { ht[:tag] = $1.to_sym }
-        tag_section.scan(/\.([a-zA-Z][a-zA-Z0-9_\-]+)/) { class_a.push($1) }
-        tag_section.scan(/\#([a-zA-Z][a-zA-Z0-9_\-]+)/) { ht[:id] = $1.to_sym }
-        prev_key = nil
-        str.scan(/\:([^:]+)/) do 
-          misc = $1
-          if /\A\/\// =~ misc
-            ht[prev_key] += ":#{misc}"
-            next
-          end
-          if misc =~ /([a-zA-Z\-\_]+)=(.*)/
-            key, value = $1.to_sym, $2
-            ht[key] = value
-            prev_key = key
-          else
-            ht[:child] = misc
-          end
-        end
-        ht[:class] = class_a unless class_a.empty?
-        ht[:tag] ||= :div
-        return ht
       end
     end
 
@@ -288,73 +261,78 @@ module Ezframe
 
     # 配列を<UL><OL>要素に変換するためのクラス
     class List < Array
-      attr_accessor :tag
-      def to_ht(opts = {})
+      attr_accessor :at_first, :at_last, :before, :after, :option
+
+      def initialize(opts = {})
+        @option = opts
+      end
+
+      def to_ht
         return nil if self.empty?
-        child = self.map { |elem| Ht.li(elem) }
-        h = { tag: @tag, wrap: true, child: child }
-        h.update(opts)
-        return h
+        children = self.map {|elem| wrap_item(item, @option[:item_tag]) }
+        children.unshift(@at_first) if @at_first
+        children.push(@at_last) if @at_last
+        ht = Ht.from_array(opts[:wrapper_tag])
+        ht[:child] = children
+        return add_before_after(ht)
       end
-    end
 
-    # 配列を<UL>要素に変換するためのクラス
-    class Ul < List
-      def to_ht(opts = {})
-        @tag = :ul
-        return super(opts)
+      def wrap_item(item, opts = {})
+        ht = Ht.from_array(opts[:tag]) || { tag: :li, wrap: true }
+        elem = elem.to_ht if elem.respond_to?(:to_ht)
+        ht[:child] = elem
+        return ht
       end
-    end
 
-    # 配列を<OL>要素に変換するためのクラス
-    class Ol < List
-      def to_ht(opts = {})
-        @tag = :ol
-        return super(opts)
+      def add_before_after(ht)
+        res = [ @before, ht, @after ].compact
+        res = res[0] if res.length == 1
+        return res
       end
     end
 
     # テーブルを生成するためのクラス
-    # @matrix ... テーブルの内容となる二次元配列
     # @header ... テーブルの先頭に付ける項目名の配列
-    # @class_a ... <table><tr><td>の各ノードにそれぞれ設定したいclass属性を配列として定義
-    class Table
-      attr_accessor :class_a, :header, :matrix
+    class Table < List
+      attr_accessor :header
 
-      def initialize(matrix = nil)
-        set(matrix) if matrix
-        @matrix ||= []
-      end
-
-      def set(matrix)
-        @matrix = matrix
-      end
-
-      def add_row(row)
-        @matrix.push(row)
+      def initialize(opts = {})
+        super(opts)
+        @option[:row_tag] ||= "tr"
+        @option[:column_tag] ||= "td"
+        @option[:head_column_tag] ||= "th"
+        @option[:wrapper_tag] ||= "table"
       end
 
       def to_ht
-        table_class, tr_class, td_class = @class_a
         max_col = 0
-        @matrix.each { |row| max_col = row.length if max_col < row.length }
-        tr_a = @matrix.map do |row|
-          add_attr = nil
-          add_attr = { colspan: max_col - row.length + 1 } if row.length < max_col
-          td_a = row.map do |v| 
-            td = Ht.td(child: v) 
-            td.add_class(td_class) if td_class
-            td
-          end
-          td_a[0].update(add_attr) if add_attr
-          tr = Ht.tr(class: tr_class, child: td_a)
-          tr.add_class(tr_class) if tr_class
-          tr
+        # self.each { |row| max_col = row.length if max_col < row.length }
+        children = self.map {|row| wrap_item(row, tag: @option[:column_tag], row_tag: @option[:row_tag]) }
+        children.unshift(@at_first) if @at_first
+        children.push(@at_last) if @at_last
+        
+        head_ht = nil
+        if @header
+          head_a = self.map {|row| wrap_item(@header, tag: @option[:head_column_tag], row_tag: @option[:row_tag]) }
+          head_ht = Ht.thead(head_a)
         end
-        tr_a.unshift( Ht.thead(child: Ht.tr(child: @header.map {|v| Ht.th(child: v) }) )) if @header
-        tb = Ht.table(child: tr_a)
-        tb.add_class(table_class) if table_class
-        tb
+        table = Ht.from_array(@option[:wrapper_tag])
+        children = [ head_ht, Ht.tbody(children) ].compact
+        children = children[0] if children.length == 1
+        table[:child] = children
+        return add_before_after(table)
+      end
+
+      def wrap_item(item_a, opts = {})
+        res_a = item_a.map do |it|
+          it = it.to_ht if it.respond_to?(:to_ht)
+          ht = Ht.from_array(opts[:tag])
+          ht[:child] = it
+          ht
+        end
+        row_ht = Ht.from_array(opts[:row_tag])
+        row_ht[:child] = res_a
+        return row_ht
       end
     end
   end
