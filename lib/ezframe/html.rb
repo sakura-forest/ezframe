@@ -3,8 +3,9 @@
 module Ezframe
   class Html
     class << self
-      WrapTags = %w[html head body title h1 h2 h3 h4 h5 h6 p div span i strong ul ol li table thead tbody tr th td a form select option textarea label fieldset 
-        nav aside footer small pre iframe checkbox radio]
+      WrapTags = %w[html head body title h1 h2 h3 h4 h5 h6 p div span i strong ul ol li table thead tbody tr th td a 
+        form button select option textarea label fieldset 
+        nav aside footer small pre iframe checkbox radio script]
       SingleTags = %w[br hr meta img input ]
 
       def convert(ht_h = {})

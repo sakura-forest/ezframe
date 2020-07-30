@@ -16,7 +16,7 @@ module Ezframe
           return nil
         end
         h[:tag] ||= __callee__.to_s.to_sym
-        h[:wrap] = true
+        # h[:wrap] = true
         raise "no tag" if h[:tag] == "wrap_tag"
         return h
       end
@@ -35,7 +35,7 @@ module Ezframe
           h = ht.clone
         end
         h[:tag] = :script
-        h[:wrap] = true
+        # h[:wrap] = true
         return h
       end
 
@@ -131,23 +131,45 @@ module Ezframe
       def add_class(ht_h, class_a)
         cls = [ ht_h[:class] ].flatten
         class_a = [ class_a ].flatten
-        ht_h[:class] = (Array.new(cls) + Array.new(class_a)).uniq
+        ht_h[:class] = (Array.new(cls) + Array.new(class_a)).compact.uniq
       end
 
       # ハッシュを再帰的に探査して、指定されたタグの要素の配列を返す
-      def search(ht_h, opts)
+      def search(ht_h, query)
+        if opts.is_a?(String)
+          opts = Ht.from_array(query)
+        end
         @found ||= []
         if ht_h.is_a?(Hash)
-          if opts[:tag] && ht_h[:tag] && ht_h[:tag] == opts[:tag]
-            @found.push(ht_h)
+          if _ compare(query, ht_h)
+            # @found.push(ht_h)
+            return ht_h
           end
           if ht_h[:child]
-            search(ht_h[:child], opts)
+            res = search(ht_h[:child], opts)
+            return res if res
           end
         elsif ht_h.is_a?(Array)
-          ht_h.map { |h| search(h, opts) }
+          ht_h.map do |h| 
+            res = search(h, opts) 
+            return res if res
+          end
         end
         return @found
+      end
+
+      def _compare(query, hash)
+        flag = nil
+        cls_a = [ query[:class] ].flatten.compact
+        target_class = [ hash[:class] ].flatten.compact
+        cls_a.each do |c|
+          return nil unless target_class.include?(c)          
+        end
+        query.keys.each do |k|
+          next if k == :class
+          return nil unless hash[k] && query[k] == hash[k]
+        end
+        return true
       end
 
       def from_array(arg)
@@ -172,10 +194,7 @@ module Ezframe
             ht = parse_ht_string(val)
             next_val = array[pointer + 1]
             if next_val.is_a?(Array)
-              child = ht
-              while(child[:child]) do
-                child = child[:child]
-              end
+              child = get_bottom(ht)
               # $stderr.puts "joint to #{child}"
               child[:child] = _array_to_ht(next_val)
               pointer += 1
@@ -194,6 +213,7 @@ module Ezframe
         # debug = true if str.index("content-header")
         $stderr.puts str if debug
         $stderr.puts "parse_ht_string: #{str}" if debug
+        return $1 if /\Atext:(.*)\Z/ =~ str
         ss = StringScanner.new(str)
         ht = root = { tag: :div }
         class_a = []
@@ -236,8 +256,17 @@ module Ezframe
         $stderr.puts "root=#{root}" if debug
         return root
       end
+
+      def get_bottom(ht)
+        child = ht
+        while(child[:child]) do
+          child = child[:child]
+        end
+        return child
+      end
     end
 
+=begin    
     class Node
       attr_accessor :option
 
@@ -276,29 +305,31 @@ module Ezframe
         return Ht.wrap_tag(@option)
       end
     end
+=end
 
-    # 配列を<UL><OL>要素に変換するためのクラス
-    class List < Array
+    class List
       attr_accessor :at_first, :at_last, :before, :after, :option
 
       def initialize(opts = {})
         @option = opts
+        @item_a = []
       end
 
-      def to_ht
-        return nil if self.empty?
-        children = self.map {|elem| wrap_item(item, @option[:item_tag]) }
-        children.unshift(@at_first) if @at_first
-        children.push(@at_last) if @at_last
-        ht = Ht.from_array(opts[:wrapper_tag])
-        ht[:child] = children
-        return add_before_after(ht)
+      def add_item(item, opts = {})
+        @item_a.push(wrap_item(item, opts))
       end
 
       def wrap_item(item, opts = {})
-        ht = Ht.from_array(opts[:tag]) || { tag: :li, wrap: true }
-        elem = elem.to_ht if elem.respond_to?(:to_ht)
-        ht[:child] = elem
+        ht = Ht.from_array(opts[:item_tag] || @option[:item_tag]) || { tag: :li }
+
+        if item.respond_to?(:to_ht)
+          item = item.to_ht 
+        elsif !item.is_a?(Hash)
+          item = Ht.from_array(item)
+        end
+        Ht.add_class(ht, opts[:extra_item_class])
+        bottom = Ht.get_bottom(ht)
+        bottom[:child] = item
         return ht
       end
 
@@ -306,6 +337,17 @@ module Ezframe
         res = [ @before, ht, @after ].compact
         res = res[0] if res.length == 1
         return res
+      end
+
+      def to_ht
+        return nil if @item_a.empty?
+        @item_a.unshift(@at_first) if @at_first
+        @item_a.push(@at_last) if @at_last
+        ht = Ht.from_array(@option[:wrap_tag])
+        Ht.add_class(ht, @option[:extra_wrap_class])
+        bottom = Ht.get_bottom(ht)
+        bottom[:child] = @item_a
+        return add_before_after(ht)
       end
     end
 
@@ -322,16 +364,20 @@ module Ezframe
         @option[:wrapper_tag] ||= "table"
       end
 
+      def add_item(item, opts = {})
+        @item_a.push(item)
+      end
+
       def to_ht
         max_col = 0
         # self.each { |row| max_col = row.length if max_col < row.length }
-        children = self.map {|row| wrap_item(row, tag: @option[:column_tag], row_tag: @option[:row_tag]) }
+        children = @item_a.map {|row| wrap_item(row, tag: @option[:column_tag], row_tag: @option[:row_tag]) }
         children.unshift(@at_first) if @at_first
         children.push(@at_last) if @at_last
         
         head_ht = nil
         if @header
-          head_a = self.map {|row| wrap_item(@header, tag: @option[:head_column_tag], row_tag: @option[:row_tag]) }
+          head_a = wrap_item(@header, tag: @option[:head_column_tag], row_tag: @option[:row_tag])
           head_ht = Ht.thead(head_a)
         end
         table = Ht.from_array(@option[:wrapper_tag])

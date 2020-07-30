@@ -10,7 +10,7 @@ class HtTest < GenericTest
 
   def test_div
     h = Ht.div(child: [Ht.div(child: "A"), Ht.div(child: "B")])
-    assert_equal({ tag: :div, wrap: true, child: [ {tag: :div, wrap: true, child: "A"}, {tag: :div, wrap: true, child: "B"}]}, h)
+    assert_equal({ tag: :div, child: [ {tag: :div, wrap: true, child: "A"}, {tag: :div, wrap: true, child: "B"}]}, h)
   end
 
   def test_multidiv
@@ -79,9 +79,9 @@ class HtTest < GenericTest
 
   def test_table
     table = Ht::Table.new
-    table.push([ "v1", "v2", "v3" ])
-    table.push([ "v4", "v5", "v6" ])
-    table.push([ "v4", "v5", "v6" ])
+    table.add_item([ "v1", "v2", "v3" ])
+    table.add_item([ "v4", "v5", "v6" ])
+    table.add_item([ "v4", "v5", "v6" ])
 
     res = table.to_ht
     assert_equal(:table, res[:tag])
@@ -117,5 +117,13 @@ class HtTest < GenericTest
     col = child[0]
     assert_equal(:td_dummy, col[:tag])
     assert_equal(%w[td-class], col[:class])
+  end
+
+  def test_search
+    ht = Ht.from_array(".link2", [ ".div2", [ "p.link1:href=[link1.html]", "p.link2:href=[link2.html]",] ])
+    res = ht.search(".link2", ht)
+    assert(:div, res[:tag])    
+    res = ht.search("p.link2", ht)
+    assert(:p, res[:tag])    
   end
 end
