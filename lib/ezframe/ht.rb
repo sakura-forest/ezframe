@@ -50,6 +50,9 @@ module Ezframe
         return h
       end
 
+      alias_method :html, :wrap_tag
+      alias_method :head, :wrap_tag
+      alias_method :body, :wrap_tag
       alias_method :title, :wrap_tag
 
       alias_method :h1, :wrap_tag
@@ -126,9 +129,9 @@ module Ezframe
 
       # ハッシュにclassを追加
       def add_class(ht_h, class_a)
-        cls = ht_h[:class]
-        cls = [] unless cls
-        ht_h[:class] = Array.new(cls) + Array.new(class_a)
+        cls = [ ht_h[:class] ].flatten
+        class_a = [ class_a ].flatten
+        ht_h[:class] = (Array.new(cls) + Array.new(class_a)).uniq
       end
 
       # ハッシュを再帰的に探査して、指定されたタグの要素の配列を返す
@@ -169,8 +172,12 @@ module Ezframe
             ht = parse_ht_string(val)
             next_val = array[pointer + 1]
             if next_val.is_a?(Array)
-              ht[:child] = tmp = _array_to_ht(next_val)
-              # puts "tmp=#{tmp}"
+              child = ht
+              while(child[:child]) do
+                child = child[:child]
+              end
+              # $stderr.puts "joint to #{child}"
+              child[:child] = _array_to_ht(next_val)
               pointer += 1
             end
             res_a.push(ht)
@@ -183,13 +190,16 @@ module Ezframe
       end
 
       def parse_ht_string(str)
-        # puts "parse_ht_string: #{str}"
+        debug = nil
+        # debug = true if str.index("content-header")
+        $stderr.puts str if debug
+        $stderr.puts "parse_ht_string: #{str}" if debug
         ss = StringScanner.new(str)
         ht = root = { tag: :div }
         class_a = []
         if ss.scan(/(\w+)/)
           ht[:tag] = ss[1].to_sym
-          # puts "tag=#{ht[:tag]}"
+          $stderr.puts "tag=#{ht[:tag]}" if debug
         end
         until ss.eos?
           if ss.scan(/\.([a-zA-Z][a-zA-Z0-9_\-]*)/)
@@ -197,10 +207,18 @@ module Ezframe
             ht[:class] ||= class_a
           elsif ss.scan(/\#([a-zA-Z][a-zA-Z0-9_\-]*)/)
             ht[:id] = ss[1].to_sym
-          elsif ss.scan(/\s*>\s*([a-zA-Z][a-zA-Z0-9_\-]*)/)
+          elsif ss.scan(/\s*>\s*([a-zA-Z\.][a-zA-Z0-9_\-]*)/)
             parent = ht
             class_a = []
-            parent[:child] = ht = { tag: ss[1].to_sym }
+            if ss[1][0] == "."
+              cls = ss[1][1..-1]
+              class_a.push(cls)
+              tag = :div
+            else
+              tag = ss[1].to_sym
+            end
+            $stderr.puts ss[1] if debug
+            parent[:child] = ht = { tag: tag, class: class_a }
           elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-\.]+)=\[([^\]]+)\]/)
             ht[ss[1].to_sym] = ss[2]
           elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-\.]+)=\{([^\}]+)\}/)
@@ -211,11 +229,11 @@ module Ezframe
             ht[ss[1].to_sym] = ss[2]
           else
             ht[:child] = str[ss.pos+1..-1]
-            # puts "get child: pos=#{ss.pos}, #{ht}"
+            $stderr.puts "get child: pos=#{ss.pos}, #{ht}" if debug
             return root
           end
         end
-        # p root
+        $stderr.puts "root=#{root}" if debug
         return root
       end
     end

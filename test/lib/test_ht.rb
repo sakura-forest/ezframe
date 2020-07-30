@@ -52,7 +52,7 @@ class HtTest < GenericTest
     assert_equal("child_text", child[:child])
 
     # 連続するdiv
-    ht_a = Ht.from_array([ ".div1>span.span2>a:href=index.html:test" ])
+    ht_a = Ht.from_array([ ".div1>span.span2>a:href=index.html", [ ".child1", ".child2" ] ])
     # p ht_a
     child1 = ht_a[0]
     assert_equal(:div, child1[:tag])
@@ -63,7 +63,12 @@ class HtTest < GenericTest
     child3 = child2[:child]
     assert_equal(:a, child3[:tag])
     assert_equal("index.html", child3[:href])
-    assert_equal("test", child3[:child])
+    # assert_equal("test", child3[:child])
+    child4 = child3[:child]
+    assert_equal(Array, child4.class)
+    assert_equal(2, child4.length)
+    assert_equal(%w[child1], child4[0][:class])
+    assert_equal(%w[child2], child4[1][:class])
 
     # 様々な引数
     ht_a = Ht.from_array([ ".div1:v1=[http://localhost:9292/index.html]:v2={:test:}" ])

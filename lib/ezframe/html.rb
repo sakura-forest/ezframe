@@ -3,6 +3,10 @@
 module Ezframe
   class Html
     class << self
+      WrapTags = %w[html head body title h1 h2 h3 h4 h5 h6 p div span i strong ul ol li table thead tbody tr th td a form select option textarea label fieldset 
+        nav aside footer small pre iframe checkbox radio]
+      SingleTags = %w[br hr meta img input ]
+
       def convert(ht_h = {})
         ht_h = hook_for_convert(ht_h)
         return "" if ht_h.nil? || ht_h.to_s.empty?
@@ -22,10 +26,9 @@ module Ezframe
         tag = ht_h[:tag]
         join_info = join_attribute(ht_h)
         start_tag = [ht_h[:tag], join_info[:attr]].compact.join(" ").strip
-        if ht_h[:wrap]   # !child_s.strip.empty? || 
+        if ht_h[:wrap] || WrapTags.include?(tag.to_s)
           return "#{join_info[:before]}<#{start_tag}>#{join_info[:child]}</#{ht_h[:tag]}>#{join_info[:after]}"
         end
-        # tag_content = [ ht_h[:tag], join_info[:attr] ].compact.join(" ")
         return "#{join_info[:before]}<#{start_tag}/>#{join_info[:after]}"
       end
 
