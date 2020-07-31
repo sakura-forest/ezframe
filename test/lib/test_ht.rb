@@ -3,14 +3,14 @@ require_relative "../test_helper.rb"
 
 class HtTest < GenericTest
   def test_convert_tag
-    assert_equal({ tag: :div, wrap: true, child: "test"},  Ht.div(child: "test"))
+    assert_equal({ tag: :div, child: "test"},  Ht.div(child: "test"))
     assert_equal({ tag: :input, name: "test"},  Ht.input(name: "test"))
-    assert_equal({ tag: :span, wrap: true, child: "test"},  Ht.span(child: "test"))
+    assert_equal({ tag: :span, child: "test"},  Ht.span(child: "test"))
   end
 
   def test_div
     h = Ht.div(child: [Ht.div(child: "A"), Ht.div(child: "B")])
-    assert_equal({ tag: :div, child: [ {tag: :div, wrap: true, child: "A"}, {tag: :div, wrap: true, child: "B"}]}, h)
+    assert_equal({ tag: :div, child: [ {tag: :div, child: "A"}, {tag: :div, child: "B"}]}, h)
   end
 
   def test_multidiv
@@ -120,10 +120,14 @@ class HtTest < GenericTest
   end
 
   def test_search
-    ht = Ht.from_array(".link2", [ ".div2", [ "p.link1:href=[link1.html]", "p.link2:href=[link2.html]",] ])
-    res = ht.search(".link2", ht)
-    assert(:div, res[:tag])    
-    res = ht.search("p.link2", ht)
-    assert(:p, res[:tag])    
+    ht = Ht.from_array([".link2", [ ".div2", [ "a.link1:href=[link1.html]", "a.link2:href=[link2.html]",] ]])
+    res = Ht.search(ht, ".link2")
+    assert_equal(:div, res[:tag])    
+    res = Ht.search(ht, "a.link2")
+    assert_equal(:a, res[:tag])    
+    assert_equal("link2.html", res[:href])    
+
+    res = Ht.search(ht, { class: "link1"})
+    assert_equal("link1.html", res[:href])    
   end
 end

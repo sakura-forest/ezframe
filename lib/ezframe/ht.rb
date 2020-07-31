@@ -129,33 +129,33 @@ module Ezframe
 
       # ハッシュにclassを追加
       def add_class(ht_h, class_a)
+        return nil if ht_h.nil? || class_a.nil? || class_a.empty?
         cls = [ ht_h[:class] ].flatten
         class_a = [ class_a ].flatten
-        ht_h[:class] = (Array.new(cls) + Array.new(class_a)).compact.uniq
+        ht_h[:class] = (Array(cls) + Array(class_a)).compact.uniq
+        return ht_h
       end
 
       # ハッシュを再帰的に探査して、指定されたタグの要素の配列を返す
       def search(ht_h, query)
-        if opts.is_a?(String)
-          opts = Ht.from_array(query)
+        if query.is_a?(String)
+          query = Ht.from_array(query)
         end
-        @found ||= []
         if ht_h.is_a?(Hash)
-          if _ compare(query, ht_h)
+          if _compare(query, ht_h)
             # @found.push(ht_h)
             return ht_h
           end
           if ht_h[:child]
-            res = search(ht_h[:child], opts)
+            res = search(ht_h[:child], query)
             return res if res
           end
         elsif ht_h.is_a?(Array)
           ht_h.map do |h| 
-            res = search(h, opts) 
+            res = search(h, query) 
             return res if res
           end
         end
-        return @found
       end
 
       def _compare(query, hash)
@@ -175,6 +175,8 @@ module Ezframe
       def from_array(arg)
         if arg.is_a?(String)
           return parse_ht_string(arg)
+        elsif arg.respond_to?(:to_ht)
+          return arg.to_ht
         else
           return _array_to_ht(arg)
         end
@@ -186,7 +188,11 @@ module Ezframe
         pointer = 0
         while pointer < array.length
           val = array[pointer]
-          if val.is_a?(Hash)
+          if val.respond_to?(:to_ht)
+            res_a.push(val.to_ht)
+            pointer += 1
+            next
+          elsif val.is_a?(Hash)
             res_a.push(val)
             pointer += 1
             next
@@ -257,6 +263,13 @@ module Ezframe
         return root
       end
 
+      # 複数階層のノードの一番内側のノード(childを持たない)にchildを設定する
+      def connect_child(ht, child)
+        bottom = get_bottom(ht)
+        bottom[:child] = child
+        return ht
+      end
+
       def get_bottom(ht)
         child = ht
         while(child[:child]) do
@@ -266,53 +279,18 @@ module Ezframe
       end
     end
 
-=begin    
-    class Node
-      attr_accessor :option
-
-      def initialize(opts = nil)
-        @option = opts || {}
-      end
-
-      def add_child(child)
-        return nil unless child
-        child_a = @option[:child]
-        if child_a
-          child_a = Array.new(ch) unless child_a.is_a?(Array)
-        else
-          child_a = []
-        end
-        child_a += Array.new(child)
-        @option[:child] = child_a
-        return self
-      end
-
-      def add_class(klass)
-        return nil unless klass
-        classs_a = @option[:class]
-        if class_a
-          class_a = Array.new(class_a) unless class_a.is_a?(Array)
-        else
-          classs_a = []
-        end
-        class_a += Array.new(klass)
-        @option[:class] = class_a
-        return self
-      end
-
-      def to_ht
-        @option[:tag] ||= :div
-        return Ht.wrap_tag(@option)
-      end
-    end
-=end
-
     class List
       attr_accessor :at_first, :at_last, :before, :after, :option
 
       def initialize(opts = {})
         @option = opts
         @item_a = []
+        @at_first = []
+        @at_last = []
+        init_vars
+      end
+
+      def init_var
       end
 
       def add_item(item, opts = {})
@@ -328,8 +306,7 @@ module Ezframe
           item = Ht.from_array(item)
         end
         Ht.add_class(ht, opts[:extra_item_class])
-        bottom = Ht.get_bottom(ht)
-        bottom[:child] = item
+        Ht.connect_child(ht, item)
         return ht
       end
 
@@ -339,15 +316,19 @@ module Ezframe
         return res
       end
 
+      def make_at_first
+      end
+
       def to_ht
         return nil if @item_a.empty?
-        @item_a.unshift(@at_first) if @at_first
-        @item_a.push(@at_last) if @at_last
+        child_a = @at_first + @item_a + @at_last
         ht = Ht.from_array(@option[:wrap_tag])
         Ht.add_class(ht, @option[:extra_wrap_class])
-        bottom = Ht.get_bottom(ht)
-        bottom[:child] = @item_a
+        Ht.connect_child(ht, child_a)
         return add_before_after(ht)
+      end
+
+      def join_all
       end
     end
 
