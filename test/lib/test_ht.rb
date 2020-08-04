@@ -89,6 +89,7 @@ class HtTest < GenericTest
     assert_equal(:tbody, child[:tag])
     child = child[:child]
     assert(child.is_a?(Array))
+    p child
     assert_equal(3, child.length)
     child = child[0]
     assert_equal(:tr, child[:tag])
@@ -117,6 +118,15 @@ class HtTest < GenericTest
     col = child[0]
     assert_equal(:td_dummy, col[:tag])
     assert_equal(%w[td-class], col[:class])
+  end
+  
+  def test_connect_child
+    ht = Ht.from_array(".div1 > .div2")
+    ht2 = Ht.a(href: "#remote", child: "link")
+    Ht.connect_child(ht, ht2)
+    child = ht[:child][:child]
+    child[:tag] = :a
+    child[:child] = "link"
   end
 
   def test_search

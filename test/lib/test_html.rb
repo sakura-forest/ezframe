@@ -59,8 +59,4 @@ class HtmlTest < GenericTest
     res = Html.convert(h)
     assert_equal("<div>before_elem</div><div>main_elem</div><div>after_elem</div>", res)
   end
-
-  def test_ht_list
-    p Html.convert(Ht::Ul.new(%w[a b c d]).to_ht)
-  end
 end

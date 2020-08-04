@@ -287,7 +287,7 @@ module Ezframe
         @item_a = []
         @at_first = []
         @at_last = []
-        init_vars
+        init_var
       end
 
       def init_var
@@ -316,19 +316,20 @@ module Ezframe
         return res
       end
 
-      def make_at_first
+      def add_first_last(ch = nil)
+        child_a = (ch || @item_a).clone
+        child_a = @at_first + child_a if @at_first.is_a?(Array) && @at_first.length > 0
+        child_a = child_a + @at_last if @at_last.is_a?(Array) && @at_last.length > 0
+        return child_a
       end
 
       def to_ht
         return nil if @item_a.empty?
-        child_a = @at_first + @item_a + @at_last
         ht = Ht.from_array(@option[:wrap_tag])
         Ht.add_class(ht, @option[:extra_wrap_class])
+        child_a = add_first_last
         Ht.connect_child(ht, child_a)
         return add_before_after(ht)
-      end
-
-      def join_all
       end
     end
 
@@ -353,8 +354,7 @@ module Ezframe
         max_col = 0
         # self.each { |row| max_col = row.length if max_col < row.length }
         children = @item_a.map {|row| wrap_item(row, tag: @option[:column_tag], row_tag: @option[:row_tag]) }
-        children.unshift(@at_first) if @at_first
-        children.push(@at_last) if @at_last
+        child_a = add_first_last(children)
         
         head_ht = nil
         if @header

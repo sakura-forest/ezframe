@@ -17,11 +17,11 @@ module Ezframe
 
         tag = ht_h[:tag]
         case tag
-        when "textarea"
+        when :textarea
           textarea(ht_h)
-        when "select"
+        when :select
           return select(ht_h) if ht_h[:item]
-        when "icon"
+        when :icon
           tag = "i"
         end
         tag = ht_h[:tag]

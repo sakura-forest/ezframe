@@ -9,7 +9,7 @@ module Ezframe
     include PageMaker::Edit
     include PageMaker::Detail
 
-    def init_vars
+    def init_var
       super
       @sort_key = :id
       tab_id = "##{@class_snake}_tab"

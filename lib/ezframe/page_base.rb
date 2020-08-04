@@ -12,10 +12,10 @@ module Ezframe
       @class_snake = class_to_snake(self.class)
       # puts "class_snake = #{@class_snake}"
       set_request(request) if request
-      init_vars
+      init_var
     end
 
-    def init_vars
+    def init_var
     end
 
     # Rackのrequestを代入し、関連するインスタンス変数を定義

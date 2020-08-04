@@ -12,7 +12,7 @@ module Ezframe
     include PageMaker::Detail
     include PageMaker::Delete
 
-    def init_vars
+    def init_var
       super
       @sort_key = :id
       @dom_id = { create: "create-area", edit: "edit-area", index: "index-area", detail: "detail-area"}
