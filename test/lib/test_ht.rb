@@ -21,6 +21,9 @@ class HtTest < GenericTest
   end
 
   def test_from_array
+    ht = Ht.from_array({ tag: :div})
+    assert_equal({ tag: :div }, ht)
+
     ht_a = Ht.from_array([ "body.cl1", [ "ul#myid", [ "li", [ "a:href=[http://www.asahi.com]:asahi" ]]], ".wrapper", [ "span.cl2:child1", Ht.div(child: "child_text") ]])
 #    p ht_a
     node1 = ht_a[0]

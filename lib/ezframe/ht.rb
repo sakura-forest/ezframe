@@ -175,6 +175,8 @@ module Ezframe
       def from_array(arg)
         if arg.is_a?(String)
           return parse_ht_string(arg)
+        elsif arg.is_a?(Hash)
+          return arg
         elsif arg.respond_to?(:to_ht)
           return arg.to_ht
         else

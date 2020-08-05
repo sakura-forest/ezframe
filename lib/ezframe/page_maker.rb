@@ -3,19 +3,25 @@ module Ezframe
     module Default
       def public_default_get
         @id = get_id
-        layout = index_layout
-        center_box = layout[:center]
+        layout = Layout.new
+
+        # center_box = layout[:center]
         # 追加ボタン配置用のエリア
-        create_button =  make_create_button("on=click:url=#{make_base_url}/create")
-        extra_buttons = make_extra_buttons if self.respond_to?(:make_extra_buttons)
-        center_box.add(id: @dom_id[:create], child: create_button)
+        content = Ht::List.new
+        content.before = [ "button.btn:ezevent=[on=click:url=#{make_base_url}/create] > i.fa.fa-plus", make_extra_buttons ].compact
         # 一覧表示用のエリア
-        center_box.add(id: @dom_id[:index], child: "", ezload: "url=#{make_base_url}")
-        return show_base_template(title: Message[:index_page_title], body: layout.to_ht)
+        # center_box.add(id: @dom_id[:index], child: "", ezload: "url=#{make_base_url}")
+        layout.embed[:page_title] = Message[:index_page_title]
+        layout.embed[:main_content] = content
+        return layout
       end
 
       def public_default_post
         return { inject: "##{@dom_id[:index]}", body: Html.convert(make_index_table), set_url: make_base_url }
+      end
+
+      def make_extra_buttons
+        nil
       end
     end
 

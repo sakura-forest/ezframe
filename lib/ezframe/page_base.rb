@@ -8,24 +8,21 @@ module Ezframe
   class PageBase
     attr_accessor :controller
 
-    def initialize(request = nil)
+    def initialize(cntl)
+      @controller = cntl
       @class_snake = class_to_snake(self.class)
       # puts "class_snake = #{@class_snake}"
-      set_request(request) if request
+      @request, @response = @controller.request, @controller.response
       init_var
     end
 
     def init_var
-    end
-
-    # Rackのrequestを代入し、関連するインスタンス変数を定義
-    def set_request(request)
       @column_set = ColumnSets.get(@class_snake)
       @dataset = DB.dataset(@class_snake) if @column_set
     end
 
     def event
-      return @controller.json_body_params[:ezevent] || @controller.url_params[:ezevent] || {}
+      return @request.json_body_params[:ezevent] || @request.url_params[:ezevent] || {}
     end
 
     def event_form
@@ -62,11 +59,11 @@ module Ezframe
     end
 
     def session
-      return env['rack.session']
+      return @request.env['rack.session']
     end
 
     def warden
-      return env["warden"]
+      return @request.env["warden"]
     end
 
     def login?

@@ -40,13 +40,13 @@ module Ezframe
             # routeに無ければ、メソッドを探す
             klass = get_class(class_a[-1])
             return [ 404 ] unless klass
-            instance = klass.new
+            # instance = klass.new
             method_name = make_method_name(part, request.request_method)
-            if instance.respond_to?(method_name)
-              return [instance, method_name, args, opts]
-            else
-              EzLog.error "undefined method: #{klass}.#{method_name}: full path=#{request.path_info}"
-            end
+            return [klass, method_name, args, opts]
+            # if instance.respond_to?(method_name)
+            #else
+            #  EzLog.error "undefined method: #{klass}.#{method_name}: full path=#{request.path_info}"
+            #end
           end
         end
         # 最後にメソッド名が無い場合はpublic_default_#{method}を実行。
@@ -58,11 +58,11 @@ module Ezframe
           part = "default"
         end
         method_name = make_method_name(part, request.request_method)
-        instance = klass.new
-        if instance.respond_to?(method_name)
-          return [instance, method_name, args, opts]
-        end
-        return [ 404 ]
+#        instance = klass.new
+#        if instance.respond_to?(method_name)
+        return [ klass, method_name, args, opts]
+#        end
+#        return [ 404 ]
       end
 
       # ページクラスの階層を辿る

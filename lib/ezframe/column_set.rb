@@ -81,7 +81,7 @@ module Ezframe
 
       def create_one_table(table_name, column_set)
         col_h = column_set.get_hash(:db_type)
-        EzLog.info "create_one_table: col_h=#{col_h.inspect}"
+        # EzLog.info "create_one_table: col_h=#{col_h.inspect}"
         DB.create_table(table_name, col_h)
       end
 
