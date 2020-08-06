@@ -12,7 +12,7 @@ module Ezframe
         @status = 200
       end
 
-      def set_as_json(body)
+      def set_body_as_json(body)
         @headers["Content-Type"] = "application/json; charset=utf-8"
         @body = body
       end

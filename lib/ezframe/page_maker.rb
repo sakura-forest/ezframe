@@ -13,11 +13,14 @@ module Ezframe
         # center_box.add(id: @dom_id[:index], child: "", ezload: "url=#{make_base_url}")
         layout.embed[:page_title] = Message[:index_page_title]
         layout.embed[:main_content] = content
+        EzLog.debug("layout=#{layout.to_ht}")
         return layout
       end
 
       def public_default_post
-        return { inject: "##{@dom_id[:index]}", body: Html.convert(make_index_table), set_url: make_base_url }
+        body = Html.convert(make_index_table)
+        EzLog.debug("public_default_post: #{body}")
+        return { inject: "##{@dom_id[:index]}", body: body, set_url: make_base_url }
       end
 
       def make_extra_buttons

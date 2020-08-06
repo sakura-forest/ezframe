@@ -191,7 +191,10 @@ module Ezframe
         while pointer < array.length
           val = array[pointer]
           if val.respond_to?(:to_ht)
-            res_a.push(val.to_ht)
+            $stderr.puts "_arrray_to_ht: to_ht: #{val}"
+            res = val.to_ht
+            $stderr.puts("to_ht: #{res}")
+            res_a.push(res)
             pointer += 1
             next
           elsif val.is_a?(Hash)
@@ -202,10 +205,9 @@ module Ezframe
             ht = parse_ht_string(val)
             next_val = array[pointer + 1]
             if next_val.is_a?(Array)
-              child = get_bottom(ht)
-              # $stderr.puts "joint to #{child}"
-              child[:child] = _array_to_ht(next_val)
+              Ht.connect_child(ht, _array_to_ht(next_val))
               pointer += 1
+            else
             end
             res_a.push(ht)
           elsif val.is_a?(Array)
@@ -217,9 +219,8 @@ module Ezframe
       end
 
       def parse_ht_string(str)
-        debug = nil
+        debug = true
         # debug = true if str.index("content-header")
-        $stderr.puts str if debug
         $stderr.puts "parse_ht_string: #{str}" if debug
         return $1 if /\Atext:(.*)\Z/ =~ str
         ss = StringScanner.new(str)
@@ -245,7 +246,7 @@ module Ezframe
             else
               tag = ss[1].to_sym
             end
-            $stderr.puts ss[1] if debug
+            $stderr.puts "> chain: #{ss[1]}" if debug
             parent[:child] = ht = { tag: tag, class: class_a }
           elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-\.]+)=\[([^\]]+)\]/)
             ht[ss[1].to_sym] = ss[2]
@@ -268,11 +269,12 @@ module Ezframe
       # 複数階層のノードの一番内側のノード(childを持たない)にchildを設定する
       def connect_child(ht, child)
         bottom = get_bottom(ht)
-        bottom[:child] = child
+        bottom[:child] = child if bottom.is_a?(Hash)
         return ht
       end
 
       def get_bottom(ht)
+        return nil unless ht
         child = ht
         while(child[:child]) do
           child = child[:child]
@@ -326,11 +328,12 @@ module Ezframe
       end
 
       def to_ht
-        return nil if @item_a.empty?
+        # return nil if @item_a.empty?
         ht = Ht.from_array(@option[:wrap_tag])
         Ht.add_class(ht, @option[:extra_wrap_class])
         child_a = add_first_last
         Ht.connect_child(ht, child_a)
+        EzLog.debug("List.to_ht: #{ht}")
         return add_before_after(ht)
       end
     end

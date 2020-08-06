@@ -11,6 +11,7 @@ module Ezframe
     end
 
     def call(env)
+      $stderr.puts "rack.errors=#{env['rack.errors']}, rack.logger=#{env['rack.logger']}"
       req = Rack::Request.new(env)
       res = Controller::Response.new
       begin

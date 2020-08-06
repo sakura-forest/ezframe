@@ -1,15 +1,26 @@
 module Ezframe
   class EzLog
     class << self
-      @instance = nil
+      attr_accessor :log_file
+
+      def open_log_file
+        unless @log_file
+          file = "log/#{ENV['RACK_ENV']||'development'}.log"
+          @log_file = ::Logger.new(file)
+#          $stderr.puts "open_log_file: #{file}"
+#          @log_file = File.open(file, "a+")
+#          @log_file.sync = true
+        end
+        return @log_file
+      end
 
       def writer(level="", msg)
-        # unless @instance
-        #  @instance = File.open("log/#{ENV['RACK_ENV']||'development'}.log", "a+")
-        #  @instance.sync = true
-        # end
-        # @instance.puts "#{Time.now.to_s}:#{level.upcase}:#{msg}"
-        File.open("log/#{ENV['RACK_ENV']||'development'}.log", "a+") {|f| f.puts "#{Time.now.to_s}:#{level.upcase}:#{msg}"}
+        unless @log_file
+          open_log_file 
+        end
+        @log_file << msg
+#        $stderr.puts "writer: #{msg}"
+#        @log_file.puts "#{Time.now.to_s}:#{level.upcase}:#{msg}"
       end
 
       def level=(lv)
@@ -17,23 +28,27 @@ module Ezframe
       end
 
       def info(msg)
-        writer("info", msg)  
+        @log_file.info(msg)
+#         writer("info", msg)  
       end
 
       def debug(msg)
-        writer("debug", msg)
+        @log_file.debug(msg)
+#         writer("debug", msg)
       end
 
       def warn(msg)
-        writer("warn", msg)
+        @log_file.debug(msg)
+#        writer("warn", msg)
       end
 
       def error(msg)
-        writer("debug", msg)
+        @log_file.error(msg)
+        # writer("debug", msg)
       end
 
       def <<(msg)
-        writer("", msg)
+        # writer("", msg)
       end
     end
   end
