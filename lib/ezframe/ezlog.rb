@@ -1,3 +1,5 @@
+require "logger"
+
 module Ezframe
   class EzLog
     class << self

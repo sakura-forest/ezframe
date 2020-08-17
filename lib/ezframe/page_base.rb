@@ -6,7 +6,7 @@ require_relative "util"
 
 module Ezframe
   class PageBase
-    attr_accessor :controller
+    attr_accessor :controller, :column_set, :dataset
 
     def initialize(cntl)
       @controller = cntl
@@ -21,18 +21,10 @@ module Ezframe
       @dataset = DB.dataset(@class_snake) if @column_set
     end
 
-    def event
-      return @request.json_body_params[:ezevent] || @request.url_params[:ezevent] || {}
-    end
-
-    def event_form
-      event[:form]
-    end
-
     # routeから基本URLを生成
     def make_base_url(id = nil)
       path = Route::get_path(@class_snake)
-      params = @url_params || {}
+      params = @query_params || {}
       # EzLog.info "make_base_url: params=#{params}"
       # params[@class_snake.to_sym] = id
       path_s = path.map do |pa|

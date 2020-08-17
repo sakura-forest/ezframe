@@ -8,7 +8,7 @@ module Ezframe
         # center_box = layout[:center]
         # 追加ボタン配置用のエリア
         content = Ht::List.new
-        content.before = [ "button.btn:ezevent=[on=click:url=#{make_base_url}/create] > i.fa.fa-plus", make_extra_buttons ].compact
+        content.before = Ht.from_array([ "button.btn:ezevent=[on=click:url=#{make_base_url}/create] > i.fa.fa-plus", make_extra_buttons ].compact)
         # 一覧表示用のエリア
         # center_box.add(id: @dom_id[:index], child: "", ezload: "url=#{make_base_url}")
         layout.embed[:page_title] = Message[:index_page_title]
@@ -28,7 +28,11 @@ module Ezframe
       end
     end
 
-    module Index
+    class IndexPageMaker
+      def initialize(ctrl)
+        @controller = ctrl
+      end
+
       # 一覧表の生成
       def make_index_table
         # 表示データの取得
@@ -81,106 +85,21 @@ module Ezframe
     end
 
     module Edit
-      # 新規登録フォーム表示(ページ切り替え式)
-      def public_create_get
-        @column_set.clear
-        table = make_edit_form(:create)
-        layout = main_layout(center: make_form("#{make_base_url}/create", table), type: 2)
-        show_base_template(title: Message[:parent_create_page_title], body: Html.convert(layout))
-      end
-
       # 新規データ登録
       def public_create_post
-        edit_base(:create)
+        maker = EditPageMaker.new(@controller, self)
+        return maker.selector(:create)
       end
 
       # データ編集受信
       def public_edit_post
-        edit_base(:edit)
+        maker = EditPageMaker.new(@controller, self)
+        return maker.selector(:edit)
       end
 
-      def edit_base(typ = :edit)
-        @form = event_form
-        @id = get_id if typ == :edit
-        validation = Valiadtor.new(@column_set.validate(@form))
-        if @event[:branch] == "single_validate"
-          EzLog.debug("public_#{:typ}_post: single validate:event=#{@event}, form=#{@form}")
-          return validate_one(validation, @event[:target_key])
-        end
-        if @event[:cancel]
-          # キャンセルする
-          # data = @column_set.set_from_db(@id)
-          return act_after_cancel(typ)
-        end
-        unless @form
-          # 入力前。フォームの表示
-          case typ
-          when :edit
-            data = @column_set.set_from_db(@id)
-            return show_message_page("no data", "data is not defined: #{@id}") unless data
-            # フォームの表示
-            form = make_edit_form
-            # サイズ指定があったら、CSSクラスを指定。必要？
-            # found_a = Ht.search(form, tag: "input")
-            # found_a.each { |h| h.add_class("#{@class_snake}-edit-box") if h[:size] }
-            return { inject: "##{@dom_id[:detail]}", body: Html.convert(form) }
-          when :create
-            return { inject: "##{@dom_id[:create]}", body: Html.convert(make_edit_form(:create)) }
-          end
-        else
-          # 入力値を保存
-          case typ
-          when :edit
-            @column_set.update(@id, @event[:form])
-            return act_after_edit(:edit)
-          when :create
-            values = {}
-            values.update(@form)
-            values.update(path_params)
-            @column_set[:id].value = @id = @column_set.create(form_values)
-            return act_after_edit(:create)
-          end
-        end
-      end
-
-      # 編集フォームの生成
-      def make_edit_form(typ = :edit)
-        target_keys = @edit_keys || @column_set.edit_keys
-        form = PageStruct::Form.new
-        form.action = "#{make_base_url}/#{typ}"
-        target_keys.map do |key|
-          key = key.to_sym
-          form.add(make_edit_line(key))
-        end
-        cancel_button = make_cancel_button("on=click:url=#{make_base_url(@id)}/#{typ}:cancel=true:with=form")
-        send_button = edit_finish_button
-        form.add(Ht.p(class: %w[edit-finish-buttons], child: [send_button, cancel_button]))
-        return form
-      end
-
-      # 編集ページの行を生成
-      def make_edit_line(key)
-        column = @column_set[key]
-        unless column
-          EzLog.error("undefined column entry: #{key}")
-          return nil
-        end
-        input = column.form
-        if input
-          return Ht.p(class: %w[form-line], child: [Ht.small(column.label), input ]) 
-        end
-        return nil 
-      end
-
-      # 編集完了ボタン
-      def edit_finish_button(typ = :edit, event = nil)
-        msg = Message("#{typ}_finish_button_label")
-        event ||= "on=click:url=#{make_base_url(@id)}/#{typ}:with=form"
-        btn = Ht.button(id: "#{@class_snake}-#{typ}-finish-button", class: %w[btn], 
-          child: [ Ht.icon("check"), msg ], 
-          ezevent: event
-        )
-        return btn
+      # キャンセル時の表示
+      def act_after_cancel
+        return public_detail_post
       end
 
       # 編集完了後の表示
@@ -192,10 +111,111 @@ module Ezframe
           return { redirect: make_base_url(@id) }
         end
       end
+    end
 
-      # キャンセル時の表示
-      def act_after_cancel
-        return public_detail_post
+    class EditPageMaker
+      include EditorCommon
+      # 新規登録フォーム表示(ページ切り替え式)
+#      def public_create_get
+#        @column_set.clear
+#        table = make_edit_form(:create)
+#        layout = main_layout(center: make_form("#{make_base_url}/create", table), type: 2)
+#        show_base_template(title: Message[:parent_create_page_title], body: Html.convert(layout))
+#      end
+
+      def initialize(ctrl, parent)
+        @controller = ctrl
+        @parent = parent
+        # EzLog.debug("EditPageMaker.new: column_set=#{@column_set}")
+      end
+
+      def selector(typ = :edit)
+        @ezevent = @controller.ezevent
+        if @ezevent[:branch] == "single_validate"
+          validation = Validator.new(@parent.column_set.validate(@form))
+          return Validator.new.validate_one(validation, @ezevent[:target_key])
+        elsif @ezevent[:cancel]
+          return cancel_edit
+        elsif @controller.event_form
+          # 入力後。フォーム内容をDBに格納
+          if typ == :create
+            store_create_form
+          else
+            store_edit_form
+          end
+        else
+          # 入力前。フォームを表示
+          if typ == :create
+            show_create_form
+          else
+            show_edit_form
+          end
+        end
+      end
+
+      # 新規登録フォームの表示
+      def show_create_form
+        return { inject: "#main-content", body: Html.convert(make_edit_form(:create)) }
+      end
+
+      # 編集フォームの表示
+      def show_edit_form
+        @id = get_id
+        data = @parent.column_set.set_from_db(@id)
+        return show_message_page("no data", "data is not defined: #{@id}") unless data
+        # フォームの表示
+        form = make_edit_form
+        return { inject: "#main-content", body: Html.convert(form) }
+      end
+
+      def store_edit_form
+        @id = get_id
+        @column_set.update(@id, ezevent[:form])
+        return act_after_edit(:edit)
+      end
+
+      def store_create_form
+        values = {}
+        values.update(@ezevent[:form])
+        values.update(path_params)
+        @parent.column_set[:id].value = @id = @parent.column_set.create(form_values)
+        return act_after_edit(:create)
+      end
+
+      # 編集のキャンセル
+      def cancel_edit
+        return :cancel
+      end
+
+      # 編集フォームの生成
+      def make_edit_form(typ = :edit)
+        target_keys = @parent.column_set.edit_keys
+        new_form = Bootstrap::Form.new
+        new_form.action = "#{@parent.make_base_url}/#{typ}"
+        target_keys.map { |key| make_edit_line(new_form, key) }
+        cancel_button = make_cancel_button("on=click:url=#{@parent.make_base_url(@id)}/#{typ}:cancel=true:with=form")
+        send_button = edit_finish_button
+        new_form.append = Ht.from_array([ "div", [send_button, cancel_button] ])
+        return new_form
+      end
+
+      # 編集ページの行を生成
+      def make_edit_line(form, key)
+        column = @parent.column_set[key.to_sym]
+        unless column
+          EzLog.error("undefined column entry: #{key}")
+          return nil
+        end
+        inpgrp = form.add_input(column.form)
+        inpgrp.add_prepend(column.label)
+        return inpgrp
+      end
+
+      # 編集完了ボタン
+      def edit_finish_button(typ = :edit, event = nil)
+        msg = Message["#{typ}_finish_button_label"]
+        event ||= "on=click:url=#{@parent.make_base_url(@id)}/#{typ}:with=form"
+        return [ "button.btn.btn-primary:ezevent=[#{event}]", [ "i.fa.fa-check", "text:#{msg}" ] ]
       end
     end
 

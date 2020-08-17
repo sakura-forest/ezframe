@@ -5,7 +5,7 @@ module Ezframe
   # 各顧客に関連づいた情報の編集を一般化したクラス
   class SubEditor < PageBase
     include EditorCommon
-    include PageMaker::Index
+    # include PageMaker::Index
     include PageMaker::Edit
     include PageMaker::Detail
 

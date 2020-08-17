@@ -31,6 +31,7 @@ require_relative 'ezframe/message'
 require_relative 'ezframe/auth.rb'
 require_relative 'ezframe/loader'
 require_relative 'ezframe/route'
+require_relative 'ezframe/validator'
 
 
 

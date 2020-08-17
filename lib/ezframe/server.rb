@@ -11,11 +11,10 @@ module Ezframe
     end
 
     def call(env)
-      $stderr.puts "rack.errors=#{env['rack.errors']}, rack.logger=#{env['rack.logger']}"
       req = Rack::Request.new(env)
       res = Controller::Response.new
       begin
-        Controller.new(req, res)
+        ctrl = Controller.new(req, res)
       rescue => e
         EzLog.error("Controller.exec: exception: #{e.message}:\n#{e.backtrace}")
         res.status = 500

@@ -9,6 +9,7 @@ module Ezframe
       SingleTags = %w[br hr meta img input ]
 
       def convert(ht_h = {})
+        ht_h = ht_h.to_ht if ht_h.respond_to?(:to_ht)
         ht_h = hook_for_convert(ht_h)
         return "" if ht_h.nil? || ht_h.to_s.empty?
         return ht_h.to_html if ht_h.respond_to?(:to_html)

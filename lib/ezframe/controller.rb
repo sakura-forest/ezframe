@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 module Ezframe
   class Controller
-    attr_accessor :request, :response
 
     class Response
       attr_accessor :body, :status, :headers
@@ -31,24 +30,25 @@ module Ezframe
       end
     end
 
+    attr_accessor :request, :response, :query_params, :json_body_params, :route_params, :class_opts
     def initialize(req = nil, res = nil)
       @request, = req || Rack::Request.new
       @response = res || Response.new
-      page_class, method, @route_params, class_opts = Route::choose(@request)
+      page_class, method, @route_params, @class_opts = Route::choose(@request)
+      @query_params = parse_query_string(env["QUERY_STRING"])
+      EzLog.debug("Controller.initialize: path=#{request_path}, params=#{request_params}, class=#{page_class}, method=#{method}, query_params=#{@query_params}, class_opts=#{@class_opts}")
 
-      EzLog.debug("Controller.exec: path=#{request_path}, params=#{req_params}, class=#{page_class}, method=#{method}, url_params=#{@query_params}, class_opts=#{class_opts}")
       if !page_class || page_class == 404
         file_not_found
         return
       end
       page_instance = page_class.new(self)
       @session = @request.env["rack.session"]
-      @query_params = parse_query_string(env["QUERY_STRING"])
       if @request.content_type && @request.content_type.index("json")
         @json_body_params = parse_json_body(@request.body.read)
       end
-      if class_opts
-        opt_auth = class_opts[:auth]
+      if @class_opts
+        opt_auth = @class_opts[:auth]
         if !@session[:user] && Config[:auth] && (!opt_auth || opt_auth != "disable")
           EzLog.debug("authenticate!")
           warden.authenticate!
@@ -56,12 +56,12 @@ module Ezframe
         end
       end
       body = page_instance.send(method)
+      # EzLog.debug("Controller.initialize: body=#{body}")
 
       # 戻り値によるレスポンス生成
       if body.respond_to?(:to_ht)
         @response.body = [ Html.convert(body.to_ht) ]
       elsif body.is_a?(Hash) || body.is_a?(Array)
-        # EzLog.debug("Controller: body = #{body}")
         json = JSON.generate(body)
         @response.body = [json]
         @response["Content-Type"] = "application/json; charset=utf-8"
@@ -89,32 +89,28 @@ module Ezframe
       @request.request_method
     end
 
-    def query_params
-      @query_params
-    end
-
-    def req_params
+    def request_params
       @request.params
-    end
-
-    def route_params
-      @route_params
-    end
-
-    def json_body_params
-      @json_body_params
     end
 
     def env
       @request.env
     end
 
-    def body
+    def request_body
       @request.body
     end
 
     def request_path
       @request.path_info
+    end
+
+    def ezevent
+      return @json_body_params[:ezevent] || @query_params[:ezevent] || {}
+    end
+
+    def event_form
+      ezevent[:form]
     end
 
     def warden

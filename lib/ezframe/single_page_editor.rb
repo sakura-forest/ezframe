@@ -7,7 +7,7 @@ module Ezframe
   class SinglePageEditor < PageBase
     include EditorCommon
     include PageMaker::Default
-    include PageMaker::Index
+    # include PageMaker::Index
     include PageMaker::Edit
     include PageMaker::Detail
     include PageMaker::Delete
@@ -15,7 +15,8 @@ module Ezframe
     def init_var
       super
       @sort_key = :id
-      @dom_id = { create: "create-area", edit: "edit-area", index: "index-area", detail: "detail-area"}
+      # @dom_id = { create: "create-area", edit: "edit-area", index: "index-area", detail: "detail-area"}
+      @dom_id = { create: "main-content", edit: "main-content", index: "main-content", detail: "main-content"}
       # @show_delete_button = nil
     end
   end
