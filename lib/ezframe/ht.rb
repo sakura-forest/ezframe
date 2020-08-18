@@ -10,7 +10,11 @@ module Ezframe
         if ht_h.is_a?(String) || ht_h.is_a?(Array)
           h = { child: ht_h }
         elsif ht_h.is_a?(Hash)
-          h = ht_h.dup
+          if ht_h[:tag]
+            h = { child: ht_h }
+          else
+            h = ht_h.dup
+          end
         else
           EzLog.info("[WARN] wrap_tag: unknown type: #{ht_h.inspect}")
           return nil
@@ -219,7 +223,7 @@ module Ezframe
       end
 
       def parse_ht_string(str)
-        debug = true
+        debug = nil
         # debug = true if str.index("content-header")
         $stderr.puts "parse_ht_string: #{str}" if debug
         return $1 if /\Atext:(.*)\Z/ =~ str
@@ -248,16 +252,18 @@ module Ezframe
             end
             $stderr.puts "> chain: #{ss[1]}" if debug
             parent[:child] = ht = { tag: tag, class: class_a }
-          elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-\.]+)=\[([^\]]+)\]/)
-            ht[ss[1].to_sym] = ss[2]
-          elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-\.]+)=\{([^\}]+)\}/)
-            ht[ss[1].to_sym] = ss[2]
-          elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-^.]+)=\(([^\)]+)\)/)
-            ht[ss[1].to_sym] = ss[2]
-          elsif ss.scan(/:([a-zA-Z][a-zA-Z0-9_\-^.]+)=([^:]+)/)
-            ht[ss[1].to_sym] = ss[2]
+          elsif ss.scan(/:/)
+            if ss.scan(/([a-zA-Z][a-zA-Z0-9_\-\.]+)=\[([^\]]+)\]/)
+              ht[ss[1].to_sym] = ss[2]
+            elsif ss.scan(/([a-zA-Z][a-zA-Z0-9_\-\.]+)=\{([^\}]+)\}/)
+              ht[ss[1].to_sym] = ss[2]
+            elsif ss.scan(/([a-zA-Z][a-zA-Z0-9_\-^.]+)=\(([^\)]+)\)/)
+              ht[ss[1].to_sym] = ss[2]
+            elsif ss.scan(/([a-zA-Z][a-zA-Z0-9_\-^.]+)=([^:]+)/)
+              ht[ss[1].to_sym] = ss[2]
+            end
           else
-            ht[:child] = str[ss.pos+1..-1]
+            ht[:child] = str[ss.pos..-1]
             $stderr.puts "get child: pos=#{ss.pos}, #{ht}" if debug
             return root
           end
@@ -284,13 +290,13 @@ module Ezframe
     end
 
     class List
-      attr_accessor :at_first, :at_last, :before, :after, :option
+      attr_accessor :prepend, :append, :before, :after, :option
 
       def initialize(opts = {})
         @option = opts
         @item_a = []
-        @at_first = []
-        @at_last = []
+        @prepend = nil
+        @append = nil
         init_var
       end
 
@@ -301,8 +307,22 @@ module Ezframe
         @item_a.push(wrap_item(item, opts))
       end
 
+      def add_prepend(item)
+        @prepend ||= []
+        @prepend.push(item)
+      end
+
+      def add_append(item)
+        @append ||= []
+        @append.push(item)
+      end
+
       def wrap_item(item, opts = {})
-        ht = Ht.from_array(opts[:item_tag] || @option[:item_tag]) || { tag: :li }
+        item_tag = opts[:item_tag] || @option[:item_tag]
+        unless item_tag
+          return item
+        end
+        ht = Ht.from_array(item_tag)
 
         if item.respond_to?(:to_ht)
           item = item.to_ht 
@@ -322,19 +342,24 @@ module Ezframe
 
       def add_first_last(ch = nil)
         child_a = (ch || @item_a).clone
-        child_a = @at_first + child_a if @at_first.is_a?(Array) && @at_first.length > 0
-        child_a = child_a + @at_last if @at_last.is_a?(Array) && @at_last.length > 0
+        child_a = @prepend + child_a if @prepend.is_a?(Array) && @prepend.length > 0
+        child_a = child_a + @append if @append.is_a?(Array) && @append.length > 0
         return child_a
       end
 
       def to_ht
         # return nil if @item_a.empty?
-        ht = Ht.from_array(@option[:wrap_tag])
+        wrap_tag = @option[:wrap_tag] || "div"
+        ht = Ht.from_array(wrap_tag)
         Ht.add_class(ht, @option[:extra_wrap_class])
         child_a = add_first_last
         Ht.connect_child(ht, child_a)
-        EzLog.debug("List.to_ht: #{ht}")
+        EzLog.debug("List.to_ht: #{ht}: @item_a=#{@item_a}")
         return add_before_after(ht)
+      end
+
+      def length
+        return @item_a.length
       end
     end
 
@@ -343,45 +368,55 @@ module Ezframe
     class Table < List
       attr_accessor :header
 
-      def initialize(opts = {})
-        super(opts)
+      def init_var
         @option[:row_tag] ||= "tr"
         @option[:column_tag] ||= "td"
         @option[:head_column_tag] ||= "th"
-        @option[:wrapper_tag] ||= "table"
+        @option[:head_row_tag] ||= "tr"
+        @option[:wrap_tag] ||= "table"
       end
 
       def add_item(item, opts = {})
-        @item_a.push(item)
+        @item_a.push([item, opts])
       end
 
       def to_ht
         max_col = 0
         # self.each { |row| max_col = row.length if max_col < row.length }
-        children = @item_a.map {|row| wrap_item(row, tag: @option[:column_tag], row_tag: @option[:row_tag]) }
+        children = @item_a.map do |row| 
+          col_a, row_opt = row
+          wrap_item(col_a, row_opt)
+        end
         child_a = add_first_last(children)
         
         head_ht = nil
         if @header
-          head_a = wrap_item(@header, tag: @option[:head_column_tag], row_tag: @option[:row_tag])
-          head_ht = Ht.thead(head_a)
+          head_a = wrap_item(@header, column_tag: @option[:head_column_tag], row_tag: @option[:head_row_tag])
+          EzLog.debug "head_a=#{head_a}"
+          head_ht = Ht.thead(child: head_a)
         end
-        table = Ht.from_array(@option[:wrapper_tag])
+        table = Ht.from_array(@option[:wrap_tag])
         children = [ head_ht, Ht.tbody(children) ].compact
         children = children[0] if children.length == 1
-        table[:child] = children
+        Ht.connect_child(table, children)
         return add_before_after(table)
       end
 
       def wrap_item(item_a, opts = {})
         res_a = item_a.map do |it|
           it = it.to_ht if it.respond_to?(:to_ht)
-          ht = Ht.from_array(opts[:tag])
-          ht[:child] = it
-          ht
+          tag = opts[:column_tag] || @option[:column_tag]
+          td = Ht.from_array(tag)
+          col_attr = opts[:col_attr]
+          td.update(col_attr) if col_attr
+          Ht.connect_child(td, it)
+          td
         end
-        row_ht = Ht.from_array(opts[:row_tag])
-        row_ht[:child] = res_a
+        row_tag = opts[:row_tag] || @option[:row_tag]
+        row_ht = Ht.from_array(row_tag)
+        row_attr = opts[:row_attr]
+        row_ht.update(row_attr) if row_attr
+        Ht.connect_child(row_ht, res_a)
         return row_ht
       end
     end

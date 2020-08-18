@@ -4,6 +4,8 @@ require_relative "../test_helper.rb"
 class HtTest < GenericTest
   def test_convert_tag
     assert_equal({ tag: :div, child: "test"},  Ht.div(child: "test"))
+    assert_equal({ tag: :div, child: "test"},  Ht.div("test"))
+    assert_equal({ tag: :thead, child: { tag: :div, child: "test" }},  Ht.thead(Ht.div("test")))
     assert_equal({ tag: :input, name: "test"},  Ht.input(name: "test"))
     assert_equal({ tag: :span, child: "test"},  Ht.span(child: "test"))
   end
@@ -92,7 +94,7 @@ class HtTest < GenericTest
     assert_equal(:tbody, child[:tag])
     child = child[:child]
     assert(child.is_a?(Array))
-    p child
+    # p child
     assert_equal(3, child.length)
     child = child[0]
     assert_equal(:tr, child[:tag])
@@ -102,7 +104,7 @@ class HtTest < GenericTest
     col = child[0]
     assert_equal(:td, col[:tag])
 
-    table.option[:wrapper_tag] = "table_dummy.table-class"
+    table.option[:wrap_tag] = "table_dummy.table-class"
     table.option[:row_tag] = "tr_dummy.tr-class"
     table.option[:column_tag] = "td_dummy.td-class"
     res = table.to_ht
@@ -121,6 +123,15 @@ class HtTest < GenericTest
     col = child[0]
     assert_equal(:td_dummy, col[:tag])
     assert_equal(%w[td-class], col[:class])
+
+    table.header = [ "k1", "k2", "k3" ]
+    res = table.to_ht
+    assert_equal(:table_dummy, res[:tag])
+    child = res[:child]
+    assert_equal(2, child.length)
+    thead, tbody = child
+    assert_equal(:thead, thead[:tag])
+    assert_equal(:tbody, tbody[:tag])
   end
   
   def test_connect_child
@@ -142,5 +153,31 @@ class HtTest < GenericTest
 
     res = Ht.search(ht, { class: "link1"})
     assert_equal("link1.html", res[:href])    
+  end
+
+  def test_list
+    list = Ht::List.new    
+    list.add_item("item1")
+    list.add_item("item2")
+    list.add_item("item3")
+    ht = list.to_ht
+    puts ht
+    assert(:div, ht[:tag])
+    child = ht[:child]
+    assert_equal(3, child.length)
+    item = child[0]
+    assert(item.is_a?(String))
+
+    list = Ht::List.new(wrap_tag: "ul.class1", item_tag: "li")
+    list.add_item(".item1:item1")
+    list.add_item(".item2:item2")
+    list.add_item(".item3:item3")
+    ht = list.to_ht
+    puts ht
+    assert(:ul, ht[:tag])
+    child = ht[:child]
+    assert_equal(3, child.length)
+    item = child[0]
+    assert_equal(:li, item[:tag])
   end
 end

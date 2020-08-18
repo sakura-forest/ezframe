@@ -45,7 +45,7 @@ module Ezframe
     # キャンセルボタンの生成
     def make_cancel_button(event = nil)
       event ||= "on=click:url=#{make_base_url(@id)}/detail:cancel=true:with=form"
-      return Ht.button(class: %w[btn red], child: [Ht.icon("cancel"), Message[:cancel_button_label]], ezevent: event)
+      return [ "button.btn.btn-danger:ezevent=[#{event}]", [ "i.fa.fa-times", "text:#{Message[:cancel_button_label]}" ]]
     end
 
     # 値の更新

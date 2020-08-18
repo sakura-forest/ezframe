@@ -8,12 +8,15 @@ module Ezframe
         # center_box = layout[:center]
         # 追加ボタン配置用のエリア
         content = Ht::List.new
-        content.before = Ht.from_array([ "button.btn:ezevent=[on=click:url=#{make_base_url}/create] > i.fa.fa-plus", make_extra_buttons ].compact)
         # 一覧表示用のエリア
         # center_box.add(id: @dom_id[:index], child: "", ezload: "url=#{make_base_url}")
+        @index_page_maker ||= IndexPageMaker
+        maker = @index_page_maker.new(@controller, self)
         layout.embed[:page_title] = Message[:index_page_title]
-        layout.embed[:main_content] = content
-        EzLog.debug("layout=#{layout.to_ht}")
+        content = maker.make_content
+        content.add_prepend(Ht.from_array([ "button.btn.btn-primary:ezevent=[on=click:url=#{make_base_url}/create]", [ "i.fa.fa-plus", "text:#{Message[:create_button_label]}" ] ]))
+        layout.embed[:main_content] = content.to_ht
+        # EzLog.debug("layout=#{layout.to_ht}")
         return layout
       end
 
@@ -22,60 +25,53 @@ module Ezframe
         EzLog.debug("public_default_post: #{body}")
         return { inject: "##{@dom_id[:index]}", body: body, set_url: make_base_url }
       end
-
-      def make_extra_buttons
-        nil
-      end
     end
 
     class IndexPageMaker
-      def initialize(ctrl)
+      def initialize(ctrl, pa)
         @controller = ctrl
+        @parent = pa
       end
 
       # 一覧表の生成
-      def make_index_table
+      def make_content
         # 表示データの取得
         list = list_for_index
 
         # 一覧表示カラムの決定
-        target_keys = @index_keys
-        target_keys = @column_set.keys.select { |k| !@column_set[k].no_view? } unless target_keys
+        target_keys = @parent.index_keys || @parent.column_set.index_keys || @parent.column_set.view_keys
 
         # テーブル生成
-        table = PageStruct::Table.new
+        table = Ht::Table.new(wrap_tag: "table.table.table-bordered.dataTable")
 
         # 項目名欄の生成
         labels = @table_labels
         unless labels
-          labels = target_keys.map { |k| @column_set[k].label(force: true) || "　" }
+          labels = target_keys.map { |k| @parent.column_set[k].label(force: true) || "　" }
         end
-        table.set_head(labels)
+        table.header = labels
 
-        table.set_value(list)
         list.each do |data|
           @column_set.clear
           @column_set.values = data
-          line = table.add_line(@column_set.view_array(target_keys))
-          # ここのidの生成をどうする？
-          line.set_option(ezevent: "on=click:url=#{make_base_url(data[:id])}/detail" )
+          table.add_item(@column_set.view_array(target_keys), row_attr: { ezevent: "on=click:url=#{make_base_url(data[:id])}/detail" })
         end
-
+        return table
         # テーブルを表示用に連結
-        tb = table.to_ht
-        tb[:id] = table_id = "enable_datatable_#{@class_snake}"
-        tb[:ezload] = "command=enable_datatable:target=##{table_id}"
+        # tb = table.to_ht
+        # tb[:id] = table_id = "enable_datatable_#{@class_snake}"
+        # tb[:ezload] = "command=enable_datatable:target=##{table_id}"
 
-        container = PageStruct::Container.new
-        vert = container.add_vertical
-        vert.add(tb_ht)
-        vert.add(Ht.div(id: @dom_id[:detail], child: ""))
-        return container.to_ht
+        #container = PageStruct::Container.new
+        #vert = container.add_vertical
+        #vert.add(tb_ht)
+        #vert.add(Ht.div(id: @dom_id[:detail], child: ""))
+        #return container.to_ht
       end
 
       # 一覧ページ用のデータリスト生成
       def list_for_index
-        return @column_set.dataset.where(deleted_at: nil).order(@sort_key).all
+        return @parent.column_set.dataset.where(deleted_at: nil).order(@sort_key).all
       end
 
       # 一覧ページ用ボタン
@@ -87,14 +83,42 @@ module Ezframe
     module Edit
       # 新規データ登録
       def public_create_post
-        maker = EditPageMaker.new(@controller, self)
-        return maker.selector(:create)
+        @edit_page_maker ||= EditPageMaker
+        maker = @edit_page_maker.new(@controller, self)
+        return branch(:create)
       end
 
       # データ編集受信
       def public_edit_post
-        maker = EditPageMaker.new(@controller, self)
-        return maker.selector(:edit)
+        return branch(:edit)
+      end
+
+      def branch(typ = :edit)
+        @ezevent = @controller.ezevent
+        @edit_page_maker ||= EditPageMaker
+        if @ezevent[:branch] == "single_validate"
+          validation = Validator.new(@parent.column_set.validate(@form))
+          return Validator.new.validate_one(validation, @ezevent[:target_key])
+        elsif @ezevent[:cancel]
+          return :cancel
+        end
+
+        maker = @edit_page_maker.new(@controller, self)
+        if @controller.event_form
+          # 入力後。フォーム内容をDBに格納
+          if typ == :create
+            maker.store_create_form
+          else
+            maker.store_edit_form
+          end
+        else
+          # 入力前。フォームを表示
+          if typ == :create
+            maker.show_create_form
+          else
+            maker.show_edit_form
+          end
+        end
       end
 
       # キャンセル時の表示
@@ -115,42 +139,11 @@ module Ezframe
 
     class EditPageMaker
       include EditorCommon
-      # 新規登録フォーム表示(ページ切り替え式)
-#      def public_create_get
-#        @column_set.clear
-#        table = make_edit_form(:create)
-#        layout = main_layout(center: make_form("#{make_base_url}/create", table), type: 2)
-#        show_base_template(title: Message[:parent_create_page_title], body: Html.convert(layout))
-#      end
 
       def initialize(ctrl, parent)
         @controller = ctrl
         @parent = parent
-        # EzLog.debug("EditPageMaker.new: column_set=#{@column_set}")
-      end
-
-      def selector(typ = :edit)
         @ezevent = @controller.ezevent
-        if @ezevent[:branch] == "single_validate"
-          validation = Validator.new(@parent.column_set.validate(@form))
-          return Validator.new.validate_one(validation, @ezevent[:target_key])
-        elsif @ezevent[:cancel]
-          return cancel_edit
-        elsif @controller.event_form
-          # 入力後。フォーム内容をDBに格納
-          if typ == :create
-            store_create_form
-          else
-            store_edit_form
-          end
-        else
-          # 入力前。フォームを表示
-          if typ == :create
-            show_create_form
-          else
-            show_edit_form
-          end
-        end
       end
 
       # 新規登録フォームの表示
@@ -164,7 +157,7 @@ module Ezframe
         data = @parent.column_set.set_from_db(@id)
         return show_message_page("no data", "data is not defined: #{@id}") unless data
         # フォームの表示
-        form = make_edit_form
+        form = make_edit_form(:edit)
         return { inject: "#main-content", body: Html.convert(form) }
       end
 
@@ -180,11 +173,6 @@ module Ezframe
         values.update(path_params)
         @parent.column_set[:id].value = @id = @parent.column_set.create(form_values)
         return act_after_edit(:create)
-      end
-
-      # 編集のキャンセル
-      def cancel_edit
-        return :cancel
       end
 
       # 編集フォームの生成
@@ -207,7 +195,7 @@ module Ezframe
           return nil
         end
         inpgrp = form.add_input(column.form)
-        inpgrp.add_prepend(column.label)
+        inpgrp.add_prepend("text:#{column.label}")
         return inpgrp
       end
 

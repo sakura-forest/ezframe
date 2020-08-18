@@ -180,7 +180,7 @@ module Ezframe
 
   # カラム集合を扱う
   class ColumnSet
-    attr_accessor :name, :parent
+    attr_accessor :name, :parent, :index_keys
 
     def initialize(parent: nil, name: nil, columns: nil)
       @parent = parent

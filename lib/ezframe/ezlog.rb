@@ -14,9 +14,7 @@ module Ezframe
       end
 
       def writer(level="", msg)
-        unless @log_file
-          open_log_file 
-        end
+        open_log_file unless @log_file
         @log_file << msg
       end
 
@@ -25,23 +23,28 @@ module Ezframe
       end
 
       def info(msg)
+        open_log_file unless @log_file
         @log_file.info(msg)
       end
 
       def debug(msg)
+        open_log_file unless @log_file
         @log_file.debug(msg)
       end
 
       def warn(msg)
+        open_log_file unless @log_file
         @log_file.debug(msg)
       end
 
       def error(msg)
+        open_log_file unless @log_file
         @log_file.error(msg)
       end
 
       def <<(msg)
-        # writer("", msg)
+        open_log_file unless @log_file
+        writer("", msg)
       end
     end
   end
