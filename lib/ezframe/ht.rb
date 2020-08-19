@@ -295,8 +295,6 @@ module Ezframe
       def initialize(opts = {})
         @option = opts
         @item_a = []
-        @prepend = nil
-        @append = nil
         init_var
       end
 
@@ -315,6 +313,16 @@ module Ezframe
       def add_append(item)
         @append ||= []
         @append.push(item)
+      end
+
+      def add_before(item)
+        @before ||= []
+        @before.push(item)
+      end
+
+      def add_after(item)
+        @after ||= []
+        @after.push(item)
       end
 
       def wrap_item(item, opts = {})

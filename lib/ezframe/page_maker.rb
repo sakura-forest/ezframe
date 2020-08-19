@@ -14,7 +14,7 @@ module Ezframe
         maker = @index_page_maker.new(@controller, self)
         layout.embed[:page_title] = Message[:index_page_title]
         content = maker.make_content
-        content.add_prepend(Ht.from_array([ "button.btn.btn-primary:ezevent=[on=click:url=#{make_base_url}/create]", [ "i.fa.fa-plus", "text:#{Message[:create_button_label]}" ] ]))
+        content.add_before(Ht.from_array([ "button.btn.btn-primary#create-btn:ezevent=[on=click:url=#{make_base_url}/create]", [ "i.fa.fa-plus", "text:#{Message[:create_button_label]}" ] ]))
         layout.embed[:main_content] = content.to_ht
         # EzLog.debug("layout=#{layout.to_ht}")
         return layout
