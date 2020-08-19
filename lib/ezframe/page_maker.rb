@@ -203,7 +203,7 @@ module Ezframe
       def edit_finish_button(typ = :edit, event = nil)
         msg = Message["#{typ}_finish_button_label"]
         event ||= "on=click:url=#{@parent.make_base_url(@id)}/#{typ}:with=form"
-        return [ "button.btn.btn-primary:ezevent=[#{event}]", [ "i.fa.fa-check", "text:#{msg}" ] ]
+        return [ "button.btn.btn-primary#edit-finish-button:ezevent=[#{event}]", [ "i.fa.fa-check", "text:#{msg}" ] ]
       end
     end
 
