@@ -143,7 +143,7 @@ module Ezframe
 
       # 編集フォームの表示
       def show_edit_form
-        @id = get_id
+        @id = @parent.get_id
         data = @parent.column_set.set_from_db(@id)
         return show_message_page("no data", "data is not defined: #{@id}") unless data
         # フォームの表示
@@ -193,7 +193,7 @@ module Ezframe
       def edit_finish_button(typ = :edit, event = nil)
         msg = Message["#{typ}_finish_button_label"]
         event ||= "on=click:url=#{@parent.make_base_url(@id)}/#{typ}:with=form"
-        return [ "button.btn.btn-primary#edit-finish-button:ezevent=[#{event}]", [ "i.fa.fa-check", "text:#{msg}" ] ]
+        return [ "button.btn.btn-primary#edit-finish-button:ezevent=[#{event}]", [ "i.fa.fa-check", "span:#{msg}" ] ]
       end
     end
 
@@ -204,6 +204,7 @@ module Ezframe
         @id ||= get_id
         @detail_page_maker ||= DetailPageMaker
         maker = @detail_page_maker.new(@controller, self)
+        @column_set.set_from_db(@id)
         content = maker.make_content(@id)
         return { inject: "#main-content", body: Html.convert(content.to_ht), set_url: [ "#{make_base_url}/detail", "顧客情報" ] }
       end
@@ -212,11 +213,11 @@ module Ezframe
         @id ||= get_id
         @detail_page_maker ||= DetailPageMaker
         maker = @detail_page_maker.new(@controller, self)
-        content = maker.make_content(@id)
+        @column_set.set_from_db(@id)
+        content = maker.make_content
         layout = Layout.new
         layout.embed[:main_content] = content
         return layout
-        # return { inject: "#main-content", body: Html.convert(content.to_ht), set_url: [ "#{make_base_url}/detail", "顧客情報" ] }
       end
     end
 
@@ -226,9 +227,7 @@ module Ezframe
         @parent = parent
       end
 
-      def make_content(id)
-        data = @parent.column_set.set_from_db(id)
-        EzLog.debug "DetailPageMaker: data=#{data}"
+      def make_content
         target_keys = @detail_keys || @parent.column_set.view_keys
         list = Ht::List.new
         target_keys.each do |key|
@@ -236,9 +235,9 @@ module Ezframe
           row = make_detail_line(column)
           list.add_item(row) if row
         end
+        list.add_item(button_for_detail_box)
         return list
         # buttons = holizon.add_vertical
-        # buttons.add(button_for_detail_box)
       end
 
       # 詳細表示欄の一行を生成
@@ -256,7 +255,7 @@ module Ezframe
       end
 
       def button_for_detail_box(data)
-        buttons = [Ht.button(class: %w[btn right], ezevent: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]])]
+        buttons = [ Ht.button(class: %w[btn right], ezevent: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]])]
         if @show_delete_button
           buttons.push(make_delete_button)
         end
