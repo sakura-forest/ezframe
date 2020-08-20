@@ -35,23 +35,7 @@ var event_commands = {
   redirect: function(event) {
     console.log("redirect:" + event.url)
     location.href = event.url
-  },
-  /*
-  toggle_hide: function(event) {
-    console.log("toggle_hide: target=", event.target)
-    for(var i=0; i < event.target.length; i++) {
-      var elem = document.querySelector(event.target[i])
-      if (elem) {
-        var list = elem.classList
-        if (list.contains("hide")) {
-          elem.classList.remove("hide")
-        } else {
-          elem.classList.add("hide")
-        }
-      }
-    }
   }
-  */
 }
 
 // サーバからのレスポンスを処理する関数
@@ -73,7 +57,9 @@ var response_funcs = {
     }
     // URL表示を指定されたURLに変更する
     if (res.set_url) {
-      history.pushState(null, null, res.set_url)
+      console.log("set_url: "+res.set_url)
+      history.pushState(null, res.set_url[1], res.set_url[0])
+      document.title = res.set_url[1]
     }
   },
   set_value: function(res, obj) {
@@ -388,4 +374,10 @@ function switch_hide(button) {
 document.addEventListener('DOMContentLoaded', function () {
   add_event(document)
   exec_ezload(document)
+  window.addEventListener('popstate', function (e) {
+    //if (!e.originalEvent.state) return;
+    // changeContents(location.pathname)
+    console.log("popstate event:"+location.pathname)
+    location.replace(location.href)
+  })
 })

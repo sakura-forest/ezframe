@@ -2,9 +2,9 @@ module Ezframe
   module EditorCommon
     def get_id(class_name = nil)
       class_name ||= @class_snake
-      params = @request.env['query_params']
-      return nil unless params
+      params = @controller.route_params
       EzLog.debug "get_id: #{params.inspect}, #{class_name}"
+      return nil unless params
       return params[class_name.to_sym]
     end
 

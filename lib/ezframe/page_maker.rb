@@ -57,16 +57,6 @@ module Ezframe
           table.add_item(@parent.column_set.view_array(target_keys), row_attr: { ezevent: "on=click:url=#{@parent.make_base_url(data[:id])}/detail" })
         end
         return table
-        # テーブルを表示用に連結
-        # tb = table.to_ht
-        # tb[:id] = table_id = "enable_datatable_#{@class_snake}"
-        # tb[:ezload] = "command=enable_datatable:target=##{table_id}"
-
-        #container = PageStruct::Container.new
-        #vert = container.add_vertical
-        #vert.add(tb_ht)
-        #vert.add(Ht.div(id: @dom_id[:detail], child: ""))
-        #return container.to_ht
       end
 
       # 一覧ページ用のデータリスト生成
@@ -148,7 +138,7 @@ module Ezframe
 
       # 新規登録フォームの表示
       def show_create_form
-        return { inject: "#main-content", body: Html.convert(make_edit_form(:create)) }
+        return { inject: "#main-content", body: Html.convert(make_edit_form(:create)), set_url: [ "#{@parent.make_base_url}/create", "新規登録" ] }
       end
 
       # 編集フォームの表示
@@ -158,7 +148,7 @@ module Ezframe
         return show_message_page("no data", "data is not defined: #{@id}") unless data
         # フォームの表示
         form = make_edit_form(:edit)
-        return { inject: "#main-content", body: Html.convert(form) }
+        return { inject: "#main-content", body: Html.convert(form), set_url: [ "#{@parent.make_base_url}/edit", "情報編集" ] }
       end
 
       def store_edit_form
@@ -212,28 +202,55 @@ module Ezframe
       # データ詳細表示
       def public_detail_post
         @id ||= get_id
-        data = @column_set.set_from_db(@id)
-        target_keys = @detail_keys || @column_set.view_keys
-        container = Container.new
-        holizon = container.add_holizontal
-        detail_list = holizon.add_vertical
-        buttons = holizon.add_vertical
-        buttons.add(button_for_detail_box)
+        @detail_page_maker ||= DetailPageMaker
+        maker = @detail_page_maker.new(@controller, self)
+        content = maker.make_content(@id)
+        return { inject: "#main-content", body: Html.convert(content.to_ht), set_url: [ "#{make_base_url}/detail", "顧客情報" ] }
+      end
 
+      def public_detail_get
+        @id ||= get_id
+        @detail_page_maker ||= DetailPageMaker
+        maker = @detail_page_maker.new(@controller, self)
+        content = maker.make_content(@id)
+        layout = Layout.new
+        layout.embed[:main_content] = content
+        return layout
+        # return { inject: "#main-content", body: Html.convert(content.to_ht), set_url: [ "#{make_base_url}/detail", "顧客情報" ] }
+      end
+    end
+
+    class DetailPageMaker
+      def initialize(ctrl, parent)
+        @controller = ctrl
+        @parent = parent
+      end
+
+      def make_content(id)
+        data = @parent.column_set.set_from_db(id)
+        EzLog.debug "DetailPageMaker: data=#{data}"
+        target_keys = @detail_keys || @parent.column_set.view_keys
+        list = Ht::List.new
         target_keys.each do |key|
-          column = @column_set[key]
+          column = @parent.column_set[key]
           row = make_detail_line(column)
-          detail_list.add(row) if row
+          list.add_item(row) if row
         end
-        return { inject: "##{@dom_id[:detail]}", body: container.to_ht }
+        return list
+        # buttons = holizon.add_vertical
+        # buttons.add(button_for_detail_box)
       end
 
       # 詳細表示欄の一行を生成
       def make_detail_line(column)
         view = column.view
         if view
-          view = Ht.pre(view) if view.strip.index("\n")
-          return Ht.p([Ht.small(column.label), view])
+          if view.strip.index("\n")
+            view = Ht.pre(view) 
+          else
+            view = Ht.span(view)
+          end
+          return Ht.from_array([ "p", [ "small.text-secondary:#{column.label}", view ] ])
         end
         return nil
       end

@@ -24,7 +24,7 @@ module Ezframe
     # routeから基本URLを生成
     def make_base_url(id = nil)
       path = Route::get_path(@class_snake)
-      params = @query_params || {}
+      params = @controller.route_params || {}
       # EzLog.info "make_base_url: params=#{params}"
       # params[@class_snake.to_sym] = id
       path_s = path.map do |pa|
