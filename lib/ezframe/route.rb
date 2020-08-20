@@ -101,7 +101,7 @@ module Ezframe
       def get_class(keys)
         return nil unless keys
         keys = [ keys ] if keys.is_a?(String)
-        klass = (%w[Ezframe] + keys.map { |k| k.to_s.to_camel }).join("::")
+        klass = (%w[EzPage] + keys.map { |k| k.to_s.to_camel }).join("::")
         if Object.const_defined?(klass)
           return Object.const_get(klass)
         else

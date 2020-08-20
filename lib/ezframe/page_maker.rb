@@ -52,9 +52,9 @@ module Ezframe
         table.header = labels
 
         list.each do |data|
-          @column_set.clear
-          @column_set.values = data
-          table.add_item(@column_set.view_array(target_keys), row_attr: { ezevent: "on=click:url=#{make_base_url(data[:id])}/detail" })
+          @parent.column_set.clear
+          @parent.column_set.values = data
+          table.add_item(@parent.column_set.view_array(target_keys), row_attr: { ezevent: "on=click:url=#{@parent.make_base_url(data[:id])}/detail" })
         end
         return table
         # テーブルを表示用に連結

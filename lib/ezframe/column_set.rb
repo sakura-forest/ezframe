@@ -391,7 +391,7 @@ module Ezframe
     # カラムの表示値を配列として返す
     def view_array(target_keys = nil)
       target_keys ||= view_keys
-      return @view_keys.map do |key|
+      return target_keys.map do |key|
         col = @column_h[key.to_sym]
         unless col
           EzLog.info "[ERROR] @view_keys has unknown column:name=#{@name}:key=#{key}"
