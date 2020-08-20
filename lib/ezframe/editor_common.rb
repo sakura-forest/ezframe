@@ -4,7 +4,7 @@ module Ezframe
       class_name ||= @class_snake
       params = @request.env['query_params']
       return nil unless params
-      # EzLog.info "get_id: #{params.inspect}, #{class_name}"
+      EzLog.debug "get_id: #{params.inspect}, #{class_name}"
       return params[class_name.to_sym]
     end
 

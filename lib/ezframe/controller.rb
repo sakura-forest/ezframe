@@ -36,7 +36,7 @@ module Ezframe
       @response = res || Response.new
       page_class, method, @route_params, @class_opts = Route::choose(@request)
       @query_params = parse_query_string(env["QUERY_STRING"])
-      EzLog.debug("Controller.initialize: path=#{request_path}, params=#{request_params}, class=#{page_class}, method=#{method}, query_params=#{@query_params}, class_opts=#{@class_opts}")
+      EzLog.debug("Controller.initialize: path=#{request_path}, params=#{request_params}, class=#{page_class}, method=#{method}, query_params=#{@query_params}, route_params=#{@route_params}, class_opts=#{@class_opts}")
 
       if !page_class || page_class == 404
         file_not_found

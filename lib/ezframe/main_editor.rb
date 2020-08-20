@@ -3,6 +3,7 @@ require_relative "page_maker"
 
 module Ezframe
   class MainEditor < PageBase
+    include Ezframe
     include EditorCommon
     include PageMaker::Default
     # include PageMaker::Index

@@ -4,6 +4,7 @@ require_relative "page_maker"
 module Ezframe
   # 各顧客に関連づいた情報の編集を一般化したクラス
   class SubEditor < PageBase
+    include Ezframe
     include EditorCommon
     # include PageMaker::Index
     include PageMaker::Edit

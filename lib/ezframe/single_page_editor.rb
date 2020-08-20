@@ -5,6 +5,7 @@ require_relative "page_maker"
 module Ezframe
   # ページ遷移無しでデータを編集する仕組み
   class SinglePageEditor < PageBase
+    include Ezframe
     include EditorCommon
     include PageMaker::Default
     # include PageMaker::Index

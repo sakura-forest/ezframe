@@ -20,7 +20,7 @@ module Ezframe
 
       def connect(dbfile = nil)
         dbfile ||= @dbfile
-        @sequel = Sequel.connect(dbfile, EzLogs: [EzLog])
+        @sequel = Sequel.connect(dbfile, loggers: [EzLog])
         return @sequel
       end
 
