@@ -106,7 +106,15 @@ module Ezframe
     end
 
     def ezevent
-      return @json_body_params[:ezevent] || @query_params[:ezevent] || {}
+      if @json_body_params
+        res = @json_body_params[:ezevent]
+        return res if res
+      end
+      if @query_params
+        res = @query_params[:ezevent]
+        return res if res
+      end
+      return {}
     end
 
     def event_form
