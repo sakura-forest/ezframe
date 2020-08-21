@@ -205,8 +205,9 @@ module Ezframe
         @detail_page_maker ||= DetailPageMaker
         maker = @detail_page_maker.new(@controller, self)
         @column_set.set_from_db(@id)
-        content = maker.make_content(@id)
-        return { inject: "#main-content", body: Html.convert(content.to_ht), set_url: [ "#{make_base_url}/detail", "顧客情報" ] }
+        content = maker.make_content
+        content = content.to_ht if content.respond_to?(:to_ht)
+        return { inject: "#main-content", body: Html.convert(content), set_url: [ "#{make_base_url}/detail", "顧客情報" ] }
       end
 
       def public_detail_get
