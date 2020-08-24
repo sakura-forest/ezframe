@@ -195,9 +195,9 @@ module Ezframe
         while pointer < array.length
           val = array[pointer]
           if val.respond_to?(:to_ht)
-            $stderr.puts "_arrray_to_ht: to_ht: #{val}"
+            # $stderr.puts "_arrray_to_ht: to_ht: #{val}"
             res = val.to_ht
-            $stderr.puts("to_ht: #{res}")
+            # $stderr.puts("to_ht: #{res}")
             res_a.push(res)
             pointer += 1
             next
@@ -225,14 +225,14 @@ module Ezframe
       def parse_ht_string(str)
         debug = nil
         # debug = true if str.index("content-header")
-        $stderr.puts "parse_ht_string: #{str}" if debug
+        # $stderr.puts "parse_ht_string: #{str}" if debug
         return $1 if /\Atext:(.*)\Z/ =~ str
         ss = StringScanner.new(str)
         ht = root = { tag: :div }
         class_a = []
         if ss.scan(/(\w+)/)
           ht[:tag] = ss[1].to_sym
-          $stderr.puts "tag=#{ht[:tag]}" if debug
+          # $stderr.puts "tag=#{ht[:tag]}" if debug
         end
         until ss.eos?
           if ss.scan(/\.([a-zA-Z][a-zA-Z0-9_\-]*)/)
@@ -250,7 +250,7 @@ module Ezframe
             else
               tag = ss[1].to_sym
             end
-            $stderr.puts "> chain: #{ss[1]}" if debug
+            # $stderr.puts "> chain: #{ss[1]}" if debug
             parent[:child] = ht = { tag: tag, class: class_a }
           elsif ss.scan(/:/)
             if ss.scan(/([a-zA-Z][a-zA-Z0-9_\-\.]+)=\[([^\]]+)\]/)
@@ -264,11 +264,11 @@ module Ezframe
             end
           else
             ht[:child] = str[ss.pos..-1]
-            $stderr.puts "get child: pos=#{ss.pos}, #{ht}" if debug
+            # $stderr.puts "get child: pos=#{ss.pos}, #{ht}" if debug
             return root
           end
         end
-        $stderr.puts "root=#{root}" if debug
+        # $stderr.puts "root=#{root}" if debug
         return root
       end
 
@@ -362,7 +362,7 @@ module Ezframe
         Ht.add_class(ht, @option[:extra_wrap_class])
         child_a = add_first_last
         Ht.connect_child(ht, child_a)
-        EzLog.debug("List.to_ht: #{ht}: @item_a=#{@item_a}")
+        # EzLog.debug("List.to_ht: #{ht}: @item_a=#{@item_a}")
         return add_before_after(ht)
       end
 
@@ -400,7 +400,7 @@ module Ezframe
         head_ht = nil
         if @header
           head_a = wrap_item(@header, column_tag: @option[:head_column_tag], row_tag: @option[:head_row_tag])
-          EzLog.debug "head_a=#{head_a}"
+          # EzLog.debug "head_a=#{head_a}"
           head_ht = Ht.thead(child: head_a)
         end
         table = Ht.from_array(@option[:wrap_tag])
