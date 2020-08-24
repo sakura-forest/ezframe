@@ -305,6 +305,10 @@ module Ezframe
         @item_a.push(wrap_item(item, opts))
       end
 
+      def add_raw(item)
+        @item_a.push(item)
+      end
+
       def add_prepend(item)
         @prepend ||= []
         @prepend.push(item)

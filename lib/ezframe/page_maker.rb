@@ -21,9 +21,17 @@ module Ezframe
       end
 
       def public_default_post
-        body = Html.convert(make_index_table)
+        maker = @index_page_maker.new(@controller, self)
         EzLog.debug("public_default_post: #{body}")
-        return { inject: "##{@dom_id[:index]}", body: body, set_url: make_base_url }
+        return { inject: "##{@dom_id[:index]}", body: Html.convert(maker.make_content), set_url: make_base_url }
+      end
+
+      # 一覧ページ用のデータリスト生成
+      def list_for_index(where = nil)
+        where ||= {}
+        where.update(deleted_at: nil)
+        EzLog.debug("where: #{where}")
+        return @column_set.dataset.where(where).order(@sort_key).all
       end
     end
 
@@ -36,7 +44,7 @@ module Ezframe
       # 一覧表の生成
       def make_content
         # 表示データの取得
-        list = list_for_index
+        list = @parent.list_for_index
 
         # 一覧表示カラムの決定
         target_keys = @parent.index_keys || @parent.column_set.index_keys || @parent.column_set.view_keys
@@ -57,11 +65,6 @@ module Ezframe
           table.add_item(@parent.column_set.view_array(target_keys), row_attr: { ezevent: "on=click:url=#{@parent.make_base_url(data[:id])}/detail" })
         end
         return table
-      end
-
-      # 一覧ページ用のデータリスト生成
-      def list_for_index
-        return @parent.column_set.dataset.where(deleted_at: nil).order(@sort_key).all
       end
 
       # 一覧ページ用ボタン
