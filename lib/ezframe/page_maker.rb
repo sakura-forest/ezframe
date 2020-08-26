@@ -1,42 +1,51 @@
 module Ezframe
   module PageMaker
     module Default
-      def public_default_get
-        @id = get_id
-        layout = Layout.new
-        content = Ht::List.new
-        @index_page_maker ||= IndexPageMaker
-        maker = @index_page_maker.new(@controller, self)
-        layout.embed[:page_title] = Message[:index_page_title]
-        content = maker.make_content
-        content.add_before(Ht.from_array([ "button.btn.btn-primary#create-btn:ezevent=[on=click:url=#{make_base_url}/create]", [ "i.fa.fa-plus", "text:#{Message[:create_button_label]}" ] ]))
-        layout.embed[:main_content] = content.to_ht
-        return layout
-      end
-
-      def public_default_post
-        if @request.xhr?
-          maker = @index_page_maker.new(@controller, self)
-          EzLog.debug("public_default_post: #{body}")
-          return { inject: "##{@dom_id[:index]}", body: Html.convert(maker.make_content), set_url: make_base_url }
+      def public_default
+        @id ||= get_id
+        if @id
+          # idがあったら、詳細表示
+          return public_detail
         else
-          return public_default_get
+          # idがなかったら、一覧表示
+          @index_page_maker ||= IndexPageMaker
+          maker = @index_page_maker.new(self)
+          content = maker.make_content
+          page_title = Message[:index_page_title]
+        end
+        if @request.xhr?
+          content[:inject] = "#main-content"
+          return content
+        else
+          layout = Layout.new
+          layout.embed[:main_content] = content.to_ht
+          return layout
         end
       end
+
+#      def public_default_post
+#        if @request.xhr?
+#          maker = @index_page_maker.new(self)
+#          EzLog.debug("public_default_post: #{body}")
+#          return { inject: "##{@dom_id[:index]}", body: Html.convert(maker.make_content), url: make_base_url }
+#        else
+#          return public_default_get
+#        end
+#      end
 
       # 一覧ページ用のデータリスト生成
       def list_for_index(where = nil)
         where ||= {}
         where.update(deleted_at: nil)
-        EzLog.debug("where: #{where}")
+        # EzLog.debug("where: #{where}")
         return @column_set.dataset.where(where).order(@sort_key).all
       end
     end
 
     class IndexPageMaker
-      def initialize(ctrl, pa)
-        @controller = ctrl
-        @parent = pa
+      def initialize(parent)
+        @parent = parent
+        @controller = @parent.controller
       end
 
       # 一覧表の生成
@@ -62,43 +71,49 @@ module Ezframe
           @parent.column_set.values = data
           table.add_item(@parent.column_set.view_array(target_keys), row_attr: { ezevent: "on=click:url=#{@parent.make_base_url(data[:id])}/detail" })
         end
+        table.add_before(Ht.from_array([ "button.btn.btn-primary#create-btn:ezevent=[on=click:url=#{@parent.make_base_url}/create]", [ "i.fa.fa-plus", "text:#{Message[:create_button_label]}" ] ]))
         return table
       end
 
       # 一覧ページ用ボタン
-      def button_for_index_line(data)
-        return Ht.button(class: %w[btn right], ezevent: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]])
-      end
+      #def button_for_index_line(data)
+      #  return Ht.button(class: %w[btn right], ezevent: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]])
+      #end
     end
 
     module Edit
       # 新規データ登録
-      def public_create_get
-        layout = Layout.new
-        maker = @edit_page_maker.new(@controller, self)
-        layout.embed[:main_content] = branch(:create)
-        return layout
+      def public_create
+        @typ ||= :create
+        content = branch(@typ)
+        if @request.xhr?
+          content[:inject] = "#main-content"
+          return content
+        else
+          layout = Layout.new
+          maker = @edit_page_maker.new(self)
+          layout.embed[:main_content] = content[:body]
+          return layout
+        end
       end
 
       # 顧客データ編集
-      def public_edit_get
-        layout = Layout.new
-        maker = @edit_page_maker.new(@controller, self)
-        layout.embed[:main_content] = maker.show_edit_form
-        return layout
+      def public_edit
+        @typ = :edit
+        public_create
       end
 
       # 新規データ登録
-      def public_create_post
+#      def public_create_post
         # p@edit_page_maker ||= EditPageMaker
         # maker = @edit_page_maker.new(@controller, self)
-        return branch(:create)
-      end
+#        return branch(:create)
+#      end
 
       # データ編集受信
-      def public_edit_post
-        return branch(:edit)
-      end
+#      def public_edit_post
+#        return branch(:edit)
+#      end
 
       def branch(typ = :edit)
         @ezevent = @controller.ezevent
@@ -112,7 +127,7 @@ module Ezframe
           return act_after_cancel
         end
 
-        maker = @edit_page_maker.new(@controller, self)
+        maker = @edit_page_maker.new(self)
         if @controller.event_form
           EzLog.debug("Edit.branch: store edit values")
           # 入力後。フォーム内容をDBに格納
@@ -141,7 +156,7 @@ module Ezframe
 
       # キャンセル時の表示
       def act_after_cancel
-        return public_detail_post
+        return public_detail
       end
 
       # 編集完了後の表示
@@ -158,15 +173,16 @@ module Ezframe
     class EditPageMaker
       include EditorCommon
 
-      def initialize(ctrl, parent)
-        @controller = ctrl
+      def initialize(parent)
         @parent = parent
+        @controller = @parent.controller
         @ezevent = @controller.ezevent
       end
 
       # 新規登録フォームの表示
       def show_create_form
-        return { inject: "#main-content", body: Html.convert(make_edit_form(:create)), set_url: [ "#{@parent.make_base_url}/create", "新規登録" ] }
+#         return { inject: "#main-content", body: Html.convert(make_edit_form(:create)), set_url: [ "#{@parent.make_base_url}/create", "新規登録" ] }
+        return { body: make_edit_form(:create), url: "#{@parent.make_base_url}/create", title: "新規登録" }
       end
 
       # 編集フォームの表示
@@ -176,7 +192,8 @@ module Ezframe
         return show_message_page("no data", "data is not defined: #{@id}") unless data
         # フォームの表示
         form = make_edit_form(:edit)
-        return { inject: "#main-content", body: Html.convert(form), set_url: [ "#{@parent.make_base_url}/edit", "情報編集" ] }
+#         return { inject: "#main-content", body: Html.convert(form), set_url: [ "#{@parent.make_base_url}/edit", "情報編集" ] }
+        return { body: form, url: "#{@parent.make_base_url}/edit", title: "情報編集: #{data[:m_name]}, #{data[:f_name]}" }
       end
 
       def store_edit_form
@@ -227,21 +244,27 @@ module Ezframe
     # 詳細表示ページ生成キット
     module Detail
       # データ詳細表示
-      def public_detail_post
+      def public_detail
         @id ||= get_id
         @detail_page_maker ||= DetailPageMaker
-        maker = @detail_page_maker.new(@controller, self)
+        maker = @detail_page_maker.new(self)
         data = @column_set.set_from_db(@id)
         # EzLog.debug("Detail::public_detail_post: id=#{@id}, data=#{data}")
         content = maker.make_content
         content = content.to_ht if content.respond_to?(:to_ht)
-        return { inject: "#main-content", body: Html.convert(content), set_url: [ "#{make_base_url}/detail", "顧客情報" ] }
+        if @request.xhr?
+          return { inject: "#main-content", body: Html.convert(content), set_url: [ "#{make_base_url}/detail", "顧客情報" ] }
+        else
+          layout = Layout.new
+          layout.embed[:main_content] = content
+          return layout
+        end
       end
 
       def public_detail_get
         @id ||= get_id
         @detail_page_maker ||= DetailPageMaker
-        maker = @detail_page_maker.new(@controller, self)
+        maker = @detail_page_maker.new(self)
         @column_set.set_from_db(@id)
         content = maker.make_content
         layout = Layout.new
@@ -251,9 +274,9 @@ module Ezframe
     end
 
     class DetailPageMaker
-      def initialize(ctrl, parent)
-        @controller = ctrl
+      def initialize(parent)
         @parent = parent
+        @controller = @parent.controller
       end
 
       def make_content

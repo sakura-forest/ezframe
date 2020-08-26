@@ -91,16 +91,17 @@ module Ezframe
       end
 
       def make_method_name(base_name, request)
-        method = request.request_method
-        if request.xhr?
-          method = "post"
-        else
-          method = "get"
-        end
-        unless method
-          raise("make_method_name: method is null")
-        end
-        return ["public", base_name, method.downcase ].join("_")
+#        method = request.request_method
+#        if request.xhr?
+#          method = "post"
+#        else
+#          method = "get"
+#        end
+#        unless method
+#          raise("make_method_name: method is null")
+#        end
+#         return ["public", base_name, method.downcase ].join("_")
+        return ["public", base_name ].join("_")
       end
 
       # keysに対応するクラスが存在するか探す

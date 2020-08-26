@@ -57,7 +57,7 @@ module Ezframe
       end
       body = page_instance.send(method)
       return if body.is_a?(Rack::Response) || body.is_a?(Controller::Response)
-      # EzLog.debug("Controller.initialize: body=#{body}")
+      EzLog.debug("Controller.initialize: body=#{body}")
 
       # 戻り値によるレスポンス生成
       if @request.xhr?
