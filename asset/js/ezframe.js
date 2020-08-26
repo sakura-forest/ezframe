@@ -1,14 +1,30 @@
-// 2020年05月25日(月) 6
+// 2020年08月26日(水)
+function inject(res, obj) {
+  var elem
+  console.log("inject: " + res.inject + ", body=" + res.body)
+  if (res.inject == "this" || res.inject == "here" || res.inject == "self") {
+    elem = obj
+  } else {
+    elem = document.querySelector(res.inject)
+  }
+  if (elem) {
+    elem.innerHTML = (res.body || "")
+    add_event(elem)
+    exec_ezload(elem)
+  } else {
+    console.log("inject: no such element: " + res.inject)
+  }
+  // URL表示を指定されたURLに変更する
+  if (res.set_url) {
+    console.log("set_url: " + res.set_url)
+    history.pushState(null, res.set_url[1], res.set_url[0])
+    document.title = res.set_url[1]
+  }
+}
+
 var extra_event_funcs = []
 var event_commands = {
-  /*
-  switch_hide: function(event) {
-    console.log("switch")
-    var a = event.between
-    for(var i = 0; i<a.length; i++) {
-      switch_hide(a[i])
-    }
-  },*/
+  inject: function(event, obj) { inject(event, obj) },
   set_validation: function(event, form_dom) {
     console.log("set_validation")
     var inputs = collect_all_input_elements(form_dom)
@@ -35,33 +51,16 @@ var event_commands = {
   redirect: function(event) {
     console.log("redirect:" + event.url)
     location.href = event.url
+  },
+  inject: function(event) {
+    console.log("redirect:" + event.url)
+
   }
 }
 
 // サーバからのレスポンスを処理する関数
 var response_funcs = {
-  inject: function(res, obj) {
-    var elem
-    console.log("inject: " + res.inject + ", body=" + res.body)
-    if (res.inject == "this") {
-      elem = obj
-    } else {
-      elem = document.querySelector(res.inject)
-    }
-    if (elem) {
-      elem.innerHTML = (res.body || "")
-      add_event(elem)
-      exec_ezload(elem)
-    } else {
-      console.log("inject: no such element: " + res.inject)
-    }
-    // URL表示を指定されたURLに変更する
-    if (res.set_url) {
-      console.log("set_url: "+res.set_url)
-      history.pushState(null, res.set_url[1], res.set_url[0])
-      document.title = res.set_url[1]
-    }
-  },
+  inject: function(event, obj) { inject(event, obj) },
   set_value: function(res, obj) {
     var elem
     console.log("set_value: " + res.set_value + ", value=", res.value)
@@ -246,6 +245,7 @@ function execute_event(obj, attr_key = "ezevent", ev = null) {
 }
 
 function with_attr(event, obj) {
+  console.log("with_attr: "+event.with)
   switch (event.with) {
     case "form":
       var node = obj
@@ -273,12 +273,14 @@ function post_values(event, obj) {
   xhr.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       var res = this.response
+      console.log("xhr ready: "+res)
       manage_response(res, event, obj)
     }
   }
   console.log("post_values: url="+event.url+",event="+JSON.stringify(event))
   xhr.open("POST", event.url, true)
   xhr.setRequestHeader("Content-Type", "application/json")
+  xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
   xhr.responseType = 'json'
   send_values = { ezevent: event }
   xhr.send(JSON.stringify(send_values))
