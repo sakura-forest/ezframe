@@ -21,9 +21,13 @@ module Ezframe
       end
 
       def public_default_post
-        maker = @index_page_maker.new(@controller, self)
-        EzLog.debug("public_default_post: #{body}")
-        return { inject: "##{@dom_id[:index]}", body: Html.convert(maker.make_content), set_url: make_base_url }
+        if @request.xhr?
+          maker = @index_page_maker.new(@controller, self)
+          EzLog.debug("public_default_post: #{body}")
+          return { inject: "##{@dom_id[:index]}", body: Html.convert(maker.make_content), set_url: make_base_url }
+        else
+          return public_default_get
+        end
       end
 
       # 一覧ページ用のデータリスト生成
@@ -75,6 +79,14 @@ module Ezframe
 
     module Edit
       # 新規データ登録
+      def public_create_get
+        layout = Layout.new
+        maker = @edit_page_maker.new(@controller, self)
+        layout.embed[:main_content] = branch(:create)
+        return layout
+      end
+
+      # 新規データ登録
       def public_create_post
         @edit_page_maker ||= EditPageMaker
         maker = @edit_page_maker.new(@controller, self)
@@ -88,28 +100,39 @@ module Ezframe
 
       def branch(typ = :edit)
         @ezevent = @controller.ezevent
+        EzLog.debug("Edit.branch: ezevent: #{@ezevent}")
         @edit_page_maker ||= EditPageMaker
         if @ezevent[:branch] == "single_validate"
-          validation = Validator.new(@parent.column_set.validate(@form))
-          return Validator.new.validate_one(validation, @ezevent[:target_key])
+          EzLog.debug("Edit.branch: single_validate")
+          validation = Validator.new(@parent.column_set.validate(@controller.event_form))
+          return validation.validate_one(@ezevent[:target_key])
         elsif @ezevent[:cancel]
-          return :cancel
+          return act_after_cancel
         end
 
         maker = @edit_page_maker.new(@controller, self)
         if @controller.event_form
+          EzLog.debug("Edit.branch: store edit values")
           # 入力後。フォーム内容をDBに格納
+          validation = Validator.new(@column_set.validate(@controller.event_form))
+          cmd_a = validation.validate_all
+          if cmd_a.length > 0
+            EzLog.debug("validate_all: #{cmd_a}")
+            return cmd_a
+          end
           if typ == :create
             maker.store_create_form
           else
             maker.store_edit_form
           end
+          act_after_edit(typ)
         else
+          EzLog.debug("Edit.branch: show_form")
           # 入力前。フォームを表示
           if typ == :create
-            maker.show_create_form
+            return maker.show_create_form
           else
-            maker.show_edit_form
+            return maker.show_edit_form
           end
         end
       end
@@ -157,15 +180,14 @@ module Ezframe
       def store_edit_form
         @id = get_id
         @column_set.update(@id, ezevent[:form])
-        return act_after_edit(:edit)
       end
 
       def store_create_form
         values = {}
         values.update(@ezevent[:form])
-        values.update(path_params)
-        @parent.column_set[:id].value = @id = @parent.column_set.create(form_values)
-        return act_after_edit(:create)
+        values.update(@controller.route_params)
+        EzLog.debug("store_create_form: #{values}")
+        @parent.column_set[:id].value = @id = @parent.column_set.create(values)
       end
 
       # 編集フォームの生成

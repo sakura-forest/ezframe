@@ -33,7 +33,7 @@ module Ezframe
         list.add_raw(show_index_item)
       end
       # return { inject: "##{@class_snake}-tab", body: list.to_ht }
-      return { inject: "##{@class_snake}-tab", body: Html.convert(Ht.from_array([".row", [ list.to_ht ]])) }
+      return { inject: "##{@class_snake}-tab", body: Html.convert(Ht.from_array([".container > .row", [ list.to_ht ]])) }
     end
   end
 end

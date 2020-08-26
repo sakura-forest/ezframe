@@ -32,12 +32,12 @@ module Ezframe
 
     attr_accessor :request, :response, :query_params, :json_body_params, :route_params, :class_opts
     def initialize(req = nil, res = nil)
-      @request, = req || Rack::Request.new
+      @request = req || Rack::Request.new
       @response = res || Response.new
       page_class, method, @route_params, @class_opts = Route::choose(@request)
       @query_params = parse_query_string(env["QUERY_STRING"])
-      EzLog.debug("Controller.initialize: path=#{request_path}, params=#{request_params}, class=#{page_class}, method=#{method}, query_params=#{@query_params}, route_params=#{@route_params}, class_opts=#{@class_opts}")
-
+      EzLog.debug("Controller.initialize: xhr=#{@request.xhr?}, path=#{request_path}, params=#{request_params}, class=#{page_class}, method=#{method}, query_params=#{@query_params}, route_params=#{@route_params}, class_opts=#{@class_opts}")
+      # EzLog.debug("env=#{@request.env}")
       if !page_class || page_class == 404
         file_not_found
         return
@@ -56,18 +56,26 @@ module Ezframe
         end
       end
       body = page_instance.send(method)
-      # EzLog.debug("Controller.initialize: body=#{body}")
+      EzLog.debug("Controller.init: body=#{body}")
+      return if body.is_a?(Rack::Response) || body.is_a?(Controller::Response)
+      EzLog.debug("Controller.initialize: body=#{body}")
 
       # 戻り値によるレスポンス生成
-      if body.respond_to?(:to_ht)
-        @response.body = [ Html.convert(body.to_ht) ]
-      elsif body.is_a?(Hash) || body.is_a?(Array)
+      if @request.xhr?
         json = JSON.generate(body)
         @response.body = [json]
         @response["Content-Type"] = "application/json; charset=utf-8"
       else
-        @response.body = [body]
         @response["Content-Type"] = "text/html; charset=utf-8"
+        if body.respond_to?(:to_ht)
+          @response.body = [ Html.convert(body.to_ht) ]
+        else
+          @response.body = [ body ]
+        end
+#      elsif body.is_a?(Hash) || body.is_a?(Array)
+#        json = JSON.generate(body)
+#        @response.body = [json]
+#        @response["Content-Type"] = "application/json; charset=utf-8"
       end
       response.status = 200
     end
