@@ -245,7 +245,7 @@ function execute_event(obj, attr_key = "ezevent", ev = null) {
 }
 
 function with_attr(event, obj) {
-  console.log("with_attr: "+event.with)
+  //console.log("with_attr: "+event.with)
   switch (event.with) {
     case "form":
       var node = obj

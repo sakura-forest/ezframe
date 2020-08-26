@@ -56,9 +56,8 @@ module Ezframe
         end
       end
       body = page_instance.send(method)
-      EzLog.debug("Controller.init: body=#{body}")
       return if body.is_a?(Rack::Response) || body.is_a?(Controller::Response)
-      EzLog.debug("Controller.initialize: body=#{body}")
+      # EzLog.debug("Controller.initialize: body=#{body}")
 
       # 戻り値によるレスポンス生成
       if @request.xhr?
@@ -72,10 +71,6 @@ module Ezframe
         else
           @response.body = [ body ]
         end
-#      elsif body.is_a?(Hash) || body.is_a?(Array)
-#        json = JSON.generate(body)
-#        @response.body = [json]
-#        @response["Content-Type"] = "application/json; charset=utf-8"
       end
       response.status = 200
     end

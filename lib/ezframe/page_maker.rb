@@ -4,19 +4,13 @@ module Ezframe
       def public_default_get
         @id = get_id
         layout = Layout.new
-
-        # center_box = layout[:center]
-        # 追加ボタン配置用のエリア
         content = Ht::List.new
-        # 一覧表示用のエリア
-        # center_box.add(id: @dom_id[:index], child: "", ezload: "url=#{make_base_url}")
         @index_page_maker ||= IndexPageMaker
         maker = @index_page_maker.new(@controller, self)
         layout.embed[:page_title] = Message[:index_page_title]
         content = maker.make_content
         content.add_before(Ht.from_array([ "button.btn.btn-primary#create-btn:ezevent=[on=click:url=#{make_base_url}/create]", [ "i.fa.fa-plus", "text:#{Message[:create_button_label]}" ] ]))
         layout.embed[:main_content] = content.to_ht
-        # EzLog.debug("layout=#{layout.to_ht}")
         return layout
       end
 
@@ -86,10 +80,18 @@ module Ezframe
         return layout
       end
 
+      # 顧客データ編集
+      def public_edit_get
+        layout = Layout.new
+        maker = @edit_page_maker.new(@controller, self)
+        layout.embed[:main_content] = maker.show_edit_form
+        return layout
+      end
+
       # 新規データ登録
       def public_create_post
-        @edit_page_maker ||= EditPageMaker
-        maker = @edit_page_maker.new(@controller, self)
+        # p@edit_page_maker ||= EditPageMaker
+        # maker = @edit_page_maker.new(@controller, self)
         return branch(:create)
       end
 
