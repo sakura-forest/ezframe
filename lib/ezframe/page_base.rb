@@ -50,6 +50,12 @@ module Ezframe
       Template.fill_from_file("template/base.html", args)
     end
 
+    def redirect(url)
+      @response.status = 303
+      @response.headers["Location"] = url
+      @response.body = [ "" ]
+    end
+
     def session
       return @request.env['rack.session']
     end
