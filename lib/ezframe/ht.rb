@@ -274,6 +274,9 @@ module Ezframe
 
       # 複数階層のノードの一番内側のノード(childを持たない)にchildを設定する
       def connect_child(ht, child)
+        unless ht.is_a?(Hash)
+          raise "connect_child: it must be hash: #{ht}"
+        end
         bottom = get_bottom(ht)
         bottom[:child] = child if bottom.is_a?(Hash)
         return ht
@@ -284,6 +287,7 @@ module Ezframe
         child = ht
         while(child[:child]) do
           child = child[:child]
+          raise "get_bottom: it must be hash: #{child}" unless child.is_a?(Hash)
         end
         return child
       end
