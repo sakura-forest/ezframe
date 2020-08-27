@@ -13,24 +13,27 @@ module Ezframe
         @id ||= get_id
         if @id
           # idがあったら、詳細表示
-          return public_detail
-        else
-          # idがなかったら、一覧表示
-          @index_page_maker ||= IndexPageMaker
-          maker = @index_page_maker.new(self)
-          content = maker.make_content
+          public_detail
+          return
         end
+        # 一覧表示
+        public_index
+      end
+
+      # 一覧表示
+      def public_index
+        @index_page_maker ||= IndexPageMaker
+        maker = @index_page_maker.new(self)
+        content = maker.make_content
         if @request.xhr?
           @response.command  = { inject: "#main-content" }
           @reposend.body = content
           @response.set_url = @request.path_info
           @response.title = "データ一覧"
-          return nil
         else
           layout = Layout.new
           layout.embed[:body] = content.body
           @response.body = layout
-          return nil
         end
       end
 
@@ -85,24 +88,24 @@ module Ezframe
       def public_create
         @typ ||= :create
         content = branch(@typ)
+        return unless content
         if @request.xhr?
-          @response.type = :json
           @response.body = content
-          @reponse.command = { inject: "#main-content" }
-          return nil
+          @response.command = { inject: "#main-content" }
+          @response.set_url = @request.path_info
+          @response.title = content.title
         else
           layout = Layout.new
           layout.embed[:main_content] = content.body
-          maker = @edit_page_maker.new(self)
+          layout.embed[:page_title] = content.title
           @response.body = layout
-          return nil
         end
       end
 
       # 顧客データ編集
       def public_edit
         @typ = :edit
-        return public_create
+        public_create
       end
 
       def branch(typ = :edit)
@@ -136,19 +139,19 @@ module Ezframe
           else
             maker.store_edit_form
           end
-          return public_detail
+          public_detail
+          return nil
         else
           EzLog.debug("Edit.branch: show_form")
           # 入力前。フォームを表示
           if typ == :create
             content = maker.show_create_form
+            raise if content.is_a?(String)
           else
-            content maker.show_edit_form
+            content = maker.show_edit_form
+            raise if content.is_a?(String)
           end
-          @response.body = content
-          @response.title = content.title
-          @response.set_url = @request.request_path
-          return nil
+          return content
         end
       end
     end
@@ -237,15 +240,16 @@ module Ezframe
         @detail_page_maker ||= DetailPageMaker
         maker = @detail_page_maker.new(self)
         @column_set.set_from_db(@id)
-        @response.body = maker.make_content
+        content = maker.make_content
         if @request.xhr?
           @response.command = { inject: "#main-content" }
+          @response.body = content
           @response.set_url = make_base_url
           @response.title =  "詳細情報"
           EzLog.debug("public_detail.AJAX: #{@response}")
         else
           layout = Layout.new
-          layout.embed[:main_content] = @response.body
+          layout.embed[:main_content] = "div:ezload=[url=#{make_base_url}]"
           @response.body = layout
         end
         return nil
