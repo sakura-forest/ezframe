@@ -16,9 +16,9 @@ function inject(res, obj) {
   }
   // URL表示を指定されたURLに変更する
   if (res.set_url) {
-    console.log("set_url: " + res.set_url)
-    history.pushState(null, res.set_url[1], res.set_url[0])
-    document.title = res.set_url[1]
+    console.log("set_url: " + res.set_url + ", title: "+res.title)
+    history.pushState(null, res.title, res.set_url)
+    document.title = res.title
   }
 }
 

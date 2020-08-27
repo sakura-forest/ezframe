@@ -6,7 +6,7 @@ require_relative "util"
 
 module Ezframe
   class PageBase
-    attr_accessor :controller, :class_snake, :column_set, :dataset, :index_keys
+    attr_accessor :controller, :class_snake, :column_set, :dataset, :index_keys, :id, :request, :response
 
     def initialize(cntl)
       @controller = cntl

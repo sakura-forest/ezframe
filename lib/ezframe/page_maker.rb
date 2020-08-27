@@ -1,5 +1,13 @@
 module Ezframe
   module PageMaker
+    class PageContent
+      attr_accessor :body, :title, :url
+
+      def to_ht
+        return @body.respond_to?(:to_ht) ? @body.to_ht : @body
+      end
+    end
+
     module Default
       def public_default
         @id ||= get_id
@@ -11,33 +19,25 @@ module Ezframe
           @index_page_maker ||= IndexPageMaker
           maker = @index_page_maker.new(self)
           content = maker.make_content
-          page_title = Message[:index_page_title]
         end
         if @request.xhr?
-          content[:inject] = "#main-content"
-          return content
+          @response.command  = { inject: "#main-content" }
+          @reposend.body = content
+          @response.set_url = @request.path_info
+          @response.title = "データ一覧"
+          return nil
         else
           layout = Layout.new
-          layout.embed[:main_content] = content.to_ht
-          return layout
+          layout.embed[:body] = content.body
+          @response.body = layout
+          return nil
         end
       end
-
-#      def public_default_post
-#        if @request.xhr?
-#          maker = @index_page_maker.new(self)
-#          EzLog.debug("public_default_post: #{body}")
-#          return { inject: "##{@dom_id[:index]}", body: Html.convert(maker.make_content), url: make_base_url }
-#        else
-#          return public_default_get
-#        end
-#      end
 
       # 一覧ページ用のデータリスト生成
       def list_for_index(where = nil)
         where ||= {}
         where.update(deleted_at: nil)
-        # EzLog.debug("where: #{where}")
         return @column_set.dataset.where(where).order(@sort_key).all
       end
     end
@@ -72,13 +72,12 @@ module Ezframe
           table.add_item(@parent.column_set.view_array(target_keys), row_attr: { ezevent: "on=click:url=#{@parent.make_base_url(data[:id])}/detail" })
         end
         table.add_before(Ht.from_array([ "button.btn.btn-primary#create-btn:ezevent=[on=click:url=#{@parent.make_base_url}/create]", [ "i.fa.fa-plus", "text:#{Message[:create_button_label]}" ] ]))
-        return table
-      end
 
-      # 一覧ページ用ボタン
-      #def button_for_index_line(data)
-      #  return Ht.button(class: %w[btn right], ezevent: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]])
-      #end
+        content = PageContent.new
+        content.body = table
+        content.title = Message[:index_page_title]
+        return content
+      end
     end
 
     module Edit
@@ -87,44 +86,38 @@ module Ezframe
         @typ ||= :create
         content = branch(@typ)
         if @request.xhr?
-          content[:inject] = "#main-content"
-          return content
+          @response.type = :json
+          @response.body = content
+          @reponse.command = { inject: "#main-content" }
+          return nil
         else
           layout = Layout.new
+          layout.embed[:main_content] = content.body
           maker = @edit_page_maker.new(self)
-          layout.embed[:main_content] = content[:body]
-          return layout
+          @response.body = layout
+          return nil
         end
       end
 
       # 顧客データ編集
       def public_edit
         @typ = :edit
-        public_create
+        return public_create
       end
 
-      # 新規データ登録
-#      def public_create_post
-        # p@edit_page_maker ||= EditPageMaker
-        # maker = @edit_page_maker.new(@controller, self)
-#        return branch(:create)
-#      end
-
-      # データ編集受信
-#      def public_edit_post
-#        return branch(:edit)
-#      end
-
       def branch(typ = :edit)
+        @id ||= get_id
         @ezevent = @controller.ezevent
-        EzLog.debug("Edit.branch: ezevent: #{@ezevent}")
+        # EzLog.debug("Edit.branch: ezevent: #{@ezevent}")
         @edit_page_maker ||= EditPageMaker
         if @ezevent[:branch] == "single_validate"
           EzLog.debug("Edit.branch: single_validate")
           validation = Validator.new(@parent.column_set.validate(@controller.event_form))
-          return validation.validate_one(@ezevent[:target_key])
+          @response.command = validation.validate_one(@ezevent[:target_key])
+          return nil
         elsif @ezevent[:cancel]
-          return act_after_cancel
+          @response.command = { redirect: "#{@parent.make_base_url}/#{@id}" }
+          return nil
         end
 
         maker = @edit_page_maker.new(self)
@@ -135,37 +128,27 @@ module Ezframe
           cmd_a = validation.validate_all
           if cmd_a.length > 0
             EzLog.debug("validate_all: #{cmd_a}")
-            return cmd_a
+            @response.command = cmd_a
+            return nil
           end
           if typ == :create
-            maker.store_create_form
+            @id = maker.store_create_form
           else
             maker.store_edit_form
           end
-          act_after_edit(typ)
+          return public_detail
         else
           EzLog.debug("Edit.branch: show_form")
           # 入力前。フォームを表示
           if typ == :create
-            return maker.show_create_form
+            content = maker.show_create_form
           else
-            return maker.show_edit_form
+            content maker.show_edit_form
           end
-        end
-      end
-
-      # キャンセル時の表示
-      def act_after_cancel
-        return public_detail
-      end
-
-      # 編集完了後の表示
-      def act_after_edit(typ)
-        case typ
-        when :edit
-          return [public_default_post, public_detail_post]
-        when :create
-          return { redirect: make_base_url(@id) }
+          @response.body = content
+          @response.title = content.title
+          @response.set_url = @request.request_path
+          return nil
         end
       end
     end
@@ -176,28 +159,30 @@ module Ezframe
       def initialize(parent)
         @parent = parent
         @controller = @parent.controller
+        @response = @controller.response
         @ezevent = @controller.ezevent
       end
 
       # 新規登録フォームの表示
       def show_create_form
-#         return { inject: "#main-content", body: Html.convert(make_edit_form(:create)), set_url: [ "#{@parent.make_base_url}/create", "新規登録" ] }
-        return { body: make_edit_form(:create), url: "#{@parent.make_base_url}/create", title: "新規登録" }
+        content = make_edit_form(:create)
+        content.title = "新規登録"
+        return content
       end
 
       # 編集フォームの表示
       def show_edit_form
-        @id = @parent.get_id
+        @id ||= @parent.id
         data = @parent.column_set.set_from_db(@id)
         return show_message_page("no data", "data is not defined: #{@id}") unless data
-        # フォームの表示
-        form = make_edit_form(:edit)
-#         return { inject: "#main-content", body: Html.convert(form), set_url: [ "#{@parent.make_base_url}/edit", "情報編集" ] }
-        return { body: form, url: "#{@parent.make_base_url}/edit", title: "情報編集: #{data[:m_name]}, #{data[:f_name]}" }
+        cotent = make_edit_form(:edit)
+        content.title = "情報編集: #{data[:m_name]}, #{data[:f_name]}"
+        return content
       end
 
+      # フォームをDBに格納
       def store_edit_form
-        @id = get_id
+        @id ||= @parent.get_id
         @column_set.update(@id, ezevent[:form])
       end
 
@@ -207,6 +192,7 @@ module Ezframe
         values.update(@controller.route_params)
         EzLog.debug("store_create_form: #{values}")
         @parent.column_set[:id].value = @id = @parent.column_set.create(values)
+        return @id
       end
 
       # 編集フォームの生成
@@ -218,7 +204,9 @@ module Ezframe
         cancel_button = make_cancel_button("on=click:url=#{@parent.make_base_url(@id)}/#{typ}:cancel=true:with=form")
         send_button = edit_finish_button
         new_form.append = Ht.from_array([ "div", [send_button, cancel_button] ])
-        return new_form
+        content = Content.new
+        content.body = new_form
+        return content
       end
 
       # 編集ページの行を生成
@@ -248,28 +236,19 @@ module Ezframe
         @id ||= get_id
         @detail_page_maker ||= DetailPageMaker
         maker = @detail_page_maker.new(self)
-        data = @column_set.set_from_db(@id)
-        # EzLog.debug("Detail::public_detail_post: id=#{@id}, data=#{data}")
-        content = maker.make_content
-        content = content.to_ht if content.respond_to?(:to_ht)
+        @column_set.set_from_db(@id)
+        @response.body = maker.make_content
         if @request.xhr?
-          return { inject: "#main-content", body: Html.convert(content), set_url: [ "#{make_base_url}/detail", "顧客情報" ] }
+          @response.command = { inject: "#main-content" }
+          @response.set_url = make_base_url
+          @response.title =  "詳細情報"
+          EzLog.debug("public_detail.AJAX: #{@response}")
         else
           layout = Layout.new
-          layout.embed[:main_content] = content
-          return layout
+          layout.embed[:main_content] = @response.body
+          @response.body = layout
         end
-      end
-
-      def public_detail_get
-        @id ||= get_id
-        @detail_page_maker ||= DetailPageMaker
-        maker = @detail_page_maker.new(self)
-        @column_set.set_from_db(@id)
-        content = maker.make_content
-        layout = Layout.new
-        layout.embed[:main_content] = content
-        return layout
+        return nil
       end
     end
 
@@ -288,8 +267,9 @@ module Ezframe
           list.add_item(row) if row
         end
         list.add_item(button_for_detail_box)
-        return list
-        # buttons = holizon.add_vertical
+        content = Content.new
+        content.body = list
+        return content
       end
 
       # 詳細表示欄の一行を生成
@@ -307,11 +287,9 @@ module Ezframe
       end
 
       def button_for_detail_box(data)
-        buttons = [ Ht.button(class: %w[btn right], ezevent: "on=click:url=#{make_base_url(data[:id])}/edit", child: [Ht.icon("edit"), Message[:edit_button_label]])]
-        if @show_delete_button
-          buttons.push(make_delete_button)
-        end
-        return Ht.div(class: %w[button-box], child: buttons)
+        buttons = [ "button.btn.btn-primary:ezevent=[on=click:url=#{make_base_url(data[:id])}/edit]", [ "i.fas.fa-edit", "span:#{Message[:edit_button_label]}" ]]
+        buttons += make_delete_button if @show_delete_button
+        return Ht.array([ ".button-box", buttons ])
       end
     end
 
@@ -320,7 +298,7 @@ module Ezframe
         @id ||= get_id
         dataset = DB.dataset(@column_set.name)
         DB.delete(dataset, @id)
-        return public_default_post
+        return public_default
       end
     end
   end

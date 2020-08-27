@@ -3,21 +3,11 @@ module Ezframe
   class Controller
 
     class Response
-      attr_accessor :body, :status, :headers
+      attr_accessor :command, :body, :title, :status, :headers, :set_url
 
       def initialize
-        @headers = { "Content-Type" => "text/html" }
-        @body = []
         @status = 200
-      end
-
-      def set_body_as_json(body)
-        @headers["Content-Type"] = "application/json; charset=utf-8"
-        @body = body
-      end
-
-      def []=(k, v)
-        @headers[k] = v
+        @headers = {}
       end
 
       def content_type=(v)
@@ -25,59 +15,65 @@ module Ezframe
       end
 
       def finish
-        page_body = Array(@body)
-        return [ @status, @headers, page_body]
+        # return [ @status, @headers, Array(@body) ] if @status != 200
+        body_tmp = @body.respond_to?(:to_ht) ? @body.to_ht : @body
+        body_tmp = Html.convert(body_tmp) unless body_tmp.is_a?(String)
+        if @command
+          cmd = @command.clone
+          if cmd.is_a?(Hash) && cmd[:inject]
+            cmd[:body] = body_tmp
+            cmd[:set_url] = @set_url if @set_url
+            cmd[:title] ||= @title if @title
+          end
+          body_tmp = JSON.generate(cmd)
+          @headers["Content-Type"] = "application/json; charset=utf-8"
+        else
+          @headers["Content-Type"] ||= "text/html; charset=utf-8"
+        end
+        return [ @status, @headers, [ body_tmp ] ]
+      end
+
+      def to_s
+        return "status=#{@status}, title=#{@title}, command=#{@command}, body=#{@body}"
       end
     end
 
     attr_accessor :request, :response, :query_params, :json_body_params, :route_params, :class_opts
-    def initialize(req = nil, res = nil)
+
+    def initialize(req = nil)
       @request = req || Rack::Request.new
-      @response = res || Response.new
-      page_class, method, @route_params, @class_opts = Route::choose(@request)
+      @response = Response.new
+      @page_class, @method, @route_params, @class_opts = Route::choose(@request)
       @query_params = parse_query_string(env["QUERY_STRING"])
-      EzLog.debug("Controller.initialize: xhr=#{@request.xhr?}, path=#{request_path}, params=#{request_params}, class=#{page_class}, method=#{method}, query_params=#{@query_params}, route_params=#{@route_params}, class_opts=#{@class_opts}")
-      # EzLog.debug("env=#{@request.env}")
-      if !page_class || page_class == 404
-        file_not_found
-        return
-      end
-      page_instance = page_class.new(self)
-      @session = @request.env["rack.session"]
+      EzLog.debug("Controller.initialize: xhr=#{@request.xhr?}, path=#{request_path}, params=#{request_params}, class=#{@page_class}, method=#{@method}, query_params=#{@query_params}, route_params=#{@route_params}, class_opts=#{@class_opts}")
       if @request.content_type && @request.content_type.index("json")
         @json_body_params = parse_json_body(@request.body.read)
       end
       if @class_opts
         opt_auth = @class_opts[:auth]
-        if !@session[:user] && Config[:auth] && (!opt_auth || opt_auth != "disable")
+        if !session[:user] && Config[:auth] && (!opt_auth || opt_auth != "disable")
           EzLog.debug("authenticate!")
           warden.authenticate!
           EzLog.info "Controller.exec: warden.options = #{@request.env["warden.options"]}"
         end
       end
-      body = page_instance.send(method)
-      return if body.is_a?(Rack::Response) || body.is_a?(Controller::Response)
-      EzLog.debug("Controller.initialize: body=#{body}")
+    end
 
-      # 戻り値によるレスポンス生成
-      if @request.xhr?
-        json = JSON.generate(body)
-        @response.body = [json]
-        @response["Content-Type"] = "application/json; charset=utf-8"
+    def execute
+      if !@page_class || @page_class == 404
+        file_not_found
       else
-        @response["Content-Type"] = "text/html; charset=utf-8"
-        if body.respond_to?(:to_ht)
-          @response.body = [ Html.convert(body.to_ht) ]
-        else
-          @response.body = [ body ]
-        end
+        @page_instance = @page_class.new(self)
+        @page_instance.send(@method)
       end
-      response.status = 200
+      result = @response.finish
+      EzLog.debug("controller.execute:result=#{result}")
+      return result
     end
 
     def file_not_found
       @response.status = 404
-      @response["Content-Type"] = "text/html; charset=utf-8"
+      @response.headers["Content-Type"] ||= "text/html; charset=utf-8"
       template_file = ("#{Config[:template_dir]}/404.html")
       # puts template_file
       if File.exist?(template_file)
@@ -85,7 +81,7 @@ module Ezframe
       else
         body = Html.convert(Ht.p("file not found"))
       end
-      @response.body = [body]
+      @response.body = body
     end
 
     def request_method
@@ -98,6 +94,10 @@ module Ezframe
 
     def env
       @request.env
+    end
+
+    def session
+      return @request.env['rack.session']
     end
 
     def request_body

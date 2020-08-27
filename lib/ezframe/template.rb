@@ -21,7 +21,7 @@ module Ezframe
             ENV[keyword]
           else
             EzLog.info "[WARN] no value for keyword: #{keyword}"
-            nil
+            ""
           end
         end
         return outstr

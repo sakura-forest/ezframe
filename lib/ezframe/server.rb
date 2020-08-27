@@ -12,16 +12,15 @@ module Ezframe
 
     def call(env)
       req = Rack::Request.new(env)
-      res = Controller::Response.new
       begin
-        ctrl = Controller.new(req, res)
+        ctrl = Controller.new(req)
+        res = ctrl.execute
+        raise "response body is not a string: class=#{res[2][0].class}, body=#{res[2][0]}" unless res[2][0].is_a?(String)
+        return res
       rescue => e
         EzLog.error("Controller.exec: exception: #{e.message}:\n#{e.backtrace}")
-        res.status = 500
-        res.headers["Content-Type"] = "text/plain"
-        res.body = [ "Internal server error" ]
+        return [ 500, { "Content-Type" => "text/plain" }, [ "Internal server error" ] ]
       end
-      return res.finish
     end
   end
 end
