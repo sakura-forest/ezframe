@@ -36,7 +36,7 @@ module Ezframe
           return 
         end
         @value_h ||={}
-        @value_h.update(yaml) if yaml.length>0 # .recursively_symbolize_keys
+        @value_h.update(yaml) if yaml.length>0
       end
 
       def [](k)

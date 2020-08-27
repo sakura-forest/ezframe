@@ -23,7 +23,7 @@ module Ezframe
         end
         if /([a-z]{2})\.yml$/ =~ file
           lang = $1
-          @catalog[lang.to_sym] = yaml # .recursively_symbolize_keys
+          @catalog[lang.to_sym] = yaml
         end
       end
 

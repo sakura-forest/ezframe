@@ -24,8 +24,7 @@ module Ezframe
           EzLog.error("[ERROR] columns file is empty: #{filename}")
           return
         end
-        column_info = yaml # .recursively_symbolize_keys
-        # puts "load_one_file: filename=#{filename} column_info=#{column_info.inspect}"
+        column_info = yaml
         add(colset_name, column_info)
       end
 

@@ -18,65 +18,6 @@ class String
   end
 end
 
-# https://github.com/cliftonsluss/recursively_symbolize_keys/blob/master/recursively_symbolize_keys.rb
-class Hash
-#  def [](key)
-#    return (fetch key, nil) || (fetch key.to_s, nil) || (fetch key.to_s.to_sym, nil)
-#  end.recursively_symbolize_keys
-
-  def symbolize_keys
-    h = {}
-    self.each do |k, v|
-      if v.is_a?(Hash)
-	      h[k.to_s.to_sym] = v.recursively_symbolize_keys
-      else
-	      h[k.to_s.to_sym] = v
-      end
-    end
-    h
-  end
-
-  def add_class(klass)
-    return unless klass
-    if klass.is_a?(Array)
-      klass.each {|k| add_class(k) }
-      return
-    end
-    c = self[:class]
-    if !c
-      self[:class] = c = []
-    elsif c.is_a?(String)
-      a = [ c ]
-      self[:class] = c = a
-    end
-    return if c.include?(klass)
-    c.push(klass)
-  end
-
-  def remove_class(klass)
-    c = self[:class]
-    if c.is_a?(String)
-      if klass == c
-        self.delete(:class)
-      end
-    else
-      c.delete(klass)
-    end          
-  end
-end
-
-class Array
-  def symbolize_keys
-    self.collect do |v|
-      if v.kind_of?(Hash) || v.kind_of?(Array) 
-        v.symbolize_keys
-      else
-        v  
-      end  
-    end    
-  end
-end
-
 class Object
   def deep_dup
     Marshal.load(Marshal.dump(self))
