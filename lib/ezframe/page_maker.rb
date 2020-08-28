@@ -26,8 +26,9 @@ module Ezframe
         maker = @index_page_maker.new(self)
         content = maker.make_content
         if @request.xhr?
-          @response.command  = { inject: "#main-content" }
-          @reposend.body = content
+          EzLog.debug("public_index: response=#{@response}")
+          @response.command  = { inject: @target_box || "#main-content" }
+          @response.body = content
           @response.set_url = @request.path_info
           @response.title = "データ一覧"
         else
@@ -65,7 +66,15 @@ module Ezframe
         # 項目名欄の生成
         labels = @table_labels
         unless labels
-          labels = target_keys.map { |k| @parent.column_set[k].label(force: true) || "　" }
+          labels = target_keys.map do |k| 
+            column = @parent.column_set[k]
+            if column
+              column.label(force: true) || "　"
+            else
+              EzLog.error("IndexPageMaker: no column defined: #{key}")
+              "　"
+            end
+          end
         end
         table.header = labels
 
@@ -77,7 +86,9 @@ module Ezframe
         table.add_before(Ht.compact([ "button.btn.btn-primary#create-btn:ezevent=[on=click:url=#{@parent.make_base_url}/create]", [ "i.fa.fa-plus", "text:#{Message[:create_button_label]}" ] ]))
 
         content = PageContent.new
-        content.body = table
+        content.body = table_ht = table.to_ht
+        elem = Ht.search(table_ht, "table")
+        elem[:ezload] = "command=enable_datatable"
         content.title = Message[:index_page_title]
         return content
       end
@@ -91,7 +102,7 @@ module Ezframe
         return unless content
         if @request.xhr?
           @response.body = content
-          @response.command = { inject: "#main-content" }
+          @response.command = { inject: @target_box || "#main-content" }
           @response.set_url = @request.path_info
           @response.title = content.title
         else
@@ -244,7 +255,7 @@ module Ezframe
         @column_set.set_from_db(@id)
         content = maker.make_content
         if @request.xhr?
-          @response.command = { inject: "#main-content" }
+          @response.command = { inject: @target_box || "#main-content" }
           @response.body = content
           @response.set_url = make_base_url
           @response.title =  "詳細情報"
