@@ -124,12 +124,14 @@ module Ezframe
         end
 
         maker = @edit_page_maker.new(self)
-        if @controller.event_form
+        EzLog.debug("event_form=#{@controller.event_form}")
+        event_form = @controller.event_form
+        if event_form
           EzLog.debug("Edit.branch: store edit values")
           # 入力後。フォーム内容をDBに格納
-          validation = Validator.new(@column_set.validate(@controller.event_form))
-          cmd_a = validation.validate_all
-          if cmd_a.length > 0
+          validation = Validator.new(@column_set.validate(event_form))
+          if validation.count_errors > 0
+            cmd_a = validation.validate_all
             EzLog.debug("validate_all: #{cmd_a}")
             @response.command = cmd_a
             return nil
@@ -178,7 +180,7 @@ module Ezframe
         @id ||= @parent.id
         data = @parent.column_set.set_from_db(@id)
         return show_message_page("no data", "data is not defined: #{@id}") unless data
-        cotent = make_edit_form(:edit)
+        content = make_edit_form(:edit)
         content.title = "情報編集: #{data[:m_name]}, #{data[:f_name]}"
         return content
       end
@@ -249,7 +251,7 @@ module Ezframe
           EzLog.debug("public_detail.AJAX: #{@response}")
         else
           layout = Layout.new
-          layout.embed[:main_content] = Ht.Compact.new("div:ezload=[url=#{make_base_url}]")
+          layout.embed[:main_content] = Ht.compact("div:ezload=[url=#{make_base_url}]")
           @response.body = layout
         end
         return nil

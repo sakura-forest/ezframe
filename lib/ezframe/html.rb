@@ -24,6 +24,8 @@ module Ezframe
           return select(ht_h) if ht_h[:item]
         when :icon
           tag = "i"
+        when :button
+          ht_h[:type] ||= "button"
         end
         tag = ht_h[:tag]
         join_info = join_attribute(ht_h)

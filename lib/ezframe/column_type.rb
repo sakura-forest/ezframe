@@ -317,7 +317,8 @@ module Ezframe
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
       @items ||= @attribute[:item]
-      h = Ht.select(class: %w[browser-default], name: self.key, label: @attribute[:label], item: @items, value: @value)
+      # h = Ht.select(class: %w[browser-default], name: self.key, label: @attribute[:label], item: @items, value: @value)
+      h = Ht.select(name: self.key, label: @attribute[:label], item: @items, value: @value)
       h[:class] = @attribute[:class] if @attribute[:class]
       h[:after] = make_error_box(self.key)
       return h

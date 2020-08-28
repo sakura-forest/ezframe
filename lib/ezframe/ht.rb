@@ -7,6 +7,18 @@ module Ezframe
       self.update(args)
     end
 
+    def add_class(class_a)
+      Ht.add_class(self, class_a)
+    end
+
+    def search(query)
+      Ht.search(self, query)
+    end
+
+    def connect_child(child)
+      Ht.connect_child(self, child)
+    end
+
     def to_h
       h = Hash(self)
       h.delete(:wrap)
@@ -181,7 +193,7 @@ module Ezframe
         child = ht
         if ht.is_a?(Array)
         end
-        EzLog.debug("get_bottom: #{ht}")
+        # EzLog.debug("get_bottom: #{ht}")
         while(child[:child]) do
           child = child[:child]
           raise "get_bottom: it must be hash: #{child}" unless child.is_a?(Hash)

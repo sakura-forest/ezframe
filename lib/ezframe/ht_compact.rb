@@ -1,37 +1,11 @@
 module Ezframe
   class Ht
     class << self
-#    attr_accessor :value_a
-
-#    def initialize(*arg)
-#      @value_a = []
-#      add(arg)
-#    end
-
-#    def add(arg)
-#      return unless arg
-#      if arg.is_a?(Array)
-#        @value_a += arg
-#      elsif arg.is_a?(HtCompact)
-#        @value_a += arg.value_a
-#      elsif arg.is_a?(String) || arg.is_a?(Ht)
-#        @value_a.push(arg)
-#      else
-#        EzLog.error("HtCompact: illegal value: class=#{arg.class}:arg=#{arg}")
-#      end
-#    end
-
-#    def to_ht
-#      return self.convert(@value_a)
-#    end
-
       def compact(*arg)
         arg = arg[0] if arg.is_a?(Array) && arg.length == 1
         return nil if arg.nil?
         if arg.is_a?(String)
           res = parse_ht_string(arg)
-          puts "compact: is_a_string: res=#{res}"
-          # res = res[0] if res.is_a?(Array) && res.length == 1
           return res
         elsif arg.is_a?(Hash) || arg.is_a?(Ht)
           return arg
@@ -87,7 +61,14 @@ module Ezframe
         ht = root = Ht.new(tag: :div)
         class_a = []
         if ss.scan(/(\w+)/)
-          ht[:tag] = ss[1].to_sym
+          tag = ss[1].to_sym
+          if tag == :css
+            ht[:tag] = :link
+            ht[:rel] = "stylesheet"
+          else
+            ht[:tag] = tag
+          end
+
           # $stderr.puts "tag=#{ht[:tag]}" if debug
         end
         until ss.eos?
