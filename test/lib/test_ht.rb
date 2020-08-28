@@ -3,16 +3,24 @@ require_relative "../test_helper.rb"
 
 class HtTest < GenericTest
   def test_convert_tag
-    assert_equal({ tag: :div, child: "test"},  Ht.div(child: "test"))
-    assert_equal({ tag: :div, child: "test"},  Ht.div("test"))
-    assert_equal({ tag: :thead, child: { tag: :div, child: "test" }},  Ht.thead(Ht.div("test")))
-    assert_equal({ tag: :input, name: "test"},  Ht.input(name: "test"))
-    assert_equal({ tag: :span, child: "test"},  Ht.span(child: "test"))
+    assert_equal({ tag: :div, child: "test"},  Ht.div(child: "test").to_h)
+    assert_equal({ tag: :div, child: "test"},  Ht.div("test").to_h)
+    assert_equal({ tag: :thead, child: { tag: :div, child: "test" }},  Ht.thead(Ht.div("test")).to_h)
+    assert_equal({ tag: :input, name: "test"},  Ht.input(name: "test").to_h)
+    assert_equal({ tag: :span, child: "test"},  Ht.span(child: "test").to_h)
   end
 
   def test_div
-    h = Ht.div(child: [Ht.div(child: "A"), Ht.div(child: "B")])
-    assert_equal({ tag: :div, child: [ {tag: :div, child: "A"}, {tag: :div, child: "B"}]}, h)
+    ht = Ht.div(child: [Ht.div(child: "A"), Ht.div(child: "B")])
+    assert_equal(:div, ht[:tag])
+    child_a = ht[:child]
+    assert_equal(2, child_a.length)
+    a = child_a[0]
+    assert_equal(:div, a[:tag])
+    assert_equal("A", a[:child])
+    b = child_a[1]
+    assert_equal(:div, b[:tag])
+    assert_equal("B", b[:child])
   end
 
   def test_multidiv
@@ -22,12 +30,13 @@ class HtTest < GenericTest
     assert_equal("test", res[:child][:child])
   end
 
-  def test_from_array
-    ht = Ht.from_array({ tag: :div})
-    assert_equal({ tag: :div }, ht)
+  def test_compact
+    ht = Ht.compact("div")
+    puts "ht.class=#{ht.class}, value=#{ht}"
+    assert_equal({ tag: :div }, ht.to_h)
 
-    ht_a = Ht.from_array([ "body.cl1", [ "ul#myid", [ "li", [ "a:href=[http://www.asahi.com]:asahi" ]]], ".wrapper", [ "span.cl2:child1", Ht.div(child: "child_text") ]])
-#    p ht_a
+    ht_a = Ht.compact("body.cl1", [ "ul#myid", [ "li", [ "a:href=[http://www.asahi.com]:asahi" ]]], ".wrapper", [ "span.cl2:child1", Ht.div(child: "child_text") ])
+    puts "test_compact: ht_a=#{ht_a}"
     node1 = ht_a[0]
     assert_equal(:body, node1[:tag])
     assert_equal(%w[cl1], node1[:class])
@@ -57,7 +66,7 @@ class HtTest < GenericTest
     assert_equal("child_text", child[:child])
 
     # 連続するdiv
-    ht_a = Ht.from_array([ ".div1>span.span2>a:href=index.html", [ ".child1", ".child2" ] ])
+    ht_a = Ht.compact([ ".div1>span.span2>a:href=index.html", [ ".child1", ".child2" ] ])
     # p ht_a
     child1 = ht_a[0]
     assert_equal(:div, child1[:tag])
@@ -76,7 +85,7 @@ class HtTest < GenericTest
     assert_equal(%w[child2], child4[1][:class])
 
     # 様々な引数
-    ht_a = Ht.from_array([ ".div1:v1=[http://localhost:9292/index.html]:v2={:test:}" ])
+    ht_a = Ht.compact([ ".div1:v1=[http://localhost:9292/index.html]:v2={:test:}" ])
     node = ht_a[0]
     assert_equal("http://localhost:9292/index.html", node[:v1])
     assert_equal(":test:", node[:v2])
@@ -135,7 +144,7 @@ class HtTest < GenericTest
   end
   
   def test_connect_child
-    ht = Ht.from_array(".div1 > .div2")
+    ht = Ht.compact(".div1 > .div2")
     ht2 = Ht.a(href: "#remote", child: "link")
     Ht.connect_child(ht, ht2)
     child = ht[:child][:child]
@@ -144,7 +153,7 @@ class HtTest < GenericTest
   end
 
   def test_search
-    ht = Ht.from_array([".link2", [ ".div2", [ "a.link1:href=[link1.html]", "a.link2:href=[link2.html]",] ]])
+    ht = Ht.compact([".link2", [ ".div2", [ "a.link1:href=[link1.html]", "a.link2:href=[link2.html]",] ]])
     res = Ht.search(ht, ".link2")
     assert_equal(:div, res[:tag])    
     res = Ht.search(ht, "a.link2")

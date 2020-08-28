@@ -60,7 +60,7 @@ module Ezframe
         target_keys = @parent.index_keys || @parent.column_set.index_keys || @parent.column_set.view_keys
 
         # テーブル生成
-        table = Ht::Table.new(wrap_tag: "table.table.table-bordered.dataTable")
+        table = Ht::Table.new(wrap_tag: Ht.compact("table.table.table-bordered.dataTable"))
 
         # 項目名欄の生成
         labels = @table_labels
@@ -74,7 +74,7 @@ module Ezframe
           @parent.column_set.values = data
           table.add_item(@parent.column_set.view_array(target_keys), row_attr: { ezevent: "on=click:url=#{@parent.make_base_url(data[:id])}/detail" })
         end
-        table.add_before(Ht.from_array([ "button.btn.btn-primary#create-btn:ezevent=[on=click:url=#{@parent.make_base_url}/create]", [ "i.fa.fa-plus", "text:#{Message[:create_button_label]}" ] ]))
+        table.add_before(Ht.compact([ "button.btn.btn-primary#create-btn:ezevent=[on=click:url=#{@parent.make_base_url}/create]", [ "i.fa.fa-plus", "text:#{Message[:create_button_label]}" ] ]))
 
         content = PageContent.new
         content.body = table
@@ -206,7 +206,7 @@ module Ezframe
         target_keys.map { |key| make_edit_line(new_form, key) }
         cancel_button = make_cancel_button("on=click:url=#{@parent.make_base_url(@id)}/#{typ}:cancel=true:with=form")
         send_button = edit_finish_button
-        new_form.append = Ht.from_array([ "div", [send_button, cancel_button] ])
+        new_form.append = Ht.compact("div", [send_button, cancel_button])
         content = Content.new
         content.body = new_form
         return content
@@ -220,7 +220,7 @@ module Ezframe
           return nil
         end
         inpgrp = form.add_input(column.form)
-        inpgrp.add_prepend("text:#{column.label}")
+        inpgrp.add_prepend(column.label)
         return inpgrp
       end
 
@@ -228,7 +228,7 @@ module Ezframe
       def edit_finish_button(typ = :edit, event = nil)
         msg = Message["#{typ}_finish_button_label"]
         event ||= "on=click:url=#{@parent.make_base_url(@id)}/#{typ}:with=form"
-        return [ "button.btn.btn-primary#edit-finish-button:ezevent=[#{event}]", [ "i.fa.fa-check", "span:#{msg}" ] ]
+        return Ht.compact("button.btn.btn-primary#edit-finish-button:ezevent=[#{event}]", [ "i.fa.fa-check", "span:#{msg}" ])
       end
     end
 
@@ -249,7 +249,7 @@ module Ezframe
           EzLog.debug("public_detail.AJAX: #{@response}")
         else
           layout = Layout.new
-          layout.embed[:main_content] = "div:ezload=[url=#{make_base_url}]"
+          layout.embed[:main_content] = Ht.Compact.new("div:ezload=[url=#{make_base_url}]")
           @response.body = layout
         end
         return nil
@@ -285,15 +285,15 @@ module Ezframe
           else
             view = Ht.span(view)
           end
-          return Ht.from_array([ "p", [ "small.text-secondary:#{column.label}", view ] ])
+          return Ht.compact("p", [ "small.text-secondary:#{column.label}", view ])
         end
         return nil
       end
 
       def button_for_detail_box(data)
-        buttons = [ "button.btn.btn-primary:ezevent=[on=click:url=#{make_base_url(data[:id])}/edit]", [ "i.fas.fa-edit", "span:#{Message[:edit_button_label]}" ]]
+        buttons = Ht.compact("button.btn.btn-primary:ezevent=[on=click:url=#{make_base_url(data[:id])}/edit]", [ "i.fas.fa-edit", "span:#{Message[:edit_button_label]}" ])
         buttons += make_delete_button if @show_delete_button
-        return Ht.array([ ".button-box", buttons ])
+        return Ht.compact(".button-box", buttons)
       end
     end
 
