@@ -145,6 +145,7 @@ module Ezframe
 
       # ハッシュを再帰的に探査して、指定されたタグの要素の配列を返す
       def search(ht_h, query)
+#        EzLog.debug("Ht.search: ht_h=#{ht_h}, query=#{query}")
         if query.is_a?(String)
           query = Ht.compact(query)
         end
@@ -162,10 +163,15 @@ module Ezframe
             res = search(h, query) 
             return res if res
           end
+#        else
+#          EzLog.error("Ht.search: illegal value: #{ht_h.class}, #{ht_h}")
         end
+#        EzLog.error("Ht.search: end without value: #{ht_h.class}, #{ht_h}")
+        return nil
       end
 
       def _compare(query, hash)
+        EzLog.debug("_compare: query=#{query}, hash=#{hash}")
         flag = nil
         cls_a = [ query[:class] ].flatten.compact
         target_class = [ hash[:class] ].flatten.compact
@@ -176,6 +182,7 @@ module Ezframe
           next if k == :class
           return nil unless hash[k] && query[k] == hash[k]
         end
+        EzLog.debug("match!")
         return true
       end
 
