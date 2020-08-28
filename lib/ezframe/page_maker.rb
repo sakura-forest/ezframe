@@ -71,7 +71,7 @@ module Ezframe
             if column
               column.label(force: true) || "　"
             else
-              EzLog.error("IndexPageMaker: no column defined: #{k}")
+              EzLog.error("IndexPageMaker.make_content: no column defined: #{k}")
               "　"
             end
           end
