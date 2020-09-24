@@ -13,12 +13,17 @@ module Ezframe
       @class_snake = class_to_snake(self.class)
       # puts "class_snake = #{@class_snake}"
       @request, @response = @controller.request, @controller.response
+      @set_history = true
       init_var
     end
 
     def init_var
       @column_set = ColumnSets.get(@class_snake)
       @dataset = DB.dataset(@class_snake) if @column_set
+
+      @index_page_maker = PageMaker::IndexPageMaker
+      @detail_page_maker = PageMaker::DetailPageMaker
+      @edit_page_maker = PageMaker::EditPageMaker
     end
 
     # routeから基本URLを生成

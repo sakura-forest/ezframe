@@ -68,7 +68,13 @@ module Ezframe
 
     # エラーメッセージだけを表示するページを生成
     def show_message_page(title, body)
-      return show_base_template(title: title, body: Html.convert(body))
+      content = PageMaker::PageContent.new
+      layout = Layout.new
+      # layout.embed[:page_title] = title
+      layout.embed[:body] = Html.convert(body)
+      content.body = layout
+      content.title = title
+      return layout
     end
   end
 end

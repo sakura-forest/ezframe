@@ -137,9 +137,11 @@ module Ezframe
       # ハッシュにclassを追加
       def add_class(ht_h, class_a)
         return nil if ht_h.nil? || class_a.nil? || class_a.empty?
-        cls = [ ht_h[:class] ].flatten
-        class_a = [ class_a ].flatten
-        ht_h[:class] = (Array(cls) + Array(class_a)).compact.uniq
+        ht_h = ht_h[0] if ht_h.is_a?(Array)
+        # EzLog.debug("add_class: ht_h.class=#{ht_h[:class]}, adding=#{class_a}")
+        cls = ht_h[:class]
+        cls = [ cls ] unless cls.is_a?(Array)
+        ht_h[:class] = (cls + Array(class_a)).compact.uniq
         return ht_h
       end
 
@@ -171,7 +173,7 @@ module Ezframe
       end
 
       def _compare(query, hash)
-        EzLog.debug("_compare: query=#{query}, hash=#{hash}")
+        # EzLog.debug("_compare: query=#{query}, hash=#{hash}")
         flag = nil
         cls_a = [ query[:class] ].flatten.compact
         target_class = [ hash[:class] ].flatten.compact
@@ -182,7 +184,7 @@ module Ezframe
           next if k == :class
           return nil unless hash[k] && query[k] == hash[k]
         end
-        EzLog.debug("match!")
+        # EzLog.debug("match!")
         return true
       end
 

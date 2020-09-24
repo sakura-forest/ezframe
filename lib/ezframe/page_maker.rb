@@ -29,8 +29,10 @@ module Ezframe
           EzLog.debug("public_index: response=#{@response}")
           @response.command  = { inject: @target_box || "#main-content" }
           @response.body = content
-          @response.set_url = @request.path_info
-          @response.title = "データ一覧"
+          if @set_history
+            @response.set_url = @request.path_info
+            @response.title = "データ一覧"
+          end
         else
           layout = Layout.new
           layout.embed[:body] = content.body
@@ -103,8 +105,10 @@ module Ezframe
         if @request.xhr?
           @response.body = content
           @response.command = { inject: @target_box || "#main-content" }
-          @response.set_url = @request.path_info
-          @response.title = content.title
+          if @set_history
+            @response.set_url = @request.path_info
+            @response.title = content.title if content.respond_to?(:title)
+          end
         else
           layout = Layout.new
           layout.embed[:main_content] = content.body
@@ -257,9 +261,11 @@ module Ezframe
         if @request.xhr?
           @response.command = { inject: @target_box || "#main-content" }
           @response.body = content
-          @response.set_url = make_base_url
-          @response.title =  "詳細情報"
-          EzLog.debug("public_detail.AJAX: #{@response}")
+          if @set_history
+            @response.set_url = make_base_url
+            @response.title =  "詳細情報"
+          end
+          # EzLog.debug("public_detail.AJAX: #{@response}")
         else
           layout = Layout.new
           layout.embed[:main_content] = Ht.compact("div:ezload=[url=#{make_base_url}]")
@@ -284,7 +290,7 @@ module Ezframe
           list.add_item(row) if row
         end
         list.add_item(button_for_detail_box)
-        content = Content.new
+        content = PageContent.new
         content.body = list
         return content
       end

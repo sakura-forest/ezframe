@@ -14,6 +14,7 @@ module Ezframe
       super
       @sort_key = :id
       @target_box = "##{@class_snake}-tab"
+      @set_history = nil
       #tab_id = "##{@class_snake}_tab"
       #@dom_id = { create: tab_id, edit: tab_id, index: tab_id, detail: tab_id }
       # @parent_key = :customer

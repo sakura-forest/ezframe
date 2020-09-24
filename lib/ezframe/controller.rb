@@ -68,7 +68,7 @@ module Ezframe
       end
       result = @response.finish
       # EzLog.debug("controller.execute:result=#{result}")
-      EzLog.debug("controller.execute:result:result.status=#{@response.status}, command=#{@response.command.class}, body=#{result[2][0].to_s[0..50]}")
+      EzLog.debug("controller.execute:result:result.status=#{@response.status}, command=#{@response.command.class}, body=#{result[2][0].to_s[0..80]} .....")
       return result
     end
 
