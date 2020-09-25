@@ -3,13 +3,50 @@
 # frozen_string_literal: true
 
 $:.push("lib")
-require 'ezframe'
-require 'sequel'
+require "ezframe"
+require "sequel"
 
 include Ezframe
+
+class TableCreator
+  def create_tables
+    ColumnSets.each do |table_name, column_set|
+      begin
+        create_one_table(table_name, column_set)
+      rescue => e
+        EzLog.error("create_tables: #{e.inspect}\n#{$@.inspect}")
+      end
+    end
+  end
+
+  def create_one_table(table_name, column_set)
+    col_h = column_set.get_hash(:db_type)
+    create_table(table_name, col_h)
+  end
+
+  # テーブル生成
+  def create_table(table_name, dbtype_h)
+    %w[id created_at updated_at deleted_at].each do |key|
+      dbtype_h.delete(key.to_sym)
+    end
+    # puts "create_table: #{table_name}"
+    @sequel.create_table(table_name) do
+      if @dbfile.index("postgres")
+        primary_key :id, identity: true
+      else
+        primary_key :id, auto_increment: true
+      end
+      dbtype_h.each do |key, dbtype|
+        next unless dbtype
+        column(key, dbtype)
+      end
+      column(:created_at, :timestamp, default: Sequel::CURRENT_TIMESTAMP)
+      column(:updated_at, :timestamp)
+      column(:deleted_at, :timestamp)
+    end
+  end
+end
 
 Config.init
 DB.init
 ColumnSets.init
-
-ColumnSets.create_tables

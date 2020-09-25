@@ -116,34 +116,7 @@ module Ezframe
         return res_a
       end
 
-      # テーブル生成
-      def create_table(table_name, dbtype_h)
-        %w[id created_at updated_at deleted_at].each do |key|
-          dbtype_h.delete(key.to_sym)
-        end
-        # puts "create_table: #{table_name}"
-        if @dbfile.index("postgres")
-          @sequel.create_table(table_name) do
-            primary_key :id, identity: true
-            dbtype_h.each do |key, dbtype|
-              column(key, dbtype)
-            end
-            column(:created_at, :timestamp, default: Sequel::CURRENT_TIMESTAMP)
-            column(:updated_at, :timestamp)
-            column(:deleted_at, :timestamp)
-          end
-        else
-          @sequel.create_table(table_name) do
-            primary_key :id, auto_increment: true
-            dbtype_h.each do |key, dbtype|
-              column(key, dbtype)
-            end
-            column(:created_at, :timestamp, default: Sequel::CURRENT_TIMESTAMP)
-            column(:updated_at, :timestamp)
-            column(:deleted_at, :timestamp)
-          end
-        end
-      end
+
 
       def insert(table_name, val_h)
         dataset(table_name).insert(val_h)

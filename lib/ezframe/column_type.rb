@@ -275,6 +275,17 @@ module Ezframe
     end
   end
 
+  class HasManyType < TypeBase
+    def initialize(attr = nil)
+      super(attr)
+      table_info = @attribute[:table]
+    end
+
+    def db_type
+      nil
+    end
+  end
+
   class IdType < IntType
     def form(opts = {})
       return nil

@@ -68,21 +68,6 @@ module Ezframe
         end.join
       end
 
-      def create_tables
-        self.each do |table_name, column_set|
-          begin
-            create_one_table(table_name, column_set)
-          rescue => e
-            EzLog.error("create_tables: #{e.inspect}\n#{$@.inspect}")
-          end
-        end
-      end
-
-      def create_one_table(table_name, column_set)
-        col_h = column_set.get_hash(:db_type)
-        # EzLog.info "create_one_table: col_h=#{col_h.inspect}"
-        DB.create_table(table_name, col_h)
-      end
 
       # foreignから生成したテーブル連結情報を返す
       def full_join_structure(colset_id)
