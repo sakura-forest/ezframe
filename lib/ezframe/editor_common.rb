@@ -48,12 +48,6 @@ module Ezframe
       return [ "button.btn.btn-danger:ezevent=[#{event}]", [ "i.fa.fa-times", "text:#{Message[:cancel_button_label]}" ]]
     end
 
-    # 値の更新
-#    def update_value
-#      form = @event[:form]
-#      @column_set.update(get_id, form)
-#    end
-
     # ラベル付きで1カラムのviewを表示
     def show_label_view(key)
       col = @column_set[key]
