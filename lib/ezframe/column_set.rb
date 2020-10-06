@@ -61,6 +61,10 @@ module Ezframe
         @colset_h.each {|k, v| yield(k, v) }
       end
 
+      def keys
+        @colset_h.keys
+      end
+
       def inspect
         return @colset_h.map do |name, colset|
           # "[#{name}]:#{colset.inspect}"

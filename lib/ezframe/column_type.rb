@@ -655,9 +655,10 @@ module Ezframe
   class JpnameType < TextType
   end
 
-  class KatakanaType < TextType
+  class HiraganaType < TextType
     def normalize(val)
       val = super(val)
+      return nil unless val
       return val.tr("ァ-ン", "ぁ-ん")
     end
 
