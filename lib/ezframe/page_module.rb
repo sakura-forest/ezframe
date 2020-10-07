@@ -105,7 +105,7 @@ module Ezframe
           else
             store_edit_form
           end
-          public_detail
+          act_after_edit
           return nil
         else
           EzLog.debug("Edit.branch: show_form")
@@ -134,6 +134,10 @@ module Ezframe
         EzLog.debug("store_create_form: #{values}")
         @column_set[:id].value = @id = @column_set.create(values)
         return @id
+      end
+
+      def act_after_edit
+        public_detail
       end
     end
 
