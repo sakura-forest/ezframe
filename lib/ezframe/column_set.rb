@@ -238,7 +238,7 @@ module Ezframe
       else
         self.set_values(value_h, key_suffix: key_suffix)
       end
-      db_value_h = self.get_hash(:db_value)
+      db_value_h = self.collect_db_value
       EzLog.debug("column_set.create: #{db_value_h}")
       db_value_h.delete(:id)
       db_value_h[:updated_at] = Time.now
@@ -353,6 +353,17 @@ module Ezframe
 
     def [](col_key)
       return @column_h[col_key.to_sym]
+    end
+
+    def collect_db_value
+      res_h = {}
+      @column_h.each do |key, col|
+        val = col.db_value
+        typ = col.db_type
+        next if typ.nil?
+        res_h[key] = val
+      end
+      return res_h
     end
 
     def make_form(prefix = nil)
