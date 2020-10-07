@@ -101,7 +101,7 @@ class DBInfo
       dbtype = dbcols[column.key]
       new_type = column.db_type
       if !new_type || new_type.empty?
-        EzLog.error("check_diff: no db_type: table=#{table_name}:key=#{column.key}")
+        EzLog.debug("check_diff: no db_type: table=#{table_name}:key=#{column.key}")
         next
       end
       unless dbtype
