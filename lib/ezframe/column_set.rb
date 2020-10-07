@@ -355,6 +355,17 @@ module Ezframe
       return @column_h[col_key.to_sym]
     end
 
+    def make_form(prefix = nil)
+      res_h = {}
+      @column_h.map do |key, col|
+        fm = col.form
+        next unless fm
+        ent_key = prefix ? "#{prefix}_#{key}" : key
+        res_h[ent_key.to_sym] = [ col.label, fm ]
+      end
+      return res_h
+    end
+
     # 入力フォームを生成して配列で返す
     def form_array(target_keys = nil, convert_html = nil)
       target_keys ||= edit_keys

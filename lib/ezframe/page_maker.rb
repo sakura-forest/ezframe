@@ -106,9 +106,19 @@ module Ezframe
           EzLog.error("undefined column entry: #{key}")
           return nil
         end
-        inpgrp = form.add_input(column.form)
-        return nil unless inpgrp
-        inpgrp.add_prepend(column.label)
+        fm = column.form
+        EzLog.debug("fm=#{fm}")
+        return nil unless fm
+        unless fm[:tag]
+          fm.each do |key, contain| 
+            label, elem = contain
+            inpgrp = form.add_input(elem)
+            inpgrp.add_prepend(label) if inpgrp
+          end
+        else
+          inpgrp = form.add_input(fm)
+          inpgrp.add_prepend(column.label)
+        end
         return inpgrp
       end
 

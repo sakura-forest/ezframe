@@ -235,8 +235,8 @@ module Ezframe
 
     def target_table
       table = @attribute[:table]
-      return table if table
-      return self.key
+      return table.to_sym if table
+      return self.key.to_sym
     end
 
     def view(opts = {})
@@ -253,6 +253,11 @@ module Ezframe
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
+      if @attribute[:show_create_form]
+        tbl = target_table
+        colset = ColumnSets[tbl]
+        return colset.make_form(tbl)
+      end
       view_key = @attribute[:menu_column] || @attribute[:view_column]
       data_h = DB::Cache[target_table.to_sym]
       menu_a = data_h.map do |id, data|
