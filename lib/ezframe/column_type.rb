@@ -31,6 +31,11 @@ module Ezframe
       @attribute[:key].to_sym
     end
 
+    def set_key_prefix_suffix(key, opts)
+      key =[ opts[:key_prefix], key, opts[:key_suffix] ].compact.join("_") if opts[:key_prefix] || opts[:key_suffix]
+      return key
+    end
+
     def label(opts = {})
       return nil if @attribute[:hidden] && !opts[:force]
       @attribute[:label]
@@ -130,8 +135,7 @@ module Ezframe
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      key = self.key
-      key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
+      key = set_key_prefix_suffix(self.key, opts)
       h = Ht.input(type: "text", name: key, label: @attribute[:label], value: @value || "")
       h[:class] = @attribute[:class] if @attribute[:class]
       h[:after]  = make_error_box(key)
@@ -152,8 +156,7 @@ module Ezframe
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
       val = @value
-      key = self.key
-      key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
+      key = set_key_prefix_suffix(self.key, opts)
       h = Ht.textarea(name: key, label: @attribute[:label], child: val)
       h[:class] = @attribute[:class] if @attribute[:class]
       h[:after] = make_error_box(key)
@@ -209,8 +212,7 @@ module Ezframe
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      key = self.key
-      key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
+      key = set_key_prefix_suffix(self.key, opts)
       h = Ht.input(type: "number", name: key, label: @attribute[:label], value: @value || "")
       h[:class] = @attribute[:class] if @attribute[:class]
       h[:after] = make_error_box(key)
@@ -263,8 +265,7 @@ module Ezframe
       menu_a = data_h.map do |id, data|
         [ data[:id], data[view_key&.to_sym] ]
       end
-      key = self.key
-      key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
+      key = set_key_prefix_suffix(self.key, opts)
       return Ht.select(name: key, class: %w[browser-default], item: menu_a, value: @value, after: make_error_box(key))
     end
 
@@ -315,8 +316,7 @@ module Ezframe
 
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      key = self.key
-      key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
+      key = set_key_prefix_suffix(self.key, opts)
       h = Ht.input(type: "password", name: key, label: @attribute[:label], value: "")
       h[:class] = @attribute[:class] if @attribute[:class]
       h[:after] = make_error_box(key)
@@ -332,11 +332,12 @@ module Ezframe
   class SelectType < TypeBase
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
+      key = set_key_prefix_suffix(self.key, opts)
       @items ||= @attribute[:item]
       # h = Ht.select(class: %w[browser-default], name: self.key, label: @attribute[:label], item: @items, value: @value)
-      h = Ht.select(name: self.key, label: @attribute[:label], item: @items, value: @value)
+      h = Ht.select(name: key, label: @attribute[:label], item: @items, value: @value)
       h[:class] = @attribute[:class] if @attribute[:class]
-      h[:after] = make_error_box(self.key)
+      h[:after] = make_error_box(key)
       return h
     end
 
@@ -360,8 +361,7 @@ module Ezframe
   class CheckboxType < TypeBase
     def form(opts = {})
       return nil if no_edit? && !opts[:force]
-      key = self.key
-      key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
+      key = set_key_prefix_suffix(self.key, opts)
       h = Ht.checkbox(name: key, value: parent[:id].value, label: @attribute[:label])
       h[:class] = @attribute[:class] if @attribute[:class]
       h[:after] = make_error_box(key)
@@ -533,8 +533,7 @@ module Ezframe
       end
       year_list.unshift([ 0, "(年)" ])
 
-      key = self.key
-      key ="#{key}#{opts[:key_suffix]}" if opts[:key_suffix]
+      key = set_key_prefix_suffix(self.key, opts)
 
       year, mon, mday = parse_date(@value)
       mon_list = (1..12).map { |m| [m, "#{m}"] }

@@ -358,7 +358,7 @@ module Ezframe
     def make_form(prefix = nil)
       res_h = {}
       @column_h.map do |key, col|
-        fm = col.form
+        fm = col.form(key_prefix: prefix)
         next unless fm
         ent_key = prefix ? "#{prefix}_#{key}" : key
         res_h[ent_key.to_sym] = [ col.label, fm ]
