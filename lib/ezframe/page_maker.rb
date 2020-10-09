@@ -93,9 +93,12 @@ module Ezframe
         target_keys.map { |key| make_edit_line(new_form, key) }
         cancel_button = make_cancel_button("on=click:url=#{@parent.make_base_url(@id)}/#{typ}:cancel=true:with=form")
         send_button = edit_finish_button(typ)
-        new_form.append = Ht.compact("div", [send_button, cancel_button])
+        new_form.append = Ht.compact("div", send_button+cancel_button)
         content = PageContent.new
-        content.body = new_form
+        card = Bootstrap::Card.new
+        card.option[:wrap_tag] += ".p-5.m-5"
+        card.add_item(new_form)
+        content.body = card
         return content
       end
 
@@ -113,11 +116,11 @@ module Ezframe
           fm.each do |key, contain| 
             label, elem = contain
             inpgrp = form.add_input(elem)
-            inpgrp.add_prepend(label) if inpgrp
+            inpgrp.add_prepend("text:#{label}") if inpgrp
           end
         else
           inpgrp = form.add_input(fm)
-          inpgrp.add_prepend(column.label)
+          inpgrp.add_prepend("text:#{column.label}")
         end
         return inpgrp
       end
@@ -126,7 +129,7 @@ module Ezframe
       def edit_finish_button(typ = :edit, event = nil)
         msg = Message["#{typ}_finish_button_label"]
         event ||= "on=click:url=#{@parent.make_base_url(@id)}/#{typ}:with=form"
-        return Ht.compact("button.btn.btn-primary#edit-finish-button:ezevent=[#{event}]", [ "i.fa.fa-check", "span:#{msg}" ])
+        return [ "button.btn.btn-primary#edit-finish-button:ezevent=[#{event}]", [ "i.fa.fa-check", "span:#{msg}" ] ]
       end
     end
 

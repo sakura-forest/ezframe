@@ -274,8 +274,8 @@ module Ezframe
         return res
       end
 
-      def add_first_last(ch = nil)
-        child_a = (ch || @item_a).clone
+      def add_first_last(it_a = nil)
+        child_a = (it_a || @item_a).clone
         child_a = @prepend + child_a if @prepend.is_a?(Array) && @prepend.length > 0
         child_a = child_a + @append if @append.is_a?(Array) && @append.length > 0
         return child_a
@@ -288,7 +288,7 @@ module Ezframe
         Ht.add_class(ht, @option[:extra_wrap_class])
         child_a = add_first_last
         Ht.connect_child(ht, child_a)
-        # EzLog.debug("List.to_ht: #{ht}: @item_a=#{@item_a}")
+        EzLog.debug("List.to_ht: #{ht}: @item_a=#{@item_a}")
         return add_before_after(ht)
       end
 
