@@ -8,15 +8,27 @@ module Ezframe
         unless File.exist?(filename)
           raise "fill_template: file does not exist: #{filename}"
         end
-        instr = File.open(filename, &:read)
+        instr = File.read(filename)
+        instr = fill_in_file(instr, dir, opts)
         return fill_in_text(instr, opts)
       end
 
+      def fill_in_file(text, dir, opts = {})
+        outstr = text.gsub(/:@([\w\-]+\.[\w\-]+)@:/) do
+          keyword = $1
+          if keyword.index(".")
+            fname = "#{dir}/#{keyword}"
+            File.read(fname) if File.exist?(fname)
+          end
+        end
+        return outstr
+      end
+
       def fill_in_text(text, opts = {})
-        outstr = text.gsub(/\#\{([^\}]+)\}/) do
+        outstr = text.gsub(/:@([\w\-]+)@:/) do
           keyword = $1
           if opts[keyword.to_sym]
-            opts[keyword.to_sym] 
+            opts[keyword.to_sym]
           elsif ENV[keyword]
             ENV[keyword]
           else
