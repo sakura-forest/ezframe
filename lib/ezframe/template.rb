@@ -25,7 +25,7 @@ module Ezframe
       end
 
       def fill_in_text(text, opts = {})
-        outstr = text.gsub(/:@([\w\-]+)@:/) do
+        outstr = text.gsub(/:@(\w+)@:/) do
           keyword = $1
           if opts[keyword.to_sym]
             opts[keyword.to_sym]
