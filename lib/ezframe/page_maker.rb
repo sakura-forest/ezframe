@@ -84,7 +84,6 @@ module Ezframe
         return content
       end
 
-
       # 編集フォームの生成
       def make_edit_form(typ = :edit)
         target_keys = @parent.column_set.edit_keys
