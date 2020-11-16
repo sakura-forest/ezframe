@@ -227,9 +227,10 @@ function parse_one_event(event) {
 function execute_event(obj, attr_key = "ezevent", ev = null) {
   var event_s = obj.getAttribute(attr_key)
   console.log("execute_event: "+attr_key+", event="+event_s+", ev="+JSON.stringify(ev))
-  var event_a = parse_command(event_s)
+  var event_a = parse_event(event_s)
   for(var i = 0; i < event_a.length; i++) {
     var event = event_a[i]
+    console.log("event: "+JSON.stringify(event))
     var cmd = event.command
     if (cmd) {
       func = event_commands[event.command]
@@ -376,6 +377,7 @@ function switch_hide(button) {
 }
 */
 
+/*
 function parse_command(str) {
   var ht;
   var command_a = [];
@@ -391,9 +393,9 @@ function parse_command(str) {
     } else if (ss.scan(/([a-zA-Z][a-zA-Z0-9_\-^.]+)=([^:;]+)/)) { 
       ht[ss.getCapture(0)] = ss.getCapture(1)
     }
-    if (ss.scan(/:\s*/)) {
+   if (ss.scan(/:\s* /)) {
       continue
-    } else if (ss.scan(/;\s*/)) {
+    } else if (ss.scan(/;\s* /)) {
       command_a.push(ht)
       ht = {}
     }
@@ -403,6 +405,7 @@ function parse_command(str) {
   }
   return command_a;
 }
+*/
 
 document.addEventListener('DOMContentLoaded', function () {
   register_events(document)
