@@ -43,9 +43,9 @@ module Ezframe
         list.each do |data|
           @parent.column_set.clear
           @parent.column_set.values = data
-          table.add_item(@parent.column_set.view_array(target_keys), row_attr: { ezevent: "on=click:url=#{@parent.make_base_url(data[:id])}/detail" })
+          table.add_item(@parent.column_set.view_array(target_keys), row_attr: { ezevent: "on=click:command=post:url=#{@parent.make_base_url(data[:id])}/detail" })
         end
-        table.add_before(Ht.compact([ "button.btn.btn-primary#create-btn:ezevent=[on=click:url=#{@parent.make_base_url}/create]", [ "i.fa.fa-plus", "text:#{Message[:create_button_label]}" ] ]))
+        table.add_before(Ht.compact([ "button.btn.btn-primary#create-btn:ezevent=[on=click:command=post:url=#{@parent.make_base_url}/create]", [ "i.fa.fa-plus", "text:#{Message[:create_button_label]}" ] ]))
 
         content = PageContent.new
         content.body = table_ht = table.to_ht
@@ -90,7 +90,7 @@ module Ezframe
         new_form = Bootstrap::Form.new
         new_form.action = "#{@parent.make_base_url}/#{typ}"
         target_keys.map { |key| make_edit_line(new_form, key) }
-        cancel_button = make_cancel_button("on=click:url=#{@parent.make_base_url(@id)}/#{typ}:cancel=true:with=form")
+        cancel_button = make_cancel_button("on=click:command=post:url=#{@parent.make_base_url(@id)}/#{typ}:cancel=true:with=form")
         send_button = edit_finish_button(typ)
         new_form.append = Ht.compact("div", send_button+cancel_button)
         content = PageContent.new
@@ -127,7 +127,7 @@ module Ezframe
       # 編集完了ボタン
       def edit_finish_button(typ = :edit, event = nil)
         msg = Message["#{typ}_finish_button_label"]
-        event ||= "on=click:url=#{@parent.make_base_url(@id)}/#{typ}:with=form"
+        event ||= "on=click:command=post:url=#{@parent.make_base_url(@id)}/#{typ}:with=form"
         return [ "button.btn.btn-primary#edit-finish-button:ezevent=[#{event}]", [ "i.fa.fa-check", "span:#{msg}" ] ]
       end
     end
@@ -167,13 +167,11 @@ module Ezframe
       end
 
       def button_for_detail_box # (data)
-        # buttons = Ht.compact("button.btn.btn-primary:ezevent=[on=click:url=#{make_base_url(data[:id])}/edit]", [ "i.fas.fa-edit", "span:#{Message[:edit_button_label]}" ])
-        buttons = Ht.compact("button.btn.btn-primary:ezevent=[on=click:url=#{@parent.make_base_url(@parent.id)}/edit]", [ "i.fas.fa-edit", "span:#{Message[:edit_button_label]}" ])
+        # buttons = Ht.compact("button.btn.btn-primary:ezevent=[on=click:command=post:url=#{make_base_url(data[:id])}/edit]", [ "i.fas.fa-edit", "span:#{Message[:edit_button_label]}" ])
+        buttons = Ht.compact("button.btn.btn-primary:ezevent=[on=click:command=post:url=#{@parent.make_base_url(@parent.id)}/edit]", [ "i.fas.fa-edit", "span:#{Message[:edit_button_label]}" ])
         buttons += make_delete_button if @show_delete_button
         return Ht.compact(".button-box", buttons)
       end
     end
-
-
   end
 end

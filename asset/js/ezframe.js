@@ -1,87 +1,47 @@
-// 2020年08月26日(水)
-function inject(res, obj) {
-  var elem
-  console.log("inject: " + res.inject + ", body=" + res.body)
-  if (res.inject == "this" || res.inject == "here" || res.inject == "self") {
-    elem = obj
-  } else {
-    elem = document.querySelector(res.inject)
-  }
-  if (elem) {
-    elem.innerHTML = (res.body || "")
-    add_event(elem)
-    exec_ezload(elem)
-  } else {
-    console.log("inject: no such element: " + res.inject)
-  }
-  // URL表示を指定されたURLに変更する
-  if (res.set_url) {
-    console.log("set_url: " + res.set_url + ", title: "+res.title)
-    history.pushState(null, res.title, res.set_url)
-    document.title = res.title
-  }
-}
-
 var extra_event_funcs = []
 var event_commands = {
   inject: function(event, obj) { inject(event, obj) },
+  set_history: function(event, obj) {
+    console.log("set_url: " + event.url + ", title: "+event.title);
+    history.pushState(null, event.title, event.url);
+  },
+  set_title: function(event, obj) {
+    console.log("set_title: value=" + event.value);
+    document.title = event.value;
+  },
+  // show_modal: function(event, obj) { show_modal(event, obj) },
   set_validation: function(event, form_dom) {
-    console.log("set_validation")
-    var inputs = collect_all_input_elements(form_dom)
-    for(var i = 0; i < inputs.length; i++) {
-      var elem = inputs[i]
-      var send_with = "input";
-      var on = "change"
-      var target_key = elem.name
-      var ezvalid = elem.getAttribute("ezvalid")
-      if (ezvalid) {
-        ezvalid = parse_one_event(ezvalid)
-        if (ezvalid.with) { send_with = ezvalid.with }
-        if (ezvalid.on) { on = ezvalid.on }
-        if (ezvalid.target_key) { target_key = ezvalid.target_key }
-      }
-      var ev_s = "on=" + on + ":branch=single_validate:target_key=" + target_key + ":with=" + send_with + ":url=" + event.validate_url
-      console.log("set_validation: ev_s="+ev_s)
-      elem.setAttribute("ezevent", ev_s)
-      elem.addEventListener(on, function(ev) {
-        execute_event(ev.srcElement)
-      })
-    }
+    set_validation(event, form_dom)
   },
   redirect: function(event) {
-    console.log("redirect:" + event.url)
-    location.href = event.url
+    console.log("redirect:" + event.target)
+    location.href = event.target
   },
-  inject: function(event) {
-    console.log("redirect:" + event.url)
-
-  }
-}
-
-// サーバからのレスポンスを処理する関数
-var response_funcs = {
-  inject: function(event, obj) { inject(event, obj) },
-  set_value: function(res, obj) {
+  post: function(event) {
+    with_attr(event, obj)
+    post_value(event, obj)
+  },
+  set_value: function(event, obj) {
     var elem
-    console.log("set_value: " + res.set_value + ", value=", res.value)
-    if (res.set_value == "this") {
+    console.log("set_value:target=" + event.target + ", value=", event.value)
+    if (event.target == "this") {
       elem = obj
     } else {
-      elem = document.querySelector(res.set_value)
+      elem = document.querySelector(event.target)
     }
     if (elem) {
-      if (res.set_value.indexOf("select") > 0) {
-        elem.selectedIndex = res.value
+      if (event.target.indexOf("select") > 0) {
+        elem.selectedIndex = event.value
       } else {
-        elem.value = res.value
+        elem.value = event.value
       }
     } else {
-      console.log("set_value: no such element: " + res.set_value)
+      console.log("set_value: no such element: " + event.target)
     }
   },
-  reset_error: function(res, obj) {
-    console.log("reset_error: " + res.reset_error)
-    var elems = document.querySelectorAll(res.reset_error)
+  reset_error: function(event, obj) {
+    console.log("reset_error:target=" + event.target)
+    var elems = document.querySelectorAll(event.target)
     if (elems) {
       for(var i=0; i < elems.length; i++) {
         elem = elems[i]
@@ -90,60 +50,56 @@ var response_funcs = {
       }
     }
   },
-  set_error: function(res, obj) {
+  set_error: function(event, obj) {
     var elem;
-    console.log("set_error: " + res.set_error + ", value=", res.value)
-    elem = document.querySelector(res.set_error)
+    console.log("set_error:target=" + event.target + ", value=", event.value)
+    elem = document.querySelector(event.target)
     if (elem) {
-      elem.innerHTML = res.value
-      if (!res.value || res.value.length == 0) {
+      elem.innerHTML = event.value
+      if (!event.value || event.value.length == 0) {
         elem.classList.add("hide")
       } else {
         elem.classList.remove("hide")
       }
     } else {
-      console.log("set_error: no such element: " + res.set_error)
+      console.log("set_error: no such element: " + event.target)
     }
   },
-  add_class: function(res, obj) {
+  add_class: function(event, obj) {
     var elem;
-    console.log("add_class: " + res.add_class + ", value=", res.value)
-    if (res.add_class == "this") {
+    console.log("add_class:target=" + event.target + ", value=", event.value)
+    if (event.target == "this") {
       elem = obj
     } else {
-      elem = document.querySelector(res.add_class)
+      elem = document.querySelector(event.target)
     }
     if (elem) {
-      elem.classList.add(res.value)
+      elem.classList.add(event.value)
     }
   },
-  remove_class: function(res, obj) {
+  remove_class: function(event, obj) {
     var elem;
-    console.log("remove_class: " + res.remove_class + ", value=", res.value)
-    if (res.remove_class == "this") {
+    console.log("remove_class:target=" + event.target + ", value=", event.value)
+    if (event.target == "this") {
       elem = obj
     } else {
-      elem = document.querySelector(res.remove_class)
+      elem = document.querySelector(event.target)
     }
     if (elem) {
-      elem.classList.remove(res.value)
+      elem.classList.remove(event.value)
     }
   }
 }
 
-// register events included in a object
-function add_event(obj) {
+// register events contained in obj
+function register_events(obj) {
   var elems = obj.querySelectorAll('[ezevent]')
   if (elems) {
-    console.log("add_event: events=" + elems.length)
+    console.log("register_event: events=" + elems.length)
     for (var i = 0; i < elems.length; i++) {
       var elem = elems[i]
       var event_s = elem.getAttribute("ezevent")
       var event_a = parse_event(event_s)
-      if (event_a.length > 1) {
-        console.log("inculde multi events: "+event_a.length)
-        console.dir(event_a)
-      }
       for(var j = 0; j < event_a.length; j++) {
         var event = event_a[j]
         if (event.on == "load") {
@@ -163,6 +119,47 @@ function add_event(obj) {
   // execute extra event functions
   for(var i=0; i < extra_event_funcs.length; i++) {
     extra_event_funcs[i](obj)
+  }
+}
+
+function inject(res, obj) {
+  var elem;
+  console.log("inject:target=" + res.target + ", body=" + res.body);
+  if (res.target == "this" || res.target == "here" || res.target == "self") {
+    elem = obj
+  } else {
+    elem = document.querySelector(res.target)
+  }
+  if (elem) {
+    elem.innerHTML = (res.body || "")
+    register_events(elem)
+    exec_ezload(elem)
+  } else {
+    console.log("inject: no such element: " + res.target)
+  }
+}
+
+function set_validation(event, form_dom) {
+  console.log("set_validation")
+  var inputs = collect_all_input_elements(form_dom)
+  for(var i = 0; i < inputs.length; i++) {
+    var elem = inputs[i]
+    var send_with = "input";
+    var on = "change"
+    var target_key = elem.name
+    var ezvalid = elem.getAttribute("ezvalid")
+    if (ezvalid) {
+      ezvalid = parse_one_event(ezvalid)
+      if (ezvalid.with) { send_with = ezvalid.with }
+      if (ezvalid.on) { on = ezvalid.on }
+      if (ezvalid.target_key) { target_key = ezvalid.target_key }
+    }
+    var ev_s = "on=" + on + ":branch=single_validate:target_key=" + target_key + ":with=" + send_with + ":url=" + event.validate_url
+    console.log("set_validation: ev_s="+ev_s)
+    elem.setAttribute("ezevent", ev_s)
+    elem.addEventListener(on, function(ev) {
+      execute_event(ev.srcElement)
+    })
   }
 }
 
@@ -230,16 +227,19 @@ function parse_one_event(event) {
 function execute_event(obj, attr_key = "ezevent", ev = null) {
   var event_s = obj.getAttribute(attr_key)
   console.log("execute_event: "+attr_key+", event="+event_s+", ev="+JSON.stringify(ev))
-  var event_a = parse_event(event_s)
+  var event_a = parse_command(event_s)
   for(var i = 0; i < event_a.length; i++) {
     var event = event_a[i]
-    func = event_commands[event.command]
-    if (func) {
-      func(event, obj)
-    }
-    with_attr(event, obj)
-    if (event.url) {
-      post_values(event, obj)
+    var cmd = event.command
+    if (cmd) {
+      func = event_commands[event.command]
+      if (func) {
+        func(event, obj)
+      } else {
+        console.log("undefined command:"+event.command)
+      }
+    } else {
+      console.log("command is not set: "+JSON.stringify(event))
     }
   }
 }
@@ -268,16 +268,17 @@ function with_attr(event, obj) {
 }
 
 // サーバーにJSONをPOST
-function post_values(event, obj) {
+function post_value(event, obj) {
   var xhr = new XMLHttpRequest()
   xhr.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       var res = this.response
-      console.log("xhr ready: "+res)
+      console.log("xhr ready: ")
+      // console.dir(res)
       manage_response(res, event, obj)
     }
   }
-  console.log("post_values: url="+event.url+",event="+JSON.stringify(event))
+  console.log("post_value: url="+event.url+",event="+JSON.stringify(event))
   xhr.open("POST", event.url, true)
   xhr.setRequestHeader("Content-Type", "application/json")
   xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
@@ -288,9 +289,9 @@ function post_values(event, obj) {
 
 // サーバーからの返信を処理
 function manage_response(res, event, obj) {
-  var elem
-  // console.log("manage_response: res="+JSON.stringify(res)+", event=" + JSON.stringify(event) +
-  //  ", obj=" + JSON.stringify(obj)) 
+  //var elem
+  console.log("manage_response: res="+JSON.stringify(res)+", event=" + JSON.stringify(event) +
+    ", obj=" + JSON.stringify(obj)) 
   if (!res) { return }
   if (Array.isArray(res)) {
     for(var i = 0; i < res.length; i++) {
@@ -303,16 +304,16 @@ function manage_response(res, event, obj) {
 
 // サーバーからの返信を１件処理
 function manage_one_response(res, obj) {
-  if (res.redirect) {
-    console.log("redirect:" + res.redirect)
-    location.href = res.redirect
-    return 
-  }
-  // サーバーからの戻り値のハッシュのキーにresponse_funcsのキーに一致するものがあったら、実行する。
-  for (var key in response_funcs) {
-    if (res[key]) {
-      response_funcs[key](res, obj)
+  var cmd = res["command"]
+  if (cmd) {
+    var func = response_funcs[cmd]
+    if (func) {
+      func(res, obj)
+    } else {
+      console.log("undefined command: " + cmd)
     }
+  } else {
+    console.log("no command: "+JSON.stringify(res));
   }
 }
 
@@ -353,6 +354,7 @@ function collect_form_values(obj) {
   return res
 }
 
+/*
 function switch_hide(button) {
   console.log("switch_hide")
   var node = button
@@ -372,9 +374,38 @@ function switch_hide(button) {
     }
   }
 }
+*/
+
+function parse_command(str) {
+  var ht;
+  var command_a = [];
+  var ss = new StringScanner(str);
+  ht = {};
+  while (!ss.hasTerminated()) {
+    if (ss.scan(/([a-zA-Z][a-zA-Z0-9_\-\.]+)=\[([^\]]+)\]/)) {
+      ht[ss.getCapture(0)] = ss.getCapture(1)
+    } else if (ss.scan(/([a-zA-Z][a-zA-Z0-9_\-\.]+)=\{([^\}]+)\}/)) {
+      ht[ss.getCapture(0)] = ss.getCapture(1)
+    } else if (ss.scan(/([a-zA-Z][a-zA-Z0-9_\-^.]+)=\(([^\)]+)\)/)) {
+      ht[ss.getCapture(0)] = ss.getCapture(1)
+    } else if (ss.scan(/([a-zA-Z][a-zA-Z0-9_\-^.]+)=([^:;]+)/)) { 
+      ht[ss.getCapture(0)] = ss.getCapture(1)
+    }
+    if (ss.scan(/:\s*/)) {
+      continue
+    } else if (ss.scan(/;\s*/)) {
+      command_a.push(ht)
+      ht = {}
+    }
+  }
+  if (Object.keys(ht).length > 0) {
+    command_a.push(ht);
+  }
+  return command_a;
+}
 
 document.addEventListener('DOMContentLoaded', function () {
-  add_event(document)
+  register_events(document)
   exec_ezload(document)
   window.addEventListener('popstate', function (e) {
     //if (!e.originalEvent.state) return;

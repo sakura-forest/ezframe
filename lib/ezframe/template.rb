@@ -28,7 +28,9 @@ module Ezframe
         outstr = text.gsub(/:@(\w+)@:/) do
           keyword = $1
           if opts[keyword.to_sym]
-            opts[keyword.to_sym]
+            val = opts[keyword.to_sym]
+            val = Html.convert(val) unless val.is_a?(String)
+            val
           elsif ENV[keyword]
             ENV[keyword]
           else

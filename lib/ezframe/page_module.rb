@@ -19,7 +19,7 @@ module Ezframe
         content = maker.make_content
         if @request.xhr?
           EzLog.debug("public_index: response=#{@response}")
-          @response.command  = { inject: @target_box || "#main-content" }
+          @response.command  = { command: "inject", target: @target_box || "#main-content" }
           @response.body = content
           if @set_history
             @response.set_url = @request.path_info
@@ -48,7 +48,7 @@ module Ezframe
         return unless content
         if @request.xhr?
           @response.body = content
-          @response.command = { inject: @target_box || "#main-content" }
+          @response.command = { command: "inject", target: @target_box || "#main-content" }
           if @set_history
             @response.set_url = @request.path_info
             @response.title = content.title if content.respond_to?(:title)
@@ -82,8 +82,7 @@ module Ezframe
           @response.command = validation.validate_one(@ezevent[:target_key])
           return nil
         elsif @ezevent[:cancel]
-          # @response.command = { redirect: "#{@parent.make_base_url}/#{@id}" }
-          @response.command = { redirect: "#{make_base_url}/#{@id}" }
+          @response.command = { command: "redirect", target: "#{make_base_url}/#{@id}" }
           return nil
         end
 
@@ -151,7 +150,7 @@ module Ezframe
         @column_set.set_from_db(@id)
         content = maker.make_content
         if @request.xhr?
-          @response.command = { inject: @target_box || "#main-content" }
+          @response.command = { command: "inject", target: @target_box || "#main-content" }
           @response.body = content
           if @set_history
             @response.set_url = make_base_url

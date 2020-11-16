@@ -3,34 +3,42 @@ module Ezframe
   class Controller
 
     class Response
-      attr_accessor :command, :body, :title, :status, :headers, :set_url
+      attr_accessor :command_list, :body, :title, :status, :header, :set_history
 
       def initialize
         @status = 200
-        @headers = {}
+        @header = {}
       end
 
       def content_type=(v)
-        @headers["Content-Type"] = v
+        @header["Content-Type"] = v
+      end
+
+      def add_command(command)
+        @command_list ||= []
+        @command_list.push(command)
       end
 
       def finish
-        # return [ @status, @headers, Array(@body) ] if @status != 200
-        body_tmp = @body.respond_to?(:to_ht) ? @body.to_ht : @body
-        body_tmp = Html.convert(body_tmp) unless body_tmp.is_a?(String)
-        if @command
-          cmd = @command.clone
-          if cmd.is_a?(Hash) && cmd[:inject]
-            cmd[:body] = body_tmp
-            cmd[:set_url] = @set_url if @set_url
-            cmd[:title] ||= @title if @title
-          end
-          body_tmp = JSON.generate(cmd)
-          @headers["Content-Type"] = "application/json; charset=utf-8"
-        else
-          @headers["Content-Type"] ||= "text/html; charset=utf-8"
+        @command_list.push({ command: "set_history", url: @set_history, title: @title }) if @set_history
+        @command_list.push({ command: "set_title", value: @title }) if @title
+        # return [ @status, @header, Array(@body) ] if @status != 200
+        body_tmp = nil
+        if @body
+          body_tmp = @body.respond_to?(:to_ht) ? @body.to_ht : @body
+          body_tmp = Html.convert(body_tmp) unless body_tmp.is_a?(String)
         end
-        return [ @status, @headers, [ body_tmp ] ]
+        # EzLog.debug("response.finish: command=#{@command}, body_tmp=#{body_tmp}")
+        if @command_list
+          add_command({ command: "set_body", body: body_tmp })
+          body_tmp = JSON.generate(@command_list)
+          @header["Content-Type"] = "application/json; charset=utf-8"
+        else
+          @header["Content-Type"] ||= "text/html; charset=utf-8"
+        end
+        res = [ @status, @header, [ body_tmp ] ]
+        EzLog.debug("finish: res=#{res}")
+        return res
       end
 
       def to_s
@@ -68,13 +76,13 @@ module Ezframe
       end
       result = @response.finish
       # EzLog.debug("controller.execute:result=#{result}")
-      EzLog.debug("controller.execute:result:result.status=#{@response.status}, command=#{@response.command.class}, body=#{result[2][0].to_s[0..80]} .....")
+      EzLog.debug("controller.execute:result:result.status=#{@response.status}, command=#{@response.command_list.class}, body=#{result[2][0].to_s[0..80]} .....")
       return result
     end
 
     def file_not_found
       @response.status = 404
-      @response.headers["Content-Type"] ||= "text/html; charset=utf-8"
+      @response.header["Content-Type"] ||= "text/html; charset=utf-8"
       template_file = ("#{Config[:template_dir]}/404.html")
       # puts template_file
       if File.exist?(template_file)

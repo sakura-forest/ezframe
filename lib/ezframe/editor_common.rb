@@ -26,25 +26,25 @@ module Ezframe
 
     #  新規登録ボタンの生成
     def make_create_button(event = nil)
-      event ||= "on=click:url=#{make_base_url(@id)}/create"
+      event ||= "on=click:command=post:url=#{make_base_url(@id)}/create"
       return Ht.button(id: "#{@class_snake}-create-button", class: %[btn], child: [Ht.icon("add"), Message[:create_button_label]], ezevent: event)
     end
 
     # 編集ボタンの生成
     def make_edit_button(event = nil)
-      event ||= "on=click:url=#{make_base_url(@id)}/edit"
+      event ||= "on=click:command=post:url=#{make_base_url(@id)}/edit"
       return Ht.button(class: %w[btn], ezevent: event, child: [ Ht.icon("edit"), Message[:edit_button_label]])    
     end
 
     # 削除ボタンの生成
     def make_delete_button(event = nil)
-      event ||= "on=click:url=#{make_base_url(@id)}/delete"
+      event ||= "on=click:command=post:url=#{make_base_url(@id)}/delete"
       return Ht.button(class: %w[btn right red], ezevent: event, child: [Ht.icon("delete"), Message[:delete_button_label]])
     end
 
     # キャンセルボタンの生成
     def make_cancel_button(event = nil)
-      event ||= "on=click:url=#{make_base_url(@id)}/detail:cancel=true:with=form"
+      event ||= "on=click:command=post:url=#{make_base_url(@id)}/detail:cancel=true:with=form"
       return [ "button.btn.btn-danger:ezevent=[#{event}]", [ "i.fa.fa-times", "text:#{Message[:cancel_button_label]}" ]]
     end
 
