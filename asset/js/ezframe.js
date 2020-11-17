@@ -275,7 +275,7 @@ function post_value(event, obj) {
     if (this.readyState == 4 && this.status == 200) {
       var res = this.response
       console.log("xhr ready: ")
-      // console.dir(res)
+      console.dir(res)
       manage_response(res, event, obj)
     }
   }
@@ -307,7 +307,7 @@ function manage_response(res, event, obj) {
 function manage_one_response(res, obj) {
   var cmd = res["command"]
   if (cmd) {
-    var func = response_funcs[cmd]
+    var func = event_commands[cmd]
     if (func) {
       func(res, obj)
     } else {
